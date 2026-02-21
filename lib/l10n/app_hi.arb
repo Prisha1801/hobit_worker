@@ -1,0 +1,276 @@
+{
+  "appTitle": "होबिट वर्कर",
+  "languageSelection": "भाषा चयन",
+  "chooseLanguage": "अपनी पसंदीदा भाषा चुनें",
+  "save": "सेव करें",
+
+
+  "aboutUs": "हमारे बारे में",
+  "aboutTagline": "विश्वसनीय होम सर्विस पार्टनर",
+
+  "aboutDescription": "होबिट वर्कर एक ऐसा प्लेटफॉर्म है जो सेवा पेशेवरों को उनके नजदीकी क्षेत्रों में सत्यापित सेवा अनुरोधों से जोड़ता है। हमारा उद्देश्य लचीले काम के अवसर, पारदर्शी कमाई और सुरक्षित कार्य वातावरण प्रदान करना है।\n\nयह ऐप काम प्रबंधित करने, कमाई ट्रैक करने और पेशेवर विकास में मदद करता है।",
+
+  "version": "संस्करण",
+  "company": "कंपनी",
+  "supportEmail": "सपोर्ट ईमेल",
+  "website": "वेबसाइट",
+
+  "companyName": "होबिट प्रा. लि.",
+  "supportEmailValue": "support@hobit.in",
+  "websiteValue": "www.hobit.in",
+
+  "copyright": "© 2026 होबिट। सर्वाधिकार सुरक्षित।",
+
+
+
+  "helpSupport": "सहायता और समर्थन",
+  "needHelpHeader": "मदद चाहिए? हम आपके लिए यहाँ हैं।\nअपने काम के लिए त्वरित सहायता प्राप्त करें।",
+  "quickSupport": "त्वरित सहायता",
+  "callSupport": "सपोर्ट को कॉल करें",
+  "callSupportSubtitle": "हमारे सपोर्ट अधिकारी से बात करें",
+  "emailSupport": "सपोर्ट को ईमेल करें",
+  "emailSupportSubtitle": "support@hobit.in",
+
+
+   "profile": "प्रोफ़ाइल",
+   "helloWelcome": "नमस्ते, फिर से स्वागत है",
+   "jobsCompleted": "पूरे किए गए कार्य",
+   "wallet": "वॉलेट",
+
+   "personalInfo": "व्यक्तिगत जानकारी",
+   "personalInfoSub": "नाम, संपर्क, स्थान",
+
+   "addBank": "बैंक विवरण जोड़ें",
+   "addBankSub": "भुगतान के लिए बैंक खाता जोड़ें",
+
+   "earnings": "कमाई और भुगतान",
+   "earningsSub": "अपनी कमाई और भुगतान इतिहास देखें",
+
+   "helpSupport": "सहायता और समर्थन",
+   "helpSupportSub": "मदद प्राप्त करें या सपोर्ट से संपर्क करें",
+
+   "languageSelection": "भाषा चयन",
+   "languageSelectionSub": "अपनी पसंदीदा भाषा चुनें",
+
+   "aboutUs": "हमारे बारे में",
+   "aboutUsSub": "ऐप जानकारी, नियम और गोपनीयता",
+
+   "logout": "लॉगआउट",
+   "logoutSub": "अपने खाते से साइन आउट करें",
+
+
+   "addBank": "बैंक जोड़ें",
+   "addBankTitle": "अपने बैंक विवरण जोड़ें",
+
+   "accountHolderName": "खाता धारक का नाम",
+   "accountHolderHint": "खाता धारक का नाम",
+
+   "accountNumber": "खाता संख्या",
+   "accountNumberHint": "आपका खाता नंबर",
+
+   "bankName": "बैंक का नाम",
+   "bankNameHint": "आपके बैंक का नाम",
+
+   "ifscCode": "आईएफएससी कोड",
+   "ifscCodeHint": "आपके बैंक का IFSC कोड",
+
+   "fillAllFields": "कृपया सभी फ़ील्ड भरें",
+   "bankUpdated": "बैंक विवरण अपडेट हो गया",
+   "save": "सेव करें",
+
+
+   "personalInformation": "व्यक्तिगत जानकारी",
+   "profilePhoto": "प्रोफ़ाइल फोटो",
+   "basicInformation": "मूल जानकारी",
+
+   "name": "नाम",
+   "email": "ईमेल",
+   "mobile": "मोबाइल",
+
+   "categories": "श्रेणियाँ",
+   "services": "सेवाएँ",
+   "availabilityStatus": "उपलब्धता स्थिति",
+   "available": "उपलब्ध",
+   "unavailable": "अनुपलब्ध",
+
+   "city": "शहर",
+   "zone": "ज़ोन",
+   "area": "सेवा क्षेत्र",
+
+   "selectCityFirst": "कृपया पहले शहर चुनें",
+   "selectZoneFirst": "कृपया पहले ज़ोन चुनें",
+
+   "workerAvailability": "कार्य उपलब्धता",
+   "availableDates": "उपलब्ध तिथियाँ",
+   "availableTimeSlots": "उपलब्ध समय स्लॉट",
+   "noAvailability": "कोई उपलब्धता नहीं जोड़ी गई",
+   "selectAvailableDates": "उपलब्ध तिथियाँ चुनें",
+   "noDatesAdded": "कोई तिथि नहीं जोड़ी गई",
+   "addDate": "तिथि जोड़ें",
+
+   "selectTimeSlots": "समय स्लॉट चुनें",
+   "noTimeSlots": "कोई समय स्लॉट नहीं जोड़ा गया",
+   "addTimeSlot": "समय स्लॉट जोड़ें",
+
+   "kycDetails": "केवाईसी सत्यापन विवरण",
+   "aadhaarNumber": "आधार नंबर",
+   "policeId": "पुलिस सत्यापन आईडी",
+
+   "documentUploaded": "दस्तावेज़ अपलोड हो चुका है",
+   "uploadDocument": "दस्तावेज़ अपलोड करें",
+
+   "profileUpdated": "प्रोफ़ाइल सफलतापूर्वक अपडेट हुई",
+   "kycUploaded": "केवाईसी सफलतापूर्वक अपलोड हुई",
+   "uploadAllDocs": "कृपया सभी दस्तावेज़ अपलोड करें",
+
+   "saveChanges": "परिवर्तन सहेजें",
+   "done": "हो गया",
+
+   "enterAadhaarNumber": "आधार नंबर दर्ज करें",
+   "enterPoliceId": "आईडी दर्ज करें",
+
+   "aadhaarFront": "आधार कार्ड (सामने)",
+   "aadhaarBack": "आधार कार्ड (पीछे)",
+
+   "policeFront": "पुलिस सत्यापन (सामने)",
+   "policeBack": "पुलिस सत्यापन (पीछे)",
+
+     "myEarnings": "मेरी कमाई",
+      "walletBalance": "वॉलेट बैलेंस",
+      "withdrawRequest": "निकासी अनुरोध",
+      "withdrawHistory": "निकासी इतिहास",
+      "noWithdrawHistory": "कोई निकासी इतिहास नहीं मिला",
+
+      "amount": "राशि",
+      "requestNote": "अनुरोध नोट",
+      "weeklyPayout": "साप्ताहिक भुगतान",
+      "submitRequest": "अनुरोध सबमिट करें",
+
+      "enterAmount": "कृपया राशि दर्ज करें",
+      "enterValidAmount": "मान्य राशि दर्ज करें",
+      "withdrawDefaultNote": "निकासी अनुरोध",
+
+      "approved": "स्वीकृत",
+      "rejected": "अस्वीकृत",
+      "pending": "लंबित",
+
+
+       "logout": "लॉगआउट",
+       "logoutConfirmMessage": "क्या आप वाकई अपने खाते से लॉगआउट करना चाहते हैं?",
+       "cancel": "रद्द करें",
+
+     "bookings": "बुकिंग्स",
+     "allRequests": "सभी अनुरोध",
+     "assigned": "असाइन किया गया",
+     "inProgress": "प्रगति में",
+     "completed": "पूर्ण",
+     "cancelled": "रद्द",
+     "noBookingsFound": "कोई बुकिंग नहीं मिली",
+     "serviceRequested": "सेवा अनुरोधित",
+     "bookingId": "बुकिंग आईडी",
+
+       "attendance": "उपस्थिति",
+       "workShift": "कार्य समय : 09:00 AM से 06:00 PM",
+
+       "available": "उपलब्ध",
+       "unavailable": "अनुपलब्ध",
+
+       "currentAssignJob": "वर्तमान असाइन किया गया कार्य",
+       "noAssignedJobToday": "आज के लिए कोई असाइन किया गया कार्य नहीं",
+
+       "assigned": "असाइन किया गया",
+       "inProgress": "प्रगति में",
+       "completed": "पूर्ण",
+
+       "serviceRequested": "सेवा अनुरोधित",
+       "dateTime": "तारीख और समय",
+       "bookingId": "बुकिंग आईडी",
+
+       "startService": "सेवा शुरू करें",
+       "resendOtp": "ओटीपी पुनः भेजें",
+       "verifyOtp": "ओटीपी सत्यापित करें",
+
+       "otpVerification": "ओटीपी सत्यापन",
+       "enterOtpMsg": "कृपया सत्यापन कोड दर्ज करें",
+       "dontReceiveCode": "कोड प्राप्त नहीं हुआ?",
+       "resend": "पुनः भेजें",
+
+       "enterValidOtp": "मान्य ओटीपी दर्ज करें",
+       "invalidOtp": "अमान्य ओटीपी",
+
+         "onboardTitle1": "हम आपके लिए यहाँ हैं!",
+         "onboardTitle2": "सभी सेवाएं एक टैप में",
+         "onboardTitle3": "आस-पास विश्वसनीय प्रोफेशनल्स",
+         "getStarted": "शुरू करें",
+
+           "allowLocationTitle": "लोकेशन एक्सेस की अनुमति दें?",
+           "allowLocationDesc": "हमें आपके आसपास की सेवाएं खोजने के लिए आपकी लोकेशन की आवश्यकता है।",
+           "allowLocationButton": "लोकेशन एक्सेस की अनुमति दें",
+
+           "login": "लॉगिन",
+           "phoneNumber": "फोन नंबर",
+           "enterPhone": "अपना नंबर दर्ज करें",
+           "keepSignedIn": "मुझे लॉग इन रखें",
+           "sendOtp": "ओटीपी भेजें",
+           "dontHaveAccount": "खाता नहीं है?",
+           "signUpHere": "यहाँ साइन अप करें",
+           "invalidPhone": "कृपया सही फोन नंबर दर्ज करें",
+           "otpSent": "ओटीपी भेज दिया गया है",
+           "somethingWentWrong": "कुछ गलत हो गया",
+
+
+            "signUp": "साइन अप",
+             "name": "नाम",
+             "enterFullName": "पूरा नाम दर्ज करें",
+             "email": "ईमेल",
+             "phone": "फोन",
+             "password": "पासवर्ड",
+             "minPassword": "कम से कम 6 अक्षर",
+
+             "category": "श्रेणी",
+             "selectCategories": "श्रेणियाँ चुनें",
+             "service": "सेवा",
+             "selectServices": "सेवाएँ चुनें",
+
+             "availability": "उपलब्धता",
+             "available": "उपलब्ध",
+             "unavailable": "अनुपलब्ध",
+
+             "referCode": "रेफरल कोड",
+             "referHint": "रेफरल कोड दर्ज करें (वैकल्पिक)",
+
+             "city": "शहर",
+             "selectCity": "शहर चुनें",
+             "zone": "ज़ोन",
+             "selectZone": "ज़ोन चुनें",
+             "area": "क्षेत्र",
+             "selectArea": "क्षेत्र चुनें",
+
+             "availableDates": "उपलब्ध तिथियाँ",
+             "selectDates": "उपलब्ध तिथियाँ चुनें",
+             "availableTimeSlots": "उपलब्ध समय",
+             "selectTimeSlots": "समय चुनें",
+
+             "acceptTerms": "नियम व शर्तें स्वीकार करें",
+             "haveAccount": "पहले से खाता है?",
+             "login": "लॉगिन",
+
+             "signupSuccess": "पंजीकरण सफल रहा",
+
+             "errName": "कृपया नाम दर्ज करें",
+             "errEmail": "कृपया ईमेल दर्ज करें",
+             "errEmailValid": "मान्य ईमेल दर्ज करें",
+             "errPhone": "कृपया फोन नंबर दर्ज करें",
+             "errPhoneLen": "फोन नंबर 10 अंकों का होना चाहिए",
+             "errPassword": "कृपया पासवर्ड दर्ज करें",
+             "errPasswordLen": "पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
+             "errCategory": "कम से कम एक श्रेणी चुनें",
+             "errService": "कम से कम एक सेवा चुनें",
+             "errCity": "शहर चुनें",
+             "errZone": "ज़ोन चुनें",
+             "errArea": "क्षेत्र चुनें",
+             "errDates": "उपलब्ध तिथियाँ चुनें",
+             "errTimes": "समय चुनें",
+             "errTerms": "नियम व शर्तें स्वीकार करें"
+
+}

@@ -1,0 +1,269 @@
+{
+  "appTitle": "होबिट वर्कर",
+  "languageSelection": "भाषा निवड",
+  "chooseLanguage": "आपली पसंतीची भाषा निवडा",
+  "save": "जतन करा",
+
+    "aboutUs": "आमच्याबद्दल",
+    "aboutTagline": "विश्वसनीय गृह सेवा भागीदार",
+    "aboutDescription": "होबिट वर्कर हे एक व्यासपीठ आहे जे सेवा व्यावसायिकांना जवळील सत्यापित सेवा विनंत्यांशी जोडते. आमचे उद्दिष्ट लवचिक काम, पारदर्शक उत्पन्न आणि सुरक्षित कार्य वातावरण देणे आहे.\n\nहे अॅप कामे व्यवस्थापित करण्यास, उत्पन्न ट्रॅक करण्यास आणि व्यावसायिक वाढीस मदत करते.",
+    "version": "आवृत्ती",
+    "company": "कंपनी",
+    "supportEmail": "सपोर्ट ईमेल",
+    "website": "वेबसाइट",
+
+    "companyName": "होबिट प्रा. लि.",
+    "supportEmailValue": "support@hobit.in",
+    "websiteValue": "www.hobit.in",
+
+    "copyright": "© 2026 होबिट. सर्व हक्क राखीव.",
+
+    "helpSupport": "मदत आणि समर्थन",
+    "needHelpHeader": "मदत हवी आहे? आम्ही तुमच्यासाठी आहोत.\nतुमच्या कामासाठी त्वरित मदत मिळवा.",
+    "quickSupport": "त्वरित मदत",
+    "callSupport": "सपोर्टला कॉल करा",
+    "callSupportSubtitle": "आमच्या सपोर्ट अधिकाऱ्याशी बोला",
+    "emailSupport": "सपोर्टला ईमेल करा",
+    "emailSupportSubtitle": "support@hobit.in",
+
+
+    "profile": "प्रोफाइल",
+    "helloWelcome": "नमस्कार, पुन्हा स्वागत आहे",
+    "jobsCompleted": "पूर्ण केलेली कामे",
+    "wallet": "वॉलेट",
+
+    "personalInfo": "वैयक्तिक माहिती",
+    "personalInfoSub": "नाव, संपर्क, स्थान",
+
+    "addBank": "बँक तपशील जोडा",
+    "addBankSub": "पैसे मिळवण्यासाठी बँक खाते जोडा",
+
+    "earnings": "उत्पन्न आणि पेआउट",
+    "earningsSub": "तुमचे उत्पन्न आणि पेआउट इतिहास पहा",
+
+    "helpSupport": "मदत आणि समर्थन",
+    "helpSupportSub": "मदत मिळवा किंवा सपोर्टशी संपर्क करा",
+
+    "languageSelection": "भाषा निवड",
+    "languageSelectionSub": "आपली पसंतीची भाषा निवडा",
+
+    "aboutUs": "आमच्याबद्दल",
+    "aboutUsSub": "अ‍ॅप माहिती, अटी व गोपनीयता",
+
+    "logout": "लॉगआउट",
+    "logoutSub": "तुमच्या खात्यातून साइन आउट करा",
+
+    "addBank": "बँक जोडा",
+    "addBankTitle": "आपले बँक तपशील जोडा",
+
+    "accountHolderName": "खातेदाराचे नाव",
+    "accountHolderHint": "खातेदाराचे नाव",
+
+    "accountNumber": "खाते क्रमांक",
+    "accountNumberHint": "तुमचा खाते क्रमांक",
+
+    "bankName": "बँकेचे नाव",
+    "bankNameHint": "तुमच्या बँकेचे नाव",
+
+    "ifscCode": "IFSC कोड",
+    "ifscCodeHint": "तुमच्या बँकेचा IFSC कोड",
+
+    "fillAllFields": "कृपया सर्व माहिती भरा",
+    "bankUpdated": "बँक तपशील अद्ययावत झाले",
+    "save": "जतन करा",
+
+    "personalInformation": "वैयक्तिक माहिती",
+    "profilePhoto": "प्रोफाइल फोटो",
+    "basicInformation": "मूलभूत माहिती",
+
+    "name": "नाव",
+    "email": "ईमेल",
+    "mobile": "मोबाईल",
+
+    "categories": "वर्ग",
+    "services": "सेवा",
+    "availabilityStatus": "उपलब्धता स्थिती",
+    "available": "उपलब्ध",
+    "unavailable": "अनुपलब्ध",
+
+    "city": "शहर",
+    "zone": "झोन",
+    "area": "सेवा क्षेत्र",
+
+    "selectCityFirst": "कृपया आधी शहर निवडा",
+    "selectZoneFirst": "कृपया आधी झोन निवडा",
+
+    "workerAvailability": "कामाची उपलब्धता",
+    "availableDates": "उपलब्ध तारखा",
+    "availableTimeSlots": "उपलब्ध वेळ स्लॉट",
+    "noAvailability": "कोणतीही उपलब्धता जोडलेली नाही",
+    "selectAvailableDates": "उपलब्ध तारखा निवडा",
+    "noDatesAdded": "कोणतीही तारीख जोडलेली नाही",
+    "addDate": "तारीख जोडा",
+
+    "selectTimeSlots": "वेळ स्लॉट निवडा",
+    "noTimeSlots": "कोणताही वेळ स्लॉट जोडलेला नाही",
+    "addTimeSlot": "वेळ स्लॉट जोडा",
+
+    "kycDetails": "केवायसी पडताळणी तपशील",
+    "aadhaarNumber": "आधार क्रमांक",
+    "policeId": "पोलीस पडताळणी आयडी",
+
+    "documentUploaded": "दस्तऐवज अपलोड झाला आहे",
+    "uploadDocument": "दस्तऐवज अपलोड करा",
+
+    "profileUpdated": "प्रोफाइल यशस्वीरित्या अपडेट झाले",
+    "kycUploaded": "केवायसी यशस्वीरित्या अपलोड झाले",
+    "uploadAllDocs": "कृपया सर्व दस्तऐवज अपलोड करा",
+
+    "saveChanges": "बदल जतन करा",
+    "done": "पूर्ण झाले",
+
+    "enterAadhaarNumber": "आधार क्रमांक प्रविष्ट करा",
+    "enterPoliceId": "आयडी प्रविष्ट करा",
+
+    "aadhaarFront": "आधार कार्ड (समोर)",
+    "aadhaarBack": "आधार कार्ड (मागील)",
+
+    "policeFront": "पोलीस पडताळणी (समोर)",
+    "policeBack": "पोलीस पडताळणी (मागील)",
+
+     "myEarnings": "माझी कमाई",
+      "walletBalance": "वॉलेट शिल्लक",
+      "withdrawRequest": "पैसे काढण्याची विनंती",
+      "withdrawHistory": "पैसे काढण्याचा इतिहास",
+      "noWithdrawHistory": "पैसे काढण्याचा इतिहास आढळला नाही",
+
+      "amount": "रक्कम",
+      "requestNote": "विनंती नोट",
+      "weeklyPayout": "साप्ताहिक पेआउट",
+      "submitRequest": "विनंती सबमिट करा",
+
+      "enterAmount": "कृपया रक्कम प्रविष्ट करा",
+      "enterValidAmount": "वैध रक्कम प्रविष्ट करा",
+      "withdrawDefaultNote": "पैसे काढण्याची विनंती",
+
+      "approved": "मंजूर",
+      "rejected": "नाकारले",
+      "pending": "प्रलंबित",
+
+      "logout": "लॉगआउट",
+       "logoutConfirmMessage": "तुम्हाला खात्यातून लॉगआउट करायचे आहे का?",
+       "cancel": "रद्द करा",
+
+    "bookings": "बुकिंग्स",
+    "allRequests": "सर्व विनंत्या",
+    "assigned": "नेमलेले",
+    "inProgress": "प्रगतीत",
+    "completed": "पूर्ण झाले",
+    "cancelled": "रद्द केले",
+    "noBookingsFound": "कोणतीही बुकिंग आढळली नाही",
+    "serviceRequested": "सेवा विनंती",
+    "bookingId": "बुकिंग आयडी",
+
+     "attendance": "हजेरी",
+      "workShift": "कामाची वेळ : 09:00 AM ते 06:00 PM",
+
+      "available": "उपलब्ध",
+      "unavailable": "अनुपलब्ध",
+
+      "currentAssignJob": "सध्याचे नेमलेले काम",
+      "noAssignedJobToday": "आजसाठी कोणतेही काम नाही",
+
+      "assigned": "नेमलेले",
+      "inProgress": "प्रगतीत",
+      "completed": "पूर्ण झाले",
+
+      "serviceRequested": "सेवा विनंती",
+      "dateTime": "तारीख आणि वेळ",
+      "bookingId": "बुकिंग आयडी",
+
+      "startService": "सेवा सुरू करा",
+      "resendOtp": "ओटीपी पुन्हा पाठवा",
+      "verifyOtp": "ओटीपी पडताळा",
+
+      "otpVerification": "ओटीपी पडताळणी",
+      "enterOtpMsg": "कृपया पडताळणी कोड टाका",
+      "dontReceiveCode": "कोड मिळाला नाही?",
+      "resend": "पुन्हा पाठवा",
+
+      "enterValidOtp": "वैध ओटीपी टाका",
+      "invalidOtp": "अवैध ओटीपी",
+
+      "onboardTitle1": "आम्ही तुमच्यासाठी येथे आहोत!",
+        "onboardTitle2": "सर्व सेवा एका टॅपमध्ये",
+        "onboardTitle3": "जवळील विश्वासार्ह तज्ज्ञ",
+        "getStarted": "सुरू करा",
+
+          "allowLocationTitle": "स्थान प्रवेशास परवानगी द्यायची का?",
+          "allowLocationDesc": "आम्हाला तुमच्या जवळील सेवा शोधण्यासाठी तुमचे स्थान आवश्यक आहे.",
+          "allowLocationButton": "स्थान प्रवेशास परवानगी द्या",
+
+
+         "login": "लॉगिन",
+          "phoneNumber": "फोन नंबर",
+          "enterPhone": "तुमचा नंबर टाका",
+          "keepSignedIn": "मला लॉग इन ठेव",
+          "sendOtp": "ओटीपी पाठवा",
+          "dontHaveAccount": "खाते नाही?",
+          "signUpHere": "इथे साइन अप करा",
+          "invalidPhone": "कृपया योग्य फोन नंबर टाका",
+          "otpSent": "ओटीपी पाठवण्यात आला आहे",
+          "somethingWentWrong": "काहीतरी चूक झाली",
+
+            "signUp": "साइन अप",
+            "name": "नाव",
+            "enterFullName": "पूर्ण नाव टाका",
+            "email": "ईमेल",
+            "phone": "फोन",
+            "password": "पासवर्ड",
+            "minPassword": "किमान 6 अक्षरे",
+
+            "category": "श्रेणी",
+            "selectCategories": "श्रेणी निवडा",
+            "service": "सेवा",
+            "selectServices": "सेवा निवडा",
+
+            "availability": "उपलब्धता",
+            "available": "उपलब्ध",
+            "unavailable": "अनुपलब्ध",
+
+            "referCode": "रेफरल कोड",
+            "referHint": "रेफरल कोड टाका (ऐच्छिक)",
+
+            "city": "शहर",
+            "selectCity": "शहर निवडा",
+            "zone": "झोन",
+            "selectZone": "झोन निवडा",
+            "area": "भाग",
+            "selectArea": "भाग निवडा",
+
+            "availableDates": "उपलब्ध तारखा",
+            "selectDates": "तारखा निवडा",
+            "availableTimeSlots": "उपलब्ध वेळ",
+            "selectTimeSlots": "वेळ निवडा",
+
+            "acceptTerms": "अटी व शर्ती स्वीकारा",
+            "haveAccount": "खाते आहे?",
+            "login": "लॉगिन",
+
+            "signupSuccess": "नोंदणी यशस्वी",
+
+            "errName": "नाव टाका",
+            "errEmail": "ईमेल टाका",
+            "errEmailValid": "योग्य ईमेल टाका",
+            "errPhone": "फोन नंबर टाका",
+            "errPhoneLen": "फोन नंबर 10 अंकी असावा",
+            "errPassword": "पासवर्ड टाका",
+            "errPasswordLen": "पासवर्ड किमान 6 अक्षरे",
+            "errCategory": "किमान एक श्रेणी निवडा",
+            "errService": "किमान एक सेवा निवडा",
+            "errCity": "शहर निवडा",
+            "errZone": "झोन निवडा",
+            "errArea": "भाग निवडा",
+            "errDates": "तारखा निवडा",
+            "errTimes": "वेळ निवडा",
+            "errTerms": "अटी व शर्ती स्वीकारा"
+
+
+}

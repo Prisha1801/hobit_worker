@@ -1,0 +1,270 @@
+{
+"appTitle": "Hobit Worker",
+"languageSelection": "Language Selection",
+"chooseLanguage": "Choose your preferred language",
+"save": "Save",
+
+"aboutUs": "About Us",
+"aboutTagline": "Trusted Home Service Partner",
+
+"aboutDescription": "Hobit Worker is a platform created to empower service professionals by connecting them with verified service requests in their nearby areas. Our goal is to provide flexible work opportunities, transparent earnings, and a secure working environment for all workers.\n\nThis app helps workers manage jobs, track earnings, and grow their professional journey with ease.",
+
+"version": "Version",
+"company": "Company",
+"supportEmail": "Support Email",
+"website": "Website",
+
+"companyName": "Hobit Pvt. Ltd.",
+"supportEmailValue": "support@hobit.in",
+"websiteValue": "www.hobit.in",
+
+"copyright": "© 2026 Hobit. All rights reserved.",
+
+"helpSupport": "Help & Support",
+"needHelpHeader": "Need help? We’re here for you.\nGet quick support for your work.",
+"quickSupport": "Quick Support",
+"callSupport": "Call Support",
+"callSupportSubtitle": "Talk to our support executive",
+"emailSupport": "Email Support",
+"emailSupportSubtitle": "support@hobit.in",
+
+
+"profile": "Profile",
+"helloWelcome": "Hello, Welcome Back",
+"jobsCompleted": "Jobs Completed",
+"wallet": "Wallet",
+
+"personalInfo": "Personal Information",
+"personalInfoSub": "Name, contact, location",
+
+"addBank": "Add Bank Details",
+"addBankSub": "Add your bank account for payouts",
+
+"earnings": "Earnings & Payouts",
+"earningsSub": "View your earnings and payout history",
+
+"helpSupport": "Help & Support",
+"helpSupportSub": "Get help or contact support",
+
+"languageSelection": "Language Selection",
+"languageSelectionSub": "Choose your preferred language",
+
+"aboutUs": "About Us",
+"aboutUsSub": "App info, terms & privacy",
+
+"logout": "Logout",
+"logoutSub": "Sign out of your account",
+
+
+"addBank": "Add Bank",
+"addBankTitle": "Add Your Bank Details",
+
+"accountHolderName": "Account Holder Name",
+"accountHolderHint": "Account Holder Name",
+
+"accountNumber": "Account Number",
+"accountNumberHint": "Your Account Number",
+
+"bankName": "Bank Name",
+"bankNameHint": "Your Bank Name",
+
+"ifscCode": "IFSC Code",
+"ifscCodeHint": "Your Bank IFSC Code",
+
+"fillAllFields": "Please fill all fields",
+"bankUpdated": "Bank details updated",
+"save": "Save",
+
+"personalInformation": "Personal Information",
+"profilePhoto": "Profile Photo",
+"basicInformation": "Basic Information",
+
+"name": "Name",
+"email": "Email",
+"mobile": "Mobile",
+
+"categories": "Categories",
+"services": "Services",
+"availabilityStatus": "Availability Status",
+"available": "Available",
+"unavailable": "Unavailable",
+
+"city": "City",
+"zone": "Zone",
+"area": "Serviceable Area",
+
+"selectCityFirst": "Please select city first",
+"selectZoneFirst": "Please select zone first",
+
+"workerAvailability": "Worker Availability",
+"availableDates": "Available Dates",
+"availableTimeSlots": "Available Time Slots",
+"noAvailability": "No Availability Added",
+"selectAvailableDates": "Select Available Dates",
+"noDatesAdded": "No dates added",
+"addDate": "Add Date",
+
+"selectTimeSlots": "Select Time Slots",
+"noTimeSlots": "No time slots added",
+"addTimeSlot": "Add Time Slot",
+
+"kycDetails": "KYC Verification Details",
+"aadhaarNumber": "Aadhaar Number",
+"policeId": "Police Verification ID",
+
+"documentUploaded": "Document uploaded",
+"uploadDocument": "Upload document",
+
+"profileUpdated": "Profile updated successfully",
+"kycUploaded": "KYC uploaded successfully",
+"uploadAllDocs": "Please upload all documents",
+
+"saveChanges": "Save changes",
+"done": "Done",
+
+"enterAadhaarNumber": "Enter Aadhaar Number",
+"enterPoliceId": "Enter ID",
+
+"aadhaarFront": "Aadhaar Card (Front)",
+"aadhaarBack": "Aadhaar Card (Back)",
+
+"policeFront": "Police Verification (Front)",
+"policeBack": "Police Verification (Back)",
+
+"myEarnings": "My Earnings",
+"walletBalance": "Wallet Balance",
+"withdrawRequest": "Withdraw Request",
+"withdrawHistory": "Withdraw History",
+"noWithdrawHistory": "No withdrawal history found",
+
+"amount": "Amount",
+"requestNote": "Request Note",
+"weeklyPayout": "Weekly payout",
+"submitRequest": "Submit Request",
+
+"enterAmount": "Please enter amount",
+"enterValidAmount": "Enter valid amount",
+"withdrawDefaultNote": "Withdrawal request",
+
+"approved": "Approved",
+"rejected": "Rejected",
+"pending": "Pending",
+
+"logout": "Logout",
+"logoutConfirmMessage": "Are you sure you want to logout from your account?",
+"cancel": "Cancel",
+
+"bookings": "Bookings",
+"allRequests": "All Requests",
+"assigned": "Assigned",
+"inProgress": "In progress",
+"completed": "Completed",
+"cancelled": "Cancelled",
+"noBookingsFound": "No bookings found",
+"serviceRequested": "Service Requested",
+"bookingId": "Booking ID",
+
+
+  "attendance": "Attendance",
+  "workShift": "Work shift : 09:00 AM to 06:00 PM",
+
+  "available": "Available",
+  "unavailable": "Unavailable",
+
+  "currentAssignJob": "Current Assigned Job",
+  "noAssignedJobToday": "No assigned job for today",
+
+  "assigned": "Assigned",
+  "inProgress": "In Progress",
+  "completed": "Completed",
+
+  "serviceRequested": "Service Requested",
+  "dateTime": "Date & Time",
+  "bookingId": "Booking ID",
+
+  "startService": "Start your Service",
+  "resendOtp": "Resend OTP",
+  "verifyOtp": "Verify OTP",
+
+  "otpVerification": "OTP Verification",
+  "enterOtpMsg": "Please enter the verification code",
+  "dontReceiveCode": "Don't receive the code?",
+  "resend": "Resend",
+
+  "enterValidOtp": "Enter valid OTP",
+  "invalidOtp": "Invalid OTP",
+
+    "onboardTitle1": "We are here for you!",
+    "onboardTitle2": "All services at one tap",
+    "onboardTitle3": "Trusted professionals nearby",
+    "getStarted": "Get started",
+
+  "allowLocationTitle": "Allow location access?",
+  "allowLocationDesc": "We need your location to find nearby services.",
+  "allowLocationButton": "Allow location access",
+
+   "login": "Login",
+    "phoneNumber": "Phone Number",
+    "enterPhone": "Enter your number",
+    "keepSignedIn": "Keep me signed in",
+    "sendOtp": "Send OTP",
+    "dontHaveAccount": "Don’t have an Account?",
+    "signUpHere": "Sign up here",
+    "invalidPhone": "Please enter valid phone number",
+    "otpSent": "OTP Sent",
+    "somethingWentWrong": "Something went wrong",
+
+     "signUp": "Sign Up",
+      "name": "Name",
+      "enterFullName": "Enter your full name",
+      "email": "Email",
+      "phone": "Phone",
+      "password": "Password",
+      "minPassword": "Minimum 6 characters",
+
+      "category": "Category",
+      "selectCategories": "Select Categories",
+      "service": "Service",
+      "selectServices": "Select Services",
+
+      "availability": "Availability",
+      "available": "Available",
+      "unavailable": "Unavailable",
+
+      "referCode": "Refer / Referral Code",
+      "referHint": "Enter referral code (optional)",
+
+      "city": "City",
+      "selectCity": "Select city",
+      "zone": "Zone",
+      "selectZone": "Select zone",
+      "area": "Area",
+      "selectArea": "Select area",
+
+      "availableDates": "Available Dates",
+      "selectDates": "Select available dates",
+      "availableTimeSlots": "Available Time Slots",
+      "selectTimeSlots": "Select time range",
+
+      "acceptTerms": "Accept Terms & Conditions",
+      "haveAccount": "Have an account?",
+      "login": "Login",
+
+      "signupSuccess": "Registration successful",
+
+      "errName": "Please enter your name",
+      "errEmail": "Please enter your email",
+      "errEmailValid": "Please enter valid email",
+      "errPhone": "Please enter phone number",
+      "errPhoneLen": "Phone number must be 10 digits",
+      "errPassword": "Please enter password",
+      "errPasswordLen": "Password must be at least 6 characters",
+      "errCategory": "Please select at least one category",
+      "errService": "Please select at least one service",
+      "errCity": "Please select city",
+      "errZone": "Please select zone",
+      "errArea": "Please select area",
+      "errDates": "Please select available dates",
+      "errTimes": "Please select available time slots",
+      "errTerms": "Please accept Terms & Conditions"
+}
