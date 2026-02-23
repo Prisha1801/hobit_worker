@@ -4,6 +4,7 @@ import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
+import '../maps/customer_route_map.dart';
 import '../models/booking_model.dart';
 import '../models/get_profile_model.dart';
 import '../prefs/app_preference.dart';
@@ -387,9 +388,23 @@ class _HomeScreenState extends State<HomeScreen> {
               const Icon(Icons.location_on, size: 16, color: Colors.green),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  "${booking.address}, ${booking.city}",
-                  style: const TextStyle(fontSize: 13),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CustomerRouteMap(
+                          customerLat: booking.latitude,
+                          customerLng: booking.longitude,
+                          address: booking.address,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "${booking.address}, ${booking.city}",
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ),
               ),
               const Text(
@@ -831,7 +846,7 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
             const SizedBox(height: 6),
             Text(
-                loc.enterOtpMsg,
+              loc.enterOtpMsg,
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
             const SizedBox(height: 16),
@@ -902,7 +917,7 @@ class _OtpDialogState extends State<OtpDialog> {
                 style: const TextStyle(color: Colors.black54, fontSize: 13),
                 children: [
                   TextSpan(
-                    text:loc.resend,
+                    text: loc.resend,
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 13,
@@ -947,9 +962,7 @@ class _OtpDialogState extends State<OtpDialog> {
                         : () async {
                             if (otp.length != 6) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(loc.enterValidOtp),
-                                ),
+                                SnackBar(content: Text(loc.enterValidOtp)),
                               );
                               return;
                             }

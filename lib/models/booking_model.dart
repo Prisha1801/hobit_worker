@@ -7,6 +7,8 @@ class AssignedBookingModel {
   final String address;
   final String city;
   final String status;
+  final double latitude;
+  final double longitude;
   final ServiceModel service;
 
   AssignedBookingModel({
@@ -18,6 +20,8 @@ class AssignedBookingModel {
     required this.address,
     required this.city,
     required this.status,
+    required this.latitude,
+    required this.longitude,
     required this.service,
   });
 
@@ -30,6 +34,8 @@ class AssignedBookingModel {
       timeSlot: json['time_slot'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? '',
+      latitude: double.parse(json['latitude']),
+      longitude: double.parse(json['longitude']),
       status: json['status'] ?? '',
       service: ServiceModel.fromJson(json['service']),
     );

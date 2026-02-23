@@ -8,6 +8,7 @@ import '../models/sign_up_model.dart';
 import 'login_page.dart';
 
 class SignupApi {
+
   static Future<List<IdNameModel>> getCategories() async {
     final res = await ApiService.getRequest(serviceCategoriesUrl);
     return (res.data as List)
@@ -349,6 +350,7 @@ class _SignupScreenState extends State<SignupScreen> {
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffix,
+            fillColor: Colors.white,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
@@ -370,6 +372,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Text(label),
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
+          dropdownColor: kWhite,
           value: value,
           hint: hint != null ? Text(hint) : null, // 👈 ADD
           items: items,
@@ -456,11 +459,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> pickDate() async {
     final d = await showDatePicker(
+
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
       initialDate: DateTime.now(),
     );
+
     if (d != null) {
       final f = DateFormat("yyyy-MM-dd").format(d);
       if (!availableDates.contains(f)) {
@@ -686,7 +691,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Checkbox(
                     value: accept,
                     onChanged: (v) => setState(() => accept = v!)),
-                const Expanded(child: Text("Accept Terms & Conditions")),
+                Expanded(child: Text(loc.acceptTerms)),
               ],
             ),
 
@@ -697,13 +702,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kkblack,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // 👈 radius
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 onPressed: loading ? null : register,
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Sign Up",   style: TextStyle(
+                    : Text(loc.signUp,   style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -715,14 +720,14 @@ class _SignupScreenState extends State<SignupScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Have an account? "),
+                Text(loc.haveAccount),
                 GestureDetector(
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (_) => const LoginScreen())),
                   child:
-                  Text("Login", style: TextStyle(color: kkblack)),
+                  Text(loc.login, style: TextStyle(color: kkblack)),
                 ),
               ],
             ),
