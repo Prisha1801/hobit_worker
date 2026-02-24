@@ -647,7 +647,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             right: 16,
                             child: Row(
                               children: List.generate(
-                                3,
+                                2,
                                 (index) => Padding(
                                   padding: EdgeInsets.only(
                                     left: index > 0 ? 2 : 0,
