@@ -874,7 +874,7 @@ abstract class AppLocalizations {
   /// No description provided for @invalidOtp.
   ///
   /// In en, this message translates to:
-  /// **'Invalid OTP'**
+  /// **'Please enter valid 6 digit OTP'**
   String get invalidOtp;
 
   /// No description provided for @onboardTitle1.
@@ -1182,6 +1182,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please accept Terms & Conditions'**
   String get errTerms;
+
+  /// No description provided for @otpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve sent an OTP to the phone number'**
+  String get otpSubtitle;
+
+  /// No description provided for @pleaseCheckNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check number'**
+  String get pleaseCheckNumber;
+
+  /// No description provided for @enterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Code'**
+  String get enterCode;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @didntReceiveOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive the OTP?'**
+  String get didntReceiveOtp;
+
+  /// No description provided for @loginSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Successful'**
+  String get loginSuccessful;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

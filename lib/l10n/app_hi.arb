@@ -271,6 +271,16 @@
              "errArea": "क्षेत्र चुनें",
              "errDates": "उपलब्ध तिथियाँ चुनें",
              "errTimes": "समय चुनें",
-             "errTerms": "नियम व शर्तें स्वीकार करें"
+             "errTerms": "नियम व शर्तें स्वीकार करें",
+
+              "otpVerification": "ओटीपी सत्यापन",
+               "otpSubtitle": "हमने इस नंबर पर ओटीपी भेजा है",
+               "pleaseCheckNumber": "कृपया नंबर जांचें",
+               "enterCode": "कोड दर्ज करें",
+               "submit": "सबमिट करें",
+               "resend": "पुनः भेजें",
+               "didntReceiveOtp": "ओटीपी प्राप्त नहीं हुआ?",
+               "invalidOtp": "कृपया सही 6 अंकों का ओटीपी दर्ज करें",
+               "loginSuccessful": "लॉगिन सफल"
 
 }

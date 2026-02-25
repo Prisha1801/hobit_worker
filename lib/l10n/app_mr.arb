@@ -263,7 +263,17 @@
             "errArea": "भाग निवडा",
             "errDates": "तारखा निवडा",
             "errTimes": "वेळ निवडा",
-            "errTerms": "अटी व शर्ती स्वीकारा"
+            "errTerms": "अटी व शर्ती स्वीकारा",
+
+              "otpVerification": "ओटीपी पडताळणी",
+              "otpSubtitle": "या नंबरवर ओटीपी पाठवला आहे",
+              "pleaseCheckNumber": "कृपया नंबर तपासा",
+              "enterCode": "कोड टाका",
+              "submit": "सबमिट करा",
+              "resend": "पुन्हा पाठवा",
+              "didntReceiveOtp": "ओटीपी मिळाला नाही?",
+              "invalidOtp": "कृपया योग्य 6 अंकी ओटीपी टाका",
+              "loginSuccessful": "लॉगिन यशस्वी"
 
 
 }

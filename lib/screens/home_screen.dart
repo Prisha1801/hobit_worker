@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // AssignedBookingModel? assignedBooking;
   bool loadingBooking = true;
+  bool resendLoading = false;
 
   // int workerId = 0;
   Future<void> _refreshHome() async {
@@ -829,6 +830,7 @@ class OtpDialog extends StatefulWidget {
 class _OtpDialogState extends State<OtpDialog> {
   String otp = "";
   bool loading = false;
+  bool resendLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -911,17 +913,76 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
 
             const SizedBox(height: 26),
+            // RichText(
+            //   text: TextSpan(
+            //     text: loc.dontReceiveCode,
+            //     style: const TextStyle(color: Colors.black54, fontSize: 13),
+            //     children: [
+            //       TextSpan(
+            //         text: loc.resend,
+            //         style: const TextStyle(
+            //           color: Colors.green,
+            //           fontSize: 13,
+            //           fontWeight: FontWeight.w600,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+
             RichText(
               text: TextSpan(
                 text: loc.dontReceiveCode,
                 style: const TextStyle(color: Colors.black54, fontSize: 13),
                 children: [
-                  TextSpan(
-                    text: loc.resend,
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: resendLoading
+                          ? null
+                          : () async {
+                        setState(() => resendLoading = true);
+
+                        final success = await BookingApi.sendStartOtp(
+                          widget.bookingId,
+                        );
+
+                        setState(() => resendLoading = false);
+
+                        if (success) {
+                          otp = ""; // 🔥 reset otp
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("OTP resent successfully"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Failed to resend OTP"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: resendLoading
+                            ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                            : Text(
+                          loc.resend,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],

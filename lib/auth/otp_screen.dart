@@ -4,6 +4,7 @@ import 'package:hobit_worker/auth/permission_screen.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
 import '../api_services/urls.dart';
+import '../l10n/app_localizations.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import '../utils/bottom_nav_bar.dart';
@@ -39,9 +40,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
 
   Future<void> verifyOtp() async {
+    final loc = AppLocalizations.of(context)!;
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter valid 6 digit OTP")),
+        SnackBar(content: Text(loc.invalidOtp)),
       );
       return;
     }
@@ -96,7 +98,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         debugPrint("LOGIN TOKENnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn: $token");
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Login Successful")),
+          SnackBar(content: Text(data["message"] ?? loc.loginSuccessful)),
         );
 
         // Navigator.pushAndRemoveUntil(
@@ -129,6 +131,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -140,9 +143,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
             /// 🔹 TITLE
             Center(
-              child: const Text(
-                "OTP Verification",
-                style: TextStyle(
+              child: Text(
+               loc.otpVerification,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
@@ -156,8 +159,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               text: TextSpan(
                 style: const TextStyle(fontSize: 13, color: Colors.black54),
                 children: [
-                  const TextSpan(
-                    text: "We've sent an OTP for the above phone number,\n",
+                  TextSpan(
+                    text: loc.otpSubtitle,
                   ),
                   TextSpan(
                     text: "please check number  +91 ${widget.phone}",
@@ -174,9 +177,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             const SizedBox(height: 24),
 
             /// 🔹 ENTER CODE TEXT
-            const Text(
-              "Enter Code",
-              style: TextStyle(
+            Text(
+           loc.enterCode,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -242,9 +245,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 onPressed: isLoading ? null : verifyOtp,
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                  "Submit",
-                  style: TextStyle(
+                    : Text(
+                  loc.submit,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -259,11 +262,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             Center(
               child: RichText(
                 text: TextSpan(
-                  text: "Didn't see your email? ",
+                  text: loc.didntReceiveOtp,
                   style: const TextStyle(color: Colors.black),
                   children: [
                     TextSpan(
-                      text: "Resend",
+                      text: loc.resend,
                       style: const TextStyle(
                         color: Color(0xFF4F3CC9),
                         fontWeight: FontWeight.w600,

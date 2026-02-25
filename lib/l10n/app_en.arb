@@ -266,5 +266,15 @@
       "errArea": "Please select area",
       "errDates": "Please select available dates",
       "errTimes": "Please select available time slots",
-      "errTerms": "Please accept Terms & Conditions"
+      "errTerms": "Please accept Terms & Conditions",
+
+       "otpVerification": "OTP Verification",
+        "otpSubtitle": "We've sent an OTP to the phone number",
+        "pleaseCheckNumber": "Please check number",
+        "enterCode": "Enter Code",
+        "submit": "Submit",
+        "resend": "Resend",
+        "didntReceiveOtp": "Didn't receive the OTP?",
+        "invalidOtp": "Please enter valid 6 digit OTP",
+        "loginSuccessful": "Login Successful"
 }

@@ -396,7 +396,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterValidOtp => 'Enter valid OTP';
 
   @override
-  String get invalidOtp => 'Invalid OTP';
+  String get invalidOtp => 'Please enter valid 6 digit OTP';
 
   @override
   String get onboardTitle1 => 'We are here for you!';
@@ -550,4 +550,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errTerms => 'Please accept Terms & Conditions';
+
+  @override
+  String get otpSubtitle => 'We\'ve sent an OTP to the phone number';
+
+  @override
+  String get pleaseCheckNumber => 'Please check number';
+
+  @override
+  String get enterCode => 'Enter Code';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get didntReceiveOtp => 'Didn\'t receive the OTP?';
+
+  @override
+  String get loginSuccessful => 'Login Successful';
 }

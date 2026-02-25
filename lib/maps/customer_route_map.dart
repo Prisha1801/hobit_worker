@@ -506,7 +506,7 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
         'origin': '${origin.latitude},${origin.longitude}',
         'destination': '${destination.latitude},${destination.longitude}',
         'mode': 'driving',
-        'key': 'AIzaSyBGv9znbx4hAdCp_6YK0-HO2XVKI4ZXALk',
+        'key': 'AIzaSyAKycpWAllnNwoMkwNncDOPS_y6KV0kLZY',
       },
     );
 

@@ -396,7 +396,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get enterValidOtp => 'वैध ओटीपी टाका';
 
   @override
-  String get invalidOtp => 'अवैध ओटीपी';
+  String get invalidOtp => 'कृपया योग्य 6 अंकी ओटीपी टाका';
 
   @override
   String get onboardTitle1 => 'आम्ही तुमच्यासाठी येथे आहोत!';
@@ -550,4 +550,22 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get errTerms => 'अटी व शर्ती स्वीकारा';
+
+  @override
+  String get otpSubtitle => 'या नंबरवर ओटीपी पाठवला आहे';
+
+  @override
+  String get pleaseCheckNumber => 'कृपया नंबर तपासा';
+
+  @override
+  String get enterCode => 'कोड टाका';
+
+  @override
+  String get submit => 'सबमिट करा';
+
+  @override
+  String get didntReceiveOtp => 'ओटीपी मिळाला नाही?';
+
+  @override
+  String get loginSuccessful => 'लॉगिन यशस्वी';
 }
