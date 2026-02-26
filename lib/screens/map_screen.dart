@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:hobit_worker/utils/app_bar.dart';
 import '../api_services/location_service.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/bottom_nav_bar.dart';
 
 class ConfirmLocationScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class ConfirmLocationScreen extends StatefulWidget {
 }
 
 class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
+
   LatLng? currentLatLng;
   String address = "Fetching location...";
   Set<Marker> markers = {};
@@ -27,6 +29,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
   }
 
   Future<void> fetchLocation() async {
+    final loc = AppLocalizations.of(context)!;
     final pos = await LocationService.getCurrentLocation();
 
     currentLatLng = LatLng(pos.latitude, pos.longitude);
@@ -70,6 +73,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     if (currentLatLng == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -77,7 +81,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
     }
 
     return Scaffold(
-      appBar: CommonAppBar(title: 'Confirm Your Address'),
+      appBar: CommonAppBar(title: loc.confirmYourAddress),
       body: Stack(
         children: [
           /// 🗺 GOOGLE MAP
@@ -153,9 +157,9 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                     MaterialPageRoute(builder: (_) => const MainScreen()),
                   );
                 },
-                child: const Text(
-                  "Confirm location",
-                  style: TextStyle(
+                child: Text(
+                  loc.confirmLocation,
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),

@@ -272,6 +272,7 @@
              "errDates": "उपलब्ध तिथियाँ चुनें",
              "errTimes": "समय चुनें",
              "errTerms": "नियम व शर्तें स्वीकार करें",
+              "selectAvailability": "उपलब्धता चुनें",
 
               "otpVerification": "ओटीपी सत्यापन",
                "otpSubtitle": "हमने इस नंबर पर ओटीपी भेजा है",
@@ -281,6 +282,14 @@
                "resend": "पुनः भेजें",
                "didntReceiveOtp": "ओटीपी प्राप्त नहीं हुआ?",
                "invalidOtp": "कृपया सही 6 अंकों का ओटीपी दर्ज करें",
-               "loginSuccessful": "लॉगिन सफल"
+               "loginSuccessful": "लॉगिन सफल",
+
+              "home": "होम",
+                "bookings": "बुकिंग",
+                "profile": "प्रोफाइल",
+
+                 "confirmYourAddress": "अपना पता पुष्टि करें",
+                  "fetchingLocation": "स्थान प्राप्त किया जा रहा है...",
+                  "confirmLocation": "स्थान की पुष्टि करें"
 
 }

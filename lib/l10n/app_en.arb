@@ -103,6 +103,8 @@
 "selectAvailableDates": "Select Available Dates",
 "noDatesAdded": "No dates added",
 "addDate": "Add Date",
+  "selectAvailability": "Select Availability",
+
 
 "selectTimeSlots": "Select Time Slots",
 "noTimeSlots": "No time slots added",
@@ -276,5 +278,14 @@
         "resend": "Resend",
         "didntReceiveOtp": "Didn't receive the OTP?",
         "invalidOtp": "Please enter valid 6 digit OTP",
-        "loginSuccessful": "Login Successful"
+        "loginSuccessful": "Login Successful",
+
+
+         "home": "Home",
+          "bookings": "Bookings",
+          "profile": "Profile",
+
+          "confirmYourAddress": "Confirm Your Address",
+            "fetchingLocation": "Fetching location...",
+            "confirmLocation": "Confirm location"
 }

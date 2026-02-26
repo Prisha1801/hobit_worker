@@ -523,6 +523,12 @@ abstract class AppLocalizations {
   /// **'Add Date'**
   String get addDate;
 
+  /// No description provided for @selectAvailability.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Availability'**
+  String get selectAvailability;
+
   /// No description provided for @selectTimeSlots.
   ///
   /// In en, this message translates to:
@@ -1218,6 +1224,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login Successful'**
   String get loginSuccessful;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @confirmYourAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Your Address'**
+  String get confirmYourAddress;
+
+  /// No description provided for @fetchingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching location...'**
+  String get fetchingLocation;
+
+  /// No description provided for @confirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm location'**
+  String get confirmLocation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

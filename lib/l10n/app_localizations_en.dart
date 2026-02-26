@@ -222,6 +222,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addDate => 'Add Date';
 
   @override
+  String get selectAvailability => 'Select Availability';
+
+  @override
   String get selectTimeSlots => 'Select time range';
 
   @override
@@ -568,4 +571,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSuccessful => 'Login Successful';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get confirmYourAddress => 'Confirm Your Address';
+
+  @override
+  String get fetchingLocation => 'Fetching location...';
+
+  @override
+  String get confirmLocation => 'Confirm location';
 }

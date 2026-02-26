@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../screens/home_screen.dart';
 import '../screens/my_bookings.dart';
 import '../screens/profile.dart';
@@ -12,6 +13,7 @@ class MainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final currentIndex = ref.watch(bottomNavIndexProvider);
 
     return Scaffold(
@@ -36,22 +38,22 @@ class MainScreen extends ConsumerWidget {
           type: BottomNavigationBarType.fixed,
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.grey,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
+              icon: const Icon(Icons.home),
+              label: loc.home,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month),
-              label: 'Bookings',
+              icon: const Icon(Icons.calendar_month),
+              label: loc.bookings,
             ),
             // BottomNavigationBarItem(
             //   icon: Icon(Icons.account_balance_wallet),
             //   label: 'Wallet',
             // ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
+              icon: const Icon(Icons.person),
+              label: loc.profile,
             ),
           ],
         ),

@@ -1058,7 +1058,7 @@ class _OtpDialogState extends State<OtpDialog> {
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
-                          ),
+                        ),
                   ),
             ),
           ],

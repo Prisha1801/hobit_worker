@@ -273,7 +273,16 @@
               "resend": "पुन्हा पाठवा",
               "didntReceiveOtp": "ओटीपी मिळाला नाही?",
               "invalidOtp": "कृपया योग्य 6 अंकी ओटीपी टाका",
-              "loginSuccessful": "लॉगिन यशस्वी"
+              "loginSuccessful": "लॉगिन यशस्वी",
+
+               "home": "होम",
+                "bookings": "बुकिंग्स",
+                "profile": "प्रोफाइल",
+                "selectAvailability": "उपलब्धता निवडा",
+
+                 "confirmYourAddress": "आपला पत्ता निश्चित करा",
+                  "fetchingLocation": "स्थान मिळवत आहे...",
+                  "confirmLocation": "स्थान निश्चित करा"
 
 
 }

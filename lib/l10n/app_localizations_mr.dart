@@ -222,6 +222,9 @@ class AppLocalizationsMr extends AppLocalizations {
   String get addDate => 'तारीख जोडा';
 
   @override
+  String get selectAvailability => 'उपलब्धता निवडा';
+
+  @override
   String get selectTimeSlots => 'वेळ निवडा';
 
   @override
@@ -568,4 +571,16 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get loginSuccessful => 'लॉगिन यशस्वी';
+
+  @override
+  String get home => 'होम';
+
+  @override
+  String get confirmYourAddress => 'आपला पत्ता निश्चित करा';
+
+  @override
+  String get fetchingLocation => 'स्थान मिळवत आहे...';
+
+  @override
+  String get confirmLocation => 'स्थान निश्चित करा';
 }

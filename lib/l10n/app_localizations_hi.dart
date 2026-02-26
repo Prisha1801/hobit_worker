@@ -75,7 +75,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get emailSupportSubtitle => 'support@hobit.in';
 
   @override
-  String get profile => 'प्रोफ़ाइल';
+  String get profile => 'प्रोफाइल';
 
   @override
   String get helloWelcome => 'नमस्ते, फिर से स्वागत है';
@@ -222,6 +222,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get addDate => 'तिथि जोड़ें';
 
   @override
+  String get selectAvailability => 'उपलब्धता चुनें';
+
+  @override
   String get selectTimeSlots => 'समय चुनें';
 
   @override
@@ -330,7 +333,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cancel => 'रद्द करें';
 
   @override
-  String get bookings => 'बुकिंग्स';
+  String get bookings => 'बुकिंग';
 
   @override
   String get allRequests => 'सभी अनुरोध';
@@ -568,4 +571,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get loginSuccessful => 'लॉगिन सफल';
+
+  @override
+  String get home => 'होम';
+
+  @override
+  String get confirmYourAddress => 'अपना पता पुष्टि करें';
+
+  @override
+  String get fetchingLocation => 'स्थान प्राप्त किया जा रहा है...';
+
+  @override
+  String get confirmLocation => 'स्थान की पुष्टि करें';
 }

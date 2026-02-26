@@ -1327,7 +1327,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 }
 
                 showMultiSelectSheet(
-                  title: "Select Categories",
+                  title: loc.selectCategories,
                   items: categories,
                   selectedItems: selectedCategories,
                   onDone: (list) {
@@ -1357,7 +1357,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 }
 
                 showMultiSelectSheet(
-                  title: "Select Services",
+                  title: loc.selectServices,
                   items: filteredServices,
                   selectedItems: selectedServices,
                   onDone: (list) {
@@ -1376,7 +1376,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                //onTap: () {},
                 onTap: () {
                   showSingleSelectSheet(
-                    title: "Select Availability",
+                    title:loc.selectAvailability,
                     items:  [
                       IdNameModel(id: 1, name: "Available"),
                       IdNameModel(id: 0, name: "Unavailable"),
@@ -1427,7 +1427,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 }
 
                 final result = await showSingleSelectSheet(
-                  title: "Select City",
+                  title: loc.selectCity,
                   items: cities,
                   selectedItem: selectedCity,
                 );
@@ -1462,7 +1462,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 }
 
                 final result = await showSingleSelectSheet(
-                  title: "Select Zone",
+                  title: loc.selectZone,
                   items: filteredZones,
                   selectedItem: selectedZone,
                 );
@@ -1494,7 +1494,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 }
 
                 final result = await showSingleSelectSheet(
-                  title: "Select Area",
+                  title: loc.selectArea,
                   items: filteredAreas,
                   selectedItem: selectedArea,
                 );
