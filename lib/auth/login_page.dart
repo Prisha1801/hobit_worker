@@ -3,6 +3,8 @@ import 'package:hobit_worker/auth/signup_page.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
 import '../l10n/app_localizations.dart';
+import '../prefs/app_preference.dart';
+import '../prefs/preference_key.dart';
 import 'otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,6 +47,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? loc.otpSent)),
         );
+        /// 🔥 SAVE PHONE IF CHECKED
+        if (keepSignedIn) {
+          await AppPreference().setBool(PreferencesKey.isLoggedIn, true);
+          await AppPreference().setString(PreferencesKey.phone, phone);
+        } else {
+          await AppPreference().setBool(PreferencesKey.isLoggedIn, false);
+          await AppPreference().remove(PreferencesKey.phone);
+        }
 
         Navigator.push(
           context,
@@ -67,6 +77,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    loadSavedPhone();
+  }
+
+  void loadSavedPhone() {
+    final isSaved =
+    AppPreference().getBool(PreferencesKey.isLoggedIn);
+
+    if (isSaved) {
+      final savedPhone =
+      AppPreference().getString(PreferencesKey.phone);
+      _phoneController.text = savedPhone;
+      keepSignedIn = true;
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

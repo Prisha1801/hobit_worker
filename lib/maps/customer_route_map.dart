@@ -1,382 +1,3 @@
-// import 'dart:async';
-// import 'package:dio/dio.dart';
-// import 'package:flutter/material.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:geolocator/geolocator.dart';
-//
-// class CustomerRouteMap extends StatefulWidget {
-//   final double customerLat;
-//   final double customerLng;
-//   final String address;
-//
-//   const CustomerRouteMap({
-//     super.key,
-//     required this.customerLat,
-//     required this.customerLng,
-//     required this.address,
-//   });
-//
-//   @override
-//   State<CustomerRouteMap> createState() => _CustomerRouteMapState();
-// }
-//
-// class _CustomerRouteMapState extends State<CustomerRouteMap> {
-//   LatLng? workerLatLng;
-//   List<LatLng> routePoints = [];
-//   StreamSubscription<Position>? positionStream;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     startWorkerLocation();
-//   }
-//
-//   void startWorkerLocation() async {
-//     positionStream = Geolocator.getPositionStream(
-//       locationSettings: const LocationSettings(
-//         accuracy: LocationAccuracy.high,
-//         distanceFilter: 10,
-//       ),
-//     ).listen((pos) async {
-//       workerLatLng = LatLng(pos.latitude, pos.longitude);
-//
-//       routePoints = await fetchRoute(
-//         workerLatLng!,
-//         LatLng(widget.customerLat, widget.customerLng),
-//       );
-//
-//       setState(() {});
-//     });
-//   }
-//
-//   Future<List<LatLng>> fetchRoute(
-//       LatLng origin, LatLng destination) async {
-//     final dio = Dio();
-//     final res = await dio.get(
-//       'https://maps.googleapis.com/maps/api/directions/json',
-//       queryParameters: {
-//         'origin': '${origin.latitude},${origin.longitude}',
-//         'destination': '${destination.latitude},${destination.longitude}',
-//         'key': 'AIzaSyBGv9znbx4hAdCp_6YK0-HO2XVKI4ZXALk',
-//       },
-//     );
-//
-//     final encoded =
-//     res.data['routes'][0]['overview_polyline']['points'];
-//     return decodePolyline(encoded);
-//   }
-//
-//   List<LatLng> decodePolyline(String encoded) {
-//     List<LatLng> poly = [];
-//     int index = 0, lat = 0, lng = 0;
-//
-//     while (index < encoded.length) {
-//       int shift = 0, result = 0;
-//       int b;
-//       do {
-//         b = encoded.codeUnitAt(index++) - 63;
-//         result |= (b & 0x1f) << shift;
-//         shift += 5;
-//       } while (b >= 0x20);
-//       lat += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-//
-//       shift = 0;
-//       result = 0;
-//       do {
-//         b = encoded.codeUnitAt(index++) - 63;
-//         result |= (b & 0x1f) << shift;
-//         shift += 5;
-//       } while (b >= 0x20);
-//       lng += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-//
-//       poly.add(LatLng(lat / 1E5, lng / 1E5));
-//     }
-//     return poly;
-//   }
-//
-//   @override
-//   void dispose() {
-//     positionStream?.cancel();
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     if (workerLatLng == null) {
-//       return const Scaffold(
-//         body: Center(child: CircularProgressIndicator()),
-//       );
-//     }
-//
-//     return Scaffold(
-//       appBar: AppBar(title: Text("Customer Route")),
-//       body: GoogleMap(
-//         initialCameraPosition: CameraPosition(
-//           target: workerLatLng!,
-//           zoom: 14,
-//         ),
-//         myLocationEnabled: true,
-//         markers: {
-//           Marker(
-//             markerId: const MarkerId("worker"),
-//             position: workerLatLng!,
-//             icon: BitmapDescriptor.defaultMarkerWithHue(
-//               BitmapDescriptor.hueBlue,
-//             ),
-//           ),
-//           Marker(
-//             markerId: const MarkerId("customer"),
-//             position:
-//             LatLng(widget.customerLat, widget.customerLng),
-//           ),
-//         },
-//         polylines: {
-//           Polyline(
-//             polylineId: const PolylineId("route"),
-//             color: Colors.green,
-//             width: 5,
-//             points: routePoints,
-//           ),
-//         },
-//       ),
-//     );
-//   }
-// }
-
-
-// import 'dart:async';
-// import 'package:dio/dio.dart';
-// import 'package:flutter/material.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:geolocator/geolocator.dart';
-// import '../colors/appcolors.dart';
-//
-// class CustomerRouteMap extends StatefulWidget {
-//   final double customerLat;
-//   final double customerLng;
-//   final String address;
-//
-//   const CustomerRouteMap({
-//     super.key,
-//     required this.customerLat,
-//     required this.customerLng,
-//     required this.address,
-//   });
-//
-//   @override
-//   State<CustomerRouteMap> createState() => _CustomerRouteMapState();
-// }
-//
-// class _CustomerRouteMapState extends State<CustomerRouteMap> {
-//   LatLng? workerLatLng;
-//   List<LatLng> routePoints = [];
-//   StreamSubscription<Position>? positionStream;
-//
-//   String remainingDistance = "";
-//   String remainingTime = "";
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     startWorkerLocation();
-//   }
-//
-//   /// 🔥 Live worker location tracking
-//   void startWorkerLocation() async {
-//     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-//     if (!serviceEnabled) return;
-//
-//     LocationPermission permission = await Geolocator.checkPermission();
-//     if (permission == LocationPermission.denied) {
-//       permission = await Geolocator.requestPermission();
-//     }
-//
-//     positionStream = Geolocator.getPositionStream(
-//       locationSettings: const LocationSettings(
-//         accuracy: LocationAccuracy.high,
-//         distanceFilter: 10, // meters
-//       ),
-//     ).listen((pos) async {
-//       workerLatLng = LatLng(pos.latitude, pos.longitude);
-//
-//       routePoints = await fetchRoute(
-//         workerLatLng!,
-//         LatLng(widget.customerLat, widget.customerLng),
-//       );
-//
-//       setState(() {});
-//     });
-//   }
-//
-//   /// 🔥 Fetch route + distance + ETA
-//   Future<List<LatLng>> fetchRoute(
-//       LatLng origin,
-//       LatLng destination,
-//       ) async {
-//     final dio = Dio();
-//
-//     final res = await dio.get(
-//       'https://maps.googleapis.com/maps/api/directions/json',
-//       queryParameters: {
-//         'origin': '${origin.latitude},${origin.longitude}',
-//         'destination': '${destination.latitude},${destination.longitude}',
-//         'mode': 'driving',
-//         'key': 'AIzaSyBGv9znbx4hAdCp_6YK0-HO2XVKI4ZXALk',
-//       },
-//     );
-//
-//     final route = res.data['routes'][0];
-//     final leg = route['legs'][0];
-//
-//     // 🔥 Remaining distance & time
-//     remainingDistance = leg['distance']['text']; // e.g. 1.2 km
-//     remainingTime = leg['duration']['text']; // e.g. 5 mins
-//
-//     final encodedPolyline = route['overview_polyline']['points'];
-//     return decodePolyline(encodedPolyline);
-//   }
-//
-//   /// 🔥 Polyline decode
-//   List<LatLng> decodePolyline(String encoded) {
-//     List<LatLng> poly = [];
-//     int index = 0, lat = 0, lng = 0;
-//
-//     while (index < encoded.length) {
-//       int shift = 0, result = 0;
-//       int b;
-//       do {
-//         b = encoded.codeUnitAt(index++) - 63;
-//         result |= (b & 0x1f) << shift;
-//         shift += 5;
-//       } while (b >= 0x20);
-//       lat += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-//
-//       shift = 0;
-//       result = 0;
-//       do {
-//         b = encoded.codeUnitAt(index++) - 63;
-//         result |= (b & 0x1f) << shift;
-//         shift += 5;
-//       } while (b >= 0x20);
-//       lng += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-//
-//       poly.add(LatLng(lat / 1E5, lng / 1E5));
-//     }
-//     return poly;
-//   }
-//
-//   @override
-//   void dispose() {
-//     positionStream?.cancel();
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     if (workerLatLng == null) {
-//       return const Scaffold(
-//         body: Center(child: CircularProgressIndicator()),
-//       );
-//     }
-//
-//     return Scaffold(
-//       backgroundColor: kWhite,
-//       appBar: AppBar(title: const Text("Customer Route")),
-//       body: Stack(
-//         children: [
-//           GoogleMap(
-//             initialCameraPosition: CameraPosition(
-//               target: workerLatLng!,
-//               zoom: 14,
-//             ),
-//             myLocationEnabled: true,
-//             markers: {
-//               Marker(
-//                 markerId: const MarkerId("worker"),
-//                 position: workerLatLng!,
-//                 icon: BitmapDescriptor.defaultMarkerWithHue(
-//                   BitmapDescriptor.hueBlue,
-//                 ),
-//               ),
-//               Marker(
-//                 markerId: const MarkerId("customer"),
-//                 position:
-//                 LatLng(widget.customerLat, widget.customerLng),
-//               ),
-//             },
-//             polylines: {
-//               Polyline(
-//                 polylineId: const PolylineId("route"),
-//                 color: Colors.green,
-//                 width: 5,
-//                 points: routePoints,
-//               ),
-//             },
-//           ),
-//
-//           /// 🔥 Distance & ETA Card (Google Maps style)
-//           Positioned(
-//             bottom: 20,
-//             left: 16,
-//             right: 16,
-//             child: Card(
-//               color: kWhite,
-//               elevation: 8,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//               child: Padding(
-//                 padding: const EdgeInsets.all(16),
-//                 child: Row(
-//                   mainAxisAlignment:
-//                   MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Column(
-//                       crossAxisAlignment:
-//                       CrossAxisAlignment.start,
-//                       children: [
-//                         const Text(
-//                           "Remaining Distance",
-//                           style: TextStyle(fontSize: 12),
-//                         ),
-//                         Text(
-//                           remainingDistance,
-//                           style: const TextStyle(
-//                             fontSize: 18,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     Column(
-//                       crossAxisAlignment:
-//                       CrossAxisAlignment.start,
-//                       children: [
-//                         const Text(
-//                           "Estimated Time",
-//                           style: TextStyle(fontSize: 12),
-//                         ),
-//                         Text(
-//                           remainingTime,
-//                           style: const TextStyle(
-//                             fontSize: 18,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -486,38 +107,168 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
       lastPosition = newPos;
       workerLatLng = newPos;
 
-      routePoints = await fetchRoute(
+      // routePoints = await fetchRoute(
+      //   newPos,
+      //   LatLng(widget.customerLat, widget.customerLng),
+      // );
+      //
+      // setState(() {});
+
+      final newRoute = await fetchRoute(
         newPos,
         LatLng(widget.customerLat, widget.customerLng),
       );
+
+      if (newRoute.isNotEmpty) {
+        routePoints = newRoute;
+      }
 
       setState(() {});
     });
   }
 
-  /// 🔥 Directions API
   Future<List<LatLng>> fetchRoute(
       LatLng origin, LatLng destination) async {
-    final dio = Dio();
+     print("Workereeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrr: ${origin.latitude},${origin.longitude}");
+     print("Customerrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${destination.latitude},${destination.longitude}");
+    try {
+      final dio = Dio();
 
-    final res = await dio.get(
-      'https://maps.googleapis.com/maps/api/directions/json',
-      queryParameters: {
-        'origin': '${origin.latitude},${origin.longitude}',
-        'destination': '${destination.latitude},${destination.longitude}',
-        'mode': 'driving',
-        'key': 'AIzaSyAKycpWAllnNwoMkwNncDOPS_y6KV0kLZY',
-      },
-    );
+      final res = await dio.get(
+        'https://maps.googleapis.com/maps/api/directions/json',
+        queryParameters: {
+          'origin': '${origin.latitude},${origin.longitude}',
+          'destination': '${destination.latitude},${destination.longitude}',
+          'mode': 'driving',
+          'key': 'AIzaSyAKycpWAllnNwoMkwNncDOPS_y6KV0kLZY',
+        },
+      );
 
-    final route = res.data['routes'][0];
-    final leg = route['legs'][0];
+      print("FULL RESPONSE: ${res.data}");
 
-    remainingDistance = leg['distance']['text'];
-    remainingTime = leg['duration']['text'];
+      // 🔥 IMPORTANT STATUS CHECK
+      if (res.data['status'] != "OK") {
+        print("Directions Error: ${res.data['status']}");
+        print("Error Message: ${res.data['error_message']}");
+        return [];
+      }
 
-    return decodePolyline(route['overview_polyline']['points']);
+      if (res.data['routes'] == null ||
+          res.data['routes'].isEmpty) {
+        print("No routes found");
+        return [];
+      }
+
+      final route = res.data['routes'][0];
+
+      if (route['legs'] == null ||
+          route['legs'].isEmpty) {
+        print("No legs found");
+        return [];
+      }
+
+      final leg = route['legs'][0];
+
+      // 🔥 SAFE DISTANCE ASSIGN
+      remainingDistance = leg['distance']?['text'] ?? "";
+      remainingTime = leg['duration']?['text'] ?? "";
+
+      print("Distance: $remainingDistance");
+      print("Duration: $remainingTime");
+
+      if (route['overview_polyline'] == null ||
+          route['overview_polyline']['points'] == null) {
+        print("No polyline found");
+        return [];
+      }
+
+      return decodePolyline(route['overview_polyline']['points']);
+
+    } catch (e) {
+      print("Directions API Error: $e");
+      return [];
+    }
   }
+
+  // Future<List<LatLng>> fetchRoute(
+  //     LatLng origin, LatLng destination) async {
+  //
+  //   print("Workereeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrr: ${origin.latitude},${origin.longitude}");
+  //   print("Customerrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${destination.latitude},${destination.longitude}");
+  //
+  //   try {
+  //     final dio = Dio();
+  //
+  //     final res = await dio.get(
+  //       'https://maps.googleapis.com/maps/api/directions/json',
+  //       queryParameters: {
+  //         'origin': '${origin.latitude},${origin.longitude}',
+  //         'destination': '${destination.latitude},${destination.longitude}',
+  //         'mode': 'driving',
+  //         'key': 'AIzaSyAKycpWAllnNwoMkwNncDOPS_y6KV0kLZY',
+  //       },
+  //     );
+  //
+  //     print("Directions Status: ${res.data['status']}");
+  //
+  //     if (res.data == null ||
+  //         res.data['routes'] == null ||
+  //         res.data['routes'].isEmpty) {
+  //       print("No routes found");
+  //       return [];
+  //     }
+  //
+  //     final route = res.data['routes'][0];
+  //
+  //     if (route['legs'] == null || route['legs'].isEmpty) {
+  //       print("No legs found");
+  //       return [];
+  //     }
+  //
+  //     final leg = route['legs'][0];
+  //
+  //     remainingDistance = leg['distance']['text'];
+  //     remainingTime = leg['duration']['text'];
+  //
+  //     if (route['overview_polyline'] == null ||
+  //         route['overview_polyline']['points'] == null) {
+  //       print("No polyline found");
+  //       return [];
+  //     }
+  //
+  //     return decodePolyline(route['overview_polyline']['points']);
+  //
+  //   } catch (e) {
+  //     print("Directions API Error: $e");
+  //     return [];
+  //   }
+  // }
+
+  // /// 🔥 Directions API
+  // Future<List<LatLng>> fetchRoute(
+  //     LatLng origin, LatLng destination) async {
+  //   print("Workerrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${origin.latitude},${origin.longitude}");
+  //   print("Customerrrrrrrrrrrrrrrrrrrrrrrrrr: ${destination.latitude},${destination.longitude}");
+  //   final dio = Dio();
+  //
+  //   final res = await dio.get(
+  //     'https://maps.googleapis.com/maps/api/directions/json',
+  //     queryParameters: {
+  //       'origin': '${origin.latitude},${origin.longitude}',
+  //       'destination': '${destination.latitude},${destination.longitude}',
+  //       'mode': 'driving',
+  //       'key': 'AIzaSyAKycpWAllnNwoMkwNncDOPS_y6KV0kLZY',
+  //     },
+  //   );
+  //
+  //   final route = res.data['routes'][0];
+  //   final leg = route['legs'][0];
+  //
+  //   remainingDistance = leg['distance']['text'];
+  //   remainingTime = leg['duration']['text'];
+  //
+  //   return decodePolyline(route['overview_polyline']['points']);
+  // }
 
   /// 🔥 Polyline decode
   List<LatLng> decodePolyline(String encoded) {
@@ -578,7 +329,7 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
 
     return Scaffold(
       backgroundColor: kWhite,
-     appBar: CommonAppBar(title: 'Customer Route'),
+     appBar: CommonAppBar(title: 'Service Location'),
       body: Stack(
         children: [
           GoogleMap(
@@ -586,7 +337,7 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
               target: workerLatLng!,
               zoom: currentZoom,
             ),
-            myLocationEnabled: true,
+            myLocationEnabled: false,
             onCameraMove: (position) {
               if ((position.zoom - currentZoom).abs() > 0.3) {
                 currentZoom = position.zoom;

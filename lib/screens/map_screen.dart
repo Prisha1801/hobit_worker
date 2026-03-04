@@ -29,7 +29,6 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
   }
 
   Future<void> fetchLocation() async {
-    final loc = AppLocalizations.of(context)!;
     final pos = await LocationService.getCurrentLocation();
 
     currentLatLng = LatLng(pos.latitude, pos.longitude);

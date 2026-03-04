@@ -60,7 +60,9 @@ Future<void> logout(BuildContext context, WidgetRef ref) async {
       ),
     );
 
-    await AppPreference().clearSharedPreferences();
+    // await AppPreference().clearSharedPreferences();
+    await AppPreference().remove(PreferencesKey.token);
+    await AppPreference().remove(PreferencesKey.userId);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Logged out successfully")),
     );
@@ -171,7 +173,9 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
                       ),
                       // onPressed: () => logout(context),
                       onPressed: () async {
-                        await AppPreference().clearSharedPreferences();
+                       // await AppPreference().clearSharedPreferences();
+                        await AppPreference().remove(PreferencesKey.token);
+                        await AppPreference().remove(PreferencesKey.userId);
 
                         /// 🔥 RESET PROVIDER
                         ref.invalidate(bottomNavIndexProvider);

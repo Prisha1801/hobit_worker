@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
+import '../api_services/location_service.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
 import '../maps/customer_route_map.dart';
@@ -45,20 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await loadTodayJobs();
   }
 
-  // void _openOtpDialog(int bookingId) {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (_) => OtpDialog(
-  //       bookingId: bookingId,
-  //       onSuccess: () {
-  //         setState(() {
-  //           jobStatus = JobStatus.inProgress;
-  //         });
-  //       },
-  //     ),
-  //   );
-  // }
   void _openOtpDialog(int bookingId) {
     showDialog(
       context: context,
@@ -135,7 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final assigned = await BookingApi.getAssignedBookings();
       final inProgress = await BookingApi.getInProgressBookings();
-
+      // for (var b in assigned) {
+      //   print("API booking dateeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${b.bookingDate}");
+      // }
+      //
+      // print("Device today dateeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${DateTime.now()}");
       final todayAssigned = assigned
           .where((b) => isToday(b.bookingDate))
           .toList();
@@ -156,14 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => loadingBooking = false);
   }
 
-  // Future<void> loadAssignedBooking() async {
-  //   try {
-  //     assignedBooking = await BookingApi.getAssignedBooking();
-  //   } catch (e) {
-  //     debugPrint("Booking error: $e");
-  //   }
-  //   setState(() => loadingBooking = false);
-  // }
+
   Future<void> loadAssignedBooking() async {
     try {
       final bookings = await BookingApi.getAssignedBookings();
@@ -390,21 +374,78 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CustomerRouteMap(
-                          customerLat: booking.latitude,
-                          customerLng: booking.longitude,
-                          address: booking.address,
-                        ),
+                  // onTap: () {
+                  //   Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (_) => CustomerRouteMap(
+                  //         customerLat: booking.latitude,
+                  //         customerLng: booking.longitude,
+                  //         address: booking.address,
+                  //       ),
+                  //     ),
+                  //   );
+                  // },
+                  onTap: () async {
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => const Center(
+                        child: CircularProgressIndicator(),
                       ),
                     );
+
+                    try {
+                      final position = await LocationService.getCurrentLocation();
+
+                      final success = await BookingApi.sendWorkerLiveLocation(
+                        bookingId: booking.id,
+                        latitude: position.latitude,
+                        longitude: position.longitude,
+                      );
+
+                      Navigator.pop(context); // close loader
+
+                      if (success) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CustomerRouteMap(
+                              customerLat: booking.latitude,
+                              customerLng: booking.longitude,
+                              address: booking.address,
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Failed to send live location"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Location error"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   child: Text(
                     "${booking.address}, ${booking.city}",
-                    style: const TextStyle(fontSize: 13),
+                    // style: const TextStyle(fontSize: 13),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.blue,
+                    ),
                   ),
                 ),
               ),
@@ -424,55 +465,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 20),
 
-          // ===== BUTTON =====
-          // Center(
-          //   child: SizedBox(
-          //     width: 180,
-          //     height: 35,
-          //     child: ElevatedButton(
-          //
-          //       onPressed: () async {
-          //         showDialog(
-          //           context: context,
-          //           barrierDismissible: false,
-          //           builder: (_) =>
-          //               const Center(child: CircularProgressIndicator()),
-          //         );
-          //
-          //         final success = await BookingApi.sendStartOtp(booking.id);
-          //
-          //         Navigator.pop(context);
-          //
-          //         if (success) {
-          //           _openOtpDialog(isStartService: true);
-          //         } else {
-          //           ScaffoldMessenger.of(context).showSnackBar(
-          //             const SnackBar(
-          //               content: Text("Failed to send OTP"),
-          //               backgroundColor: Colors.red,
-          //             ),
-          //           );
-          //         }
-          //       },
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: kkblack,
-          //         padding: EdgeInsets.zero,
-          //         elevation: 0,
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(5),
-          //         ),
-          //       ),
-          //       child: const Text(
-          //         "Start your Service",
-          //         style: TextStyle(
-          //           fontSize: 12,
-          //           fontWeight: FontWeight.w600,
-          //           color: Colors.white,
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -559,6 +551,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+
+          SizedBox(height: 20,),
+
+
         ],
       ),
     );
@@ -760,16 +756,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               if (loadingBooking)
                 const Center(child: CircularProgressIndicator())
-              // else if (assignedBooking == null)
-              //   SizedBox(
-              //     height: MediaQuery.of(context).size.height * 0.35,
-              //     child: const Center(
-              //       child: Text(
-              //         "No assigned job",
-              //         style: TextStyle(color: Colors.black54, fontSize: 14),
-              //       ),
-              //     ),
-              //   )
+
               else if (todayBookings.isEmpty)
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.35,
@@ -794,7 +781,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               else
                 SizedBox(
-                  height: 300, // card height
+                  height: MediaQuery.of(context).size.height * 0.45, // card height
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: todayBookings.length,
@@ -861,23 +848,6 @@ class _OtpDialogState extends State<OtpDialog> {
                   width: 36,
                   height: 42,
                   child:
-                      // TextField(
-                      //   maxLength: 1,
-                      //   keyboardType: TextInputType.number,
-                      //   textAlign: TextAlign.center,
-                      //   onChanged: (val) {
-                      //     if (val.isNotEmpty) {
-                      //       otp += val;
-                      //       FocusScope.of(context).nextFocus();
-                      //     }
-                      //   },
-                      //   decoration: InputDecoration(
-                      //     counterText: '',
-                      //     border: OutlineInputBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //   ),
-                      // ),
                       TextField(
                         maxLength: 1,
                         keyboardType: TextInputType.number,
@@ -992,24 +962,6 @@ class _OtpDialogState extends State<OtpDialog> {
             SizedBox(
               width: double.infinity,
               child:
-                  // ElevatedButton(
-                  //   onPressed: widget.onDone,
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: kkblack,
-                  //     padding: const EdgeInsets.symmetric(vertical: 12),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(5),
-                  //     ),
-                  //   ),
-                  //   child: const Text(
-                  //     'Done',
-                  //     style: TextStyle(
-                  //       fontSize: 15,
-                  //       fontWeight: FontWeight.w600,
-                  //       color: Colors.white,
-                  //     ),
-                  //   ),
-                  // ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kkblack,

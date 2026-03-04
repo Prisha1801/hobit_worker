@@ -97,4 +97,35 @@ class BookingApi {
       return false;
     }
   }
+
+  static Future<bool> sendWorkerLiveLocation({
+    required int bookingId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final response = await ApiService.postRequest(
+        "/api/worker/location",
+        {
+          "booking_id": bookingId,
+          "latitude": latitude,
+          "longitude": longitude,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("Live location error: $e");
+      return false;
+    }
+  }
 }

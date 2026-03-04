@@ -25,19 +25,44 @@ class AssignedBookingModel {
     required this.service,
   });
 
+  // factory AssignedBookingModel.fromJson(Map<String, dynamic> json) {
+  //   return AssignedBookingModel(
+  //     id: json['id'],
+  //     customerName: json['customer_name'] ?? '',
+  //     customerPhone: json['customer_phone'] ?? '',
+  //     bookingDate: json['booking_date'] ?? '',
+  //     timeSlot: json['time_slot'] ?? '',
+  //     address: json['address'] ?? '',
+  //     city: json['city'] ?? '',
+  //     latitude: double.parse(json['latitude']),
+  //     longitude: double.parse(json['longitude']),
+  //     status: json['status'] ?? '',
+  //     service: ServiceModel.fromJson(json['service']),
+  //   );
+  // }
+
   factory AssignedBookingModel.fromJson(Map<String, dynamic> json) {
     return AssignedBookingModel(
-      id: json['id'],
+      id: json['id'] ?? 0,
       customerName: json['customer_name'] ?? '',
       customerPhone: json['customer_phone'] ?? '',
       bookingDate: json['booking_date'] ?? '',
       timeSlot: json['time_slot'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? '',
-      latitude: double.parse(json['latitude']),
-      longitude: double.parse(json['longitude']),
       status: json['status'] ?? '',
-      service: ServiceModel.fromJson(json['service']),
+
+      latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
+      longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
+
+      service: json['service'] != null
+          ? ServiceModel.fromJson(json['service'])
+          : ServiceModel(
+        id: 0,
+        name: '',
+        description: '',
+        price: '0',
+      ),
     );
   }
 }
