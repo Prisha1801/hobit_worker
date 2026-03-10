@@ -151,10 +151,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
       }
     } catch (e) {
+      String message = "Something went wrong";
+
+      if (e.toString().contains("401")) {
+        message = "Invalid OTP";
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(message)),
       );
-    } finally {
+    }
+    // } catch (e) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text(e.toString())),
+    //   );
+    // }
+    finally {
       setState(() => isLoading = false);
     }
   }

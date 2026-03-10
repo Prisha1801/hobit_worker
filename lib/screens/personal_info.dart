@@ -653,7 +653,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             loc.done,
-                            style: const TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -796,7 +796,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
 
   /// For City, Zone, Area selection - single select bottom sheet
-
   Future<void> updateProfile() async {
     final loc = AppLocalizations.of(context)!;
 
@@ -810,12 +809,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       "city_id": selectedCity?.id,
       "zone_id": selectedZone?.id,
       "area_id": selectedArea?.id,
-
-
       "available_dates": availableDates.isNotEmpty
           ? availableDates
           : profile!.workerAvailability.first.availableDates,
-
       "available_times": availableTimes.isNotEmpty
           ? availableTimes
           : profile!.workerAvailability.first.availableTimes
@@ -824,107 +820,119 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     };
 
     try {
-      setState(() {
-        isLoading = true; // 🔥 PAGE REFRESH START
-      });
+      setState(() => isLoading = true);
       await WorkerApi.updateWorker(workerId: profile!.id, body: body);
-      await fetchProfile();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.profileUpdated)),
-      );
-      Navigator.pop(context, true);
+      // ❌ REMOVED fetchProfile() from here
     } catch (e) {
       debugPrint("Update error: $e");
     }
   }
-
+  // Future<void> updateProfile() async {
+  //   final loc = AppLocalizations.of(context)!;
+  //
+  //   final body = {
+  //     "name": _nameController.text,
+  //     "email": _emailController.text,
+  //     "phone": _mobileController.text,
+  //     "category_ids": categoryIds,
+  //     "service_ids": serviceIds,
+  //     "is_active": profile!.isActive,
+  //     "city_id": selectedCity?.id,
+  //     "zone_id": selectedZone?.id,
+  //     "area_id": selectedArea?.id,
+  //
+  //
+  //     "available_dates": availableDates.isNotEmpty
+  //         ? availableDates
+  //         : profile!.workerAvailability.first.availableDates,
+  //
+  //     "available_times": availableTimes.isNotEmpty
+  //         ? availableTimes
+  //         : profile!.workerAvailability.first.availableTimes
+  //         .map((e) => {"start": e.start, "end": e.end})
+  //         .toList(),
+  //   };
+  //
+  //   try {
+  //     setState(() {
+  //       isLoading = true; // 🔥 PAGE REFRESH START
+  //     });
+  //     await WorkerApi.updateWorker(workerId: profile!.id, body: body);
+  //     await fetchProfile();
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(loc.profileUpdated)),
+  //     );
+  //    // Navigator.pop(context, true);
+  //   } catch (e) {
+  //     debugPrint("Update error: $e");
+  //   }
+  // }
 
   Future<void> uploadKyc() async {
     final loc = AppLocalizations.of(context)!;
 
     try {
-      setState(() => isLoading = true);
-
       await WorkerApi.uploadKycDocuments(
         workerId: profile!.id,
-
-        /// numbers (optional)
         aadhaarNumber: _aadhaarController.text.isNotEmpty
             ? _aadhaarController.text
             : null,
-
         policeNumber: _policeIdController.text.isNotEmpty
             ? _policeIdController.text
             : null,
-
-        /// files (optional)
         aadhaarFrontPath: aadhaarFrontFile?.path,
         aadhaarBackPath: aadhaarBackFile?.path,
         policeFrontPath: policeFrontFile?.path,
         policeBackPath: policeBackFile?.path,
       );
-
-      /// refresh profile
-      await fetchProfile();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.kycUploaded)),
-      );
-
+      // ❌ REMOVED fetchProfile() from here
     } catch (e) {
       debugPrint("KYC Upload Error: $e");
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update KYC")),
       );
-
-    } finally {
-      setState(() => isLoading = false);
     }
   }
   // Future<void> uploadKyc() async {
-  //     final loc = AppLocalizations.of(context)!;
-  //   // if (aadhaarFrontFile == null ||
-  //   //     aadhaarBackFile == null ||
-  //   //     policeFrontFile == null ||
-  //   //     policeBackFile == null) {
-  //   //   ScaffoldMessenger.of(context).showSnackBar(
-  //   //     SnackBar(content: Text(loc.uploadAllDocs)),
-  //   //   );
-  //   //   return;
-  //   // }
-  //     if (aadhaarFrontFile == null &&
-  //         aadhaarBackFile == null &&
-  //         policeFrontFile == null &&
-  //         policeBackFile == null) {
-  //
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Please upload at least one document")),
-  //       );
-  //       return;
-  //     }
+  //   final loc = AppLocalizations.of(context)!;
   //
   //   try {
   //     setState(() => isLoading = true);
   //
   //     await WorkerApi.uploadKycDocuments(
   //       workerId: profile!.id,
-  //       aadhaarNumber: _aadhaarController.text,
-  //       policeNumber: _policeIdController.text,
-  //       aadhaarFrontPath: aadhaarFrontFile!.path,
-  //       aadhaarBackPath: aadhaarBackFile!.path,
-  //       policeFrontPath: policeFrontFile!.path,
-  //       policeBackPath: policeBackFile!.path,
+  //
+  //       /// numbers (optional)
+  //       aadhaarNumber: _aadhaarController.text.isNotEmpty
+  //           ? _aadhaarController.text
+  //           : null,
+  //
+  //       policeNumber: _policeIdController.text.isNotEmpty
+  //           ? _policeIdController.text
+  //           : null,
+  //
+  //       /// files (optional)
+  //       aadhaarFrontPath: aadhaarFrontFile?.path,
+  //       aadhaarBackPath: aadhaarBackFile?.path,
+  //       policeFrontPath: policeFrontFile?.path,
+  //       policeBackPath: policeBackFile?.path,
   //     );
   //
-  //     await fetchProfile(); // 🔥 documents refresh
+  //     /// refresh profile
+  //     await fetchProfile();
   //
   //     ScaffoldMessenger.of(context).showSnackBar(
   //       SnackBar(content: Text(loc.kycUploaded)),
   //     );
+  //
   //   } catch (e) {
   //     debugPrint("KYC Upload Error: $e");
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Failed to update KYC")),
+  //     );
+  //
   //   } finally {
   //     setState(() => isLoading = false);
   //   }
@@ -1555,10 +1563,61 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 style: ElevatedButton.styleFrom(backgroundColor: kkblack, shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),),
-                // onPressed: updateProfile,
+
+                // onPressed: () async {
+                //   await updateProfile();
+                //   await uploadKyc();
+                // },
+
+                // onPressed: () async {
+                //
+                //   bool isKycChanged =
+                //       aadhaarFrontFile != null ||
+                //           aadhaarBackFile != null ||
+                //           policeFrontFile != null ||
+                //           policeBackFile != null ||
+                //           _aadhaarController.text != getDocumentNumber('aadhar') ||
+                //           _policeIdController.text != getDocumentNumber('police_verification');
+                //
+                //   if (isKycChanged) {
+                //     await uploadKyc();
+                //   } else {
+                //     await updateProfile();
+                //   }
+                //
+                // },
+
                 onPressed: () async {
-                  await updateProfile();
-                  await uploadKyc();
+                  bool isKycChanged =
+                      aadhaarFrontFile != null ||
+                          aadhaarBackFile != null ||
+                          policeFrontFile != null ||
+                          policeBackFile != null ||
+                          _aadhaarController.text != getDocumentNumber('aadhar') ||
+                          _policeIdController.text != getDocumentNumber('police_verification');
+
+                  setState(() => isLoading = true);
+
+                  try {
+                    // Always update profile
+                    await updateProfile();
+
+                    // Upload KYC only if changed
+                    if (isKycChanged) {
+                      await uploadKyc();
+                    }
+
+                    // ✅ Refresh profile ONCE at the end
+                    await fetchProfile();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(loc.profileUpdated)),
+                    );
+                  } catch (e) {
+                    debugPrint("Save error: $e");
+                  } finally {
+                    setState(() => isLoading = false);
+                  }
                 },
 
                 child: Text(
