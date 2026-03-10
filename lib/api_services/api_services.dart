@@ -59,7 +59,9 @@ class ApiService {
           break;
         }
       }
-    } else if (res.statusMessage != null &&
+    }
+
+    else if (res.statusMessage != null &&
         res.statusMessage!.trim().isNotEmpty) {
       serverMsg = res.statusMessage!.trim();
     }

@@ -583,4 +583,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get confirmLocation => 'स्थान की पुष्टि करें';
+
+  @override
+  String get referAndEarn => 'रेफर करें और कमाएं';
+
+  @override
+  String get referAndEarnSubtitle => 'दोस्तों को रेफर करें और रिवॉर्ड पाएं';
+
+  @override
+  String get reviewRatings => 'रिव्यू और रेटिंग';
+
+  @override
+  String get reviewRatingsSubtitle => 'अपने रिव्यू और रेटिंग देखें';
+
+  @override
+  String get subscription => 'सदस्यता';
+
+  @override
+  String get viewDirection => 'दिशा देखें';
 }

@@ -60,9 +60,9 @@ Future<void> logout(BuildContext context, WidgetRef ref) async {
       ),
     );
 
-    // await AppPreference().clearSharedPreferences();
-    await AppPreference().remove(PreferencesKey.token);
-    await AppPreference().remove(PreferencesKey.userId);
+    await AppPreference().clearSharedPreferences();
+    // await AppPreference().remove(PreferencesKey.token);
+    // await AppPreference().remove(PreferencesKey.userId);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Logged out successfully")),
     );
@@ -141,7 +141,8 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: OutlinedButton
+                      (
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.black),
                         shape: RoundedRectangleBorder(
@@ -165,7 +166,7 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: kkblack,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -173,9 +174,9 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
                       ),
                       // onPressed: () => logout(context),
                       onPressed: () async {
-                       // await AppPreference().clearSharedPreferences();
-                        await AppPreference().remove(PreferencesKey.token);
-                        await AppPreference().remove(PreferencesKey.userId);
+                        await AppPreference().clearSharedPreferences();
+                       //  await AppPreference().remove(PreferencesKey.token);
+                       //  await AppPreference().remove(PreferencesKey.userId);
 
                         /// 🔥 RESET PROVIDER
                         ref.invalidate(bottomNavIndexProvider);
@@ -192,7 +193,7 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
                         loc.logout,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ),

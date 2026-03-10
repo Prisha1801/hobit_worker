@@ -52,7 +52,7 @@ class AppBarHome extends StatelessWidget
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
+                      SizedBox(height: 10,),
                       /// Greeting
                       Text(
                         getGreeting(),
@@ -102,21 +102,21 @@ class AppBarHome extends StatelessWidget
           ),
 
           /// 🔹 RIGHT SIDE Notification
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NotificationScreen(),
-                ),
-              );
-            },
-            icon: Image.asset(
-              'assets/images/notification.png',
-              height: 24,
-              width: 24,
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => NotificationScreen(),
+          //       ),
+          //     );
+          //   },
+          //   icon: Image.asset(
+          //     'assets/images/notification.png',
+          //     height: 24,
+          //     width: 24,
+          //   ),
+          // ),
         ],
       ),
     );

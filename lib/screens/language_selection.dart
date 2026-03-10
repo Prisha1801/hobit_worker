@@ -150,6 +150,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hobit_worker/colors/appcolors.dart';
 import '../l10n/app_localizations.dart';
 import '../language_selection/language_provider.dart';
 import '../utils/app_bar.dart';
@@ -216,7 +217,7 @@ class _LanguageSelectionScreenState
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: kkblack,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -226,7 +227,7 @@ class _LanguageSelectionScreenState
                   style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),),
               ),
             ),

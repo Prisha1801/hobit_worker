@@ -1248,6 +1248,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm location'**
   String get confirmLocation;
+
+  /// No description provided for @referAndEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer and Earn'**
+  String get referAndEarn;
+
+  /// No description provided for @referAndEarnSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer friends and earn rewards'**
+  String get referAndEarnSubtitle;
+
+  /// No description provided for @reviewRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and Ratings'**
+  String get reviewRatings;
+
+  /// No description provided for @reviewRatingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your reviews and ratings'**
+  String get reviewRatingsSubtitle;
+
+  /// No description provided for @subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscription;
+
+  /// No description provided for @viewDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'View Direction'**
+  String get viewDirection;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

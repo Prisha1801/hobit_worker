@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import '../api_services/api_services.dart';
 import '../models/booking_model.dart';
+import '../models/extend_service_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 
@@ -127,5 +128,26 @@ class BookingApi {
       debugPrint("Live location error: $e");
       return false;
     }
+  }
+
+
+  static Future<List<BookingExtensionModel>> getBookingExtensions(int bookingId) async {
+    final token = AppPreference().getString(PreferencesKey.token);
+
+    final res = await ApiService.getRequest(
+      "/api/instant-bookings/$bookingId/extensions",
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      ),
+    );
+
+    final List list = res.data["booking"]["extensions"];
+
+    return list
+        .map((e) => BookingExtensionModel.fromJson(e))
+        .toList();
   }
 }

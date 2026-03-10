@@ -1,13 +1,14 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hobit_worker/screens/reschedule.dart';
 import '../api_services/api_services.dart';
 import '../l10n/app_localizations.dart';
+import '../models/extend_service_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import '../colors/appcolors.dart';
 import '../utils/app_bar.dart';
+import '../utils/extension_history.dart';
 
 /// MODEL
 class BookingModel {
@@ -21,6 +22,9 @@ class BookingModel {
   final String city;
   final String status;
 
+  final String startDate;   // NEW
+  final String endDate;     //
+
   BookingModel({
     required this.id,
     required this.customerName,
@@ -31,6 +35,9 @@ class BookingModel {
     required this.address,
     required this.city,
     required this.status,
+
+    required this.startDate,
+    required this.endDate,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +51,9 @@ class BookingModel {
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       status: json['status'] ?? '',
+
+      startDate: json['start_date'] ?? '',   // NEW
+      endDate: json['end_date'] ?? '',       // NEW
     );
   }
 }
@@ -102,9 +112,30 @@ class BookingApi {
       return null;
     }
   }
+  static Future<BookingExtensionResponse?> getBookingExtensions(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.getRequest(
+        "/api/instant-bookings/$bookingId/extensions",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      return BookingExtensionResponse.fromJson(res.data);
+
+    } catch (e) {
+      debugPrint("Extension API error: $e");
+      return null;
+    }
+  }
 }
 /// STATUS ENUM
-enum JobStatus { all,assigned, inProgress, completed, cancelled }
+enum JobStatus { all,assigned, inProgress, completed,  subscription }
 /// SCREEN
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({Key? key}) : super(key: key);
@@ -153,27 +184,86 @@ class _BookingsScreenState extends State<BookingsScreen>
       switch (selectedTab) {
         case JobStatus.assigned:
           status = 'assigned';
+          break;
+
         case JobStatus.inProgress:
           status = 'inprogress';
           break;
+
         case JobStatus.completed:
           status = 'completed';
           break;
-        case JobStatus.cancelled:
-          status = 'cancelled';
+
+        case JobStatus.subscription:
+          status = null;
           break;
+
         case JobStatus.all:
           status = null;
           break;
       }
 
-      bookings = await BookingApi.getBookings(status: status);
+      final data = await BookingApi.getBookings(status: status);
+
+      /// 👇 subscription filter
+      if (selectedTab == JobStatus.subscription) {
+        bookings = data.where((b) =>
+        b.subscriptionName.toLowerCase() == "monthly subscription"
+        ).toList();
+      } else {
+        bookings = data;
+      }
+
     } catch (e) {
       debugPrint("Booking API error: $e");
     }
 
     setState(() => loading = false);
   }
+
+
+  // Future<void> loadBookings({bool isRefresh = false}) async {
+  //   if (!isRefresh) {
+  //     setState(() => loading = true);
+  //   }
+  //
+  //   try {
+  //     String? status;
+  //
+  //     switch (selectedTab) {
+  //       case JobStatus.assigned:
+  //         status = 'assigned';
+  //       case JobStatus.inProgress:
+  //         status = 'inprogress';
+  //         break;
+  //       case JobStatus.completed:
+  //         status = 'completed';
+  //         break;
+  //
+  //         break;
+  //       case JobStatus.all:
+  //         status = null;
+  //         break;
+  //     }
+  //
+  //     bookings = await BookingApi.getBookings(status: status);
+  //
+  //
+  //     if (selectedTab == JobStatus.subscription) {
+  //       bookings = data.where((b) =>
+  //       b.subscriptionName.toLowerCase() == "monthly subscription"
+  //       ).toList();
+  //     } else {
+  //       bookings = data;
+  //     }
+  //
+  //
+  //   } catch (e) {
+  //     debugPrint("Booking API error: $e");
+  //   }
+  //
+  //   setState(() => loading = false);
+  // }
 
   /// =======================
   /// UI
@@ -202,7 +292,8 @@ class _BookingsScreenState extends State<BookingsScreen>
                 _buildTab(loc.assigned, JobStatus.assigned),
                 _buildTab(loc.inProgress, JobStatus.inProgress),
                 _buildTab(loc.completed, JobStatus.completed),
-                _buildTab(loc.cancelled, JobStatus.cancelled),
+                _buildTab(loc.subscription, JobStatus.subscription),
+               // _buildTab(loc.cancelled, JobStatus.cancelled),
               ],
             ),
           ),
@@ -307,11 +398,11 @@ class _BookingsScreenState extends State<BookingsScreen>
         chipText = 'Completed';
         chipTextColor = Colors.green;
         break;
-      case 'cancelled':
-        chipBg = const Color(0xFFFFEDED);
-        chipText = 'Cancelled';
-        chipTextColor = Colors.red;
-        break;
+      // case 'cancelled':
+      //   chipBg = const Color(0xFFFFEDED);
+      //   chipText = 'Cancelled';
+      //   chipTextColor = Colors.red;
+      //   break;
       default:
         chipBg = const Color(0xFFF3F3F3);
         chipText = booking.status;
@@ -324,6 +415,7 @@ class _BookingsScreenState extends State<BookingsScreen>
       decoration: BoxDecoration(
         color: kWhite,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0D000000),
@@ -465,25 +557,100 @@ class _BookingsScreenState extends State<BookingsScreen>
                       ),
                     ),
 
+                    // if (booking.subscriptionName.isNotEmpty)
+                    //   Container(
+                    //     margin: const EdgeInsets.only(top: 4),
+                    //     padding: const EdgeInsets.symmetric(
+                    //       horizontal: 8,
+                    //       vertical: 3,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.blue.withOpacity(0.1),
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //     child: Text(
+                    //       booking.subscriptionName,
+                    //       style: const TextStyle(
+                    //         fontSize: 11,
+                    //         fontWeight: FontWeight.w600,
+                    //         color: Colors.blue,
+                    //       ),
+                    //     ),
+                    //   ),
+
                     if (booking.subscriptionName.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          booking.subscriptionName,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              booking.subscriptionName,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue,
+                              ),
+                            ),
                           ),
-                        ),
+
+                          const SizedBox(height: 4),
+
+                          /// EXTENSION BUTTON
+                          FutureBuilder<BookingExtensionResponse?>(
+                            future: BookingApi.getBookingExtensions(booking.id),
+                            builder: (context, snapshot) {
+
+                              if (!snapshot.hasData) {
+                                return const SizedBox();
+                              }
+
+                              final data = snapshot.data!;
+
+                              if (data.extensionCount == 0) {
+                                return const SizedBox();
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => ExtensionHistoryDialog(
+                                      bookingId: booking.id,
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    "Extended service (${data.extensionCount})",
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -504,13 +671,33 @@ class _BookingsScreenState extends State<BookingsScreen>
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      booking.bookingDate,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                    // Text(
+                    //   booking.bookingDate,
+                    //   style: const TextStyle(
+                    //     fontSize: 13,
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
+                    if (booking.startDate.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          "Start: ${booking.startDate}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
                       ),
-                    ),
+
+                    if (booking.endDate.isNotEmpty)
+                      Text(
+                        "End: ${booking.endDate}",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
                     const SizedBox(height: 2),
                     Text(
                       booking.timeSlot,
@@ -537,7 +724,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 child: Text(
                     "${booking.address}, ${booking.city}"),
               ),
-              const Text('Booking ID - '),
+              //const Text('Booking ID - '),
               Text(
                 "BK-${booking.id}",
                 style:
@@ -563,7 +750,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 alignment: Alignment.center,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor:kkblack,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
@@ -591,6 +778,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
+                      color: Colors.black
                     ),
                   ),
                 ),

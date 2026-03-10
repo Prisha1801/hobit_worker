@@ -1,336 +1,6 @@
-// import 'package:flutter/material.dart';
-// import 'package:hobit_worker/utils/app_bar.dart';
-//
-// class MyEarningsScreen extends StatelessWidget {
-//   const MyEarningsScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//      appBar: CommonAppBar(title: 'My Earning'),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             /// ===== CURRENT EARNINGS CARD =====
-//             Container(
-//               padding: const EdgeInsets.all(20),
-//               decoration: BoxDecoration(
-//                 color: const Color(0xFFFFF2FD),
-//                 borderRadius: BorderRadius.circular(16),
-//               ),
-//               child: Column(
-//                 children: [
-//                   const Text(
-//                     "Current Earnings",
-//                     style: TextStyle(fontSize: 13, color: Colors.black54),
-//                   ),
-//                   const SizedBox(height: 6),
-//                   const Text(
-//                     "₹ 11,299",
-//                     style: TextStyle(
-//                       fontSize: 26,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 14),
-//                   SizedBox(
-//                     width: double.infinity,
-//                     height: 42,
-//                     child: ElevatedButton(
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: Colors.black,
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(8),
-//                         ),
-//                       ),
-//                       onPressed: () {},
-//                       child: const Text(
-//                         "Withdraw Request",
-//                         style: TextStyle(
-//                           fontWeight: FontWeight.w600,
-//                           color: Colors.white,
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//
-//             const SizedBox(height: 16),
-//
-//             /// ===== SMALL STATS =====
-//             Row(
-//               children: [
-//                 _smallCard("₹ 1,299", "Today's Earning"),
-//                 const SizedBox(width: 12),
-//                 _smallCard("₹ 9,299", "This Week's"),
-//               ],
-//             ),
-//
-//             const SizedBox(height: 24),
-//
-//             /// ===== PREVIOUS TRANSACTIONS =====
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 const Text(
-//                   "Previous Transactions",
-//                   style: TextStyle(
-//                     fontSize: 14,
-//                     fontWeight: FontWeight.w600,
-//                   ),
-//                 ),
-//                 GestureDetector(
-//                   onTap: () {
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                         builder: (_) => const AllTransactionsScreen(),
-//                       ),
-//                     );
-//                   },
-//                   child: const Text(
-//                     "View All",
-//                     style: TextStyle(
-//                       color: Colors.blue,
-//                       fontSize: 13,
-//                       fontWeight: FontWeight.w500,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//
-//             const SizedBox(height: 12),
-//
-//             _transactionTile(isCredit: true),
-//             _transactionTile(isCredit: true),
-//             _transactionTile(isCredit: true),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _smallCard(String amount, String title) {
-//     return Expanded(
-//       child: Container(
-//         padding: const EdgeInsets.all(16),
-//         decoration: BoxDecoration(
-//           color: const Color(0xFFF6F7FF),
-//           borderRadius: BorderRadius.circular(14),
-//         ),
-//         child: Column(
-//           children: [
-//             Text(
-//               amount,
-//               style: const TextStyle(
-//                 fontSize: 16,
-//                 fontWeight: FontWeight.w600,
-//               ),
-//             ),
-//             const SizedBox(height: 4),
-//             Text(
-//               title,
-//               style: const TextStyle(fontSize: 12, color: Colors.black54),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _transactionTile({required bool isCredit}) {
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 10),
-//       padding: const EdgeInsets.all(14),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: const [
-//           BoxShadow(
-//             color: Color(0x0D000000),
-//             offset: Offset(0, 4),
-//             blurRadius: 4,
-//           ),
-//         ],
-//       ),
-//       child: Row(
-//         children: [
-//           const CircleAvatar(
-//             radius: 18,
-//             backgroundColor: Color(0xFFF6F7FF),
-//             child: Icon(Icons.home, size: 18),
-//           ),
-//           const SizedBox(width: 12),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: const [
-//                 Text(
-//                   "Utensils Washing",
-//                   style: TextStyle(fontWeight: FontWeight.w600),
-//                 ),
-//                 SizedBox(height: 2),
-//                 Text(
-//                   "2 Feb 2026",
-//                   style: TextStyle(fontSize: 12, color: Colors.black54),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           Text(
-//             isCredit ? "+ ₹6,500.00" : "- ₹6,500.00",
-//             style: TextStyle(
-//               fontWeight: FontWeight.w600,
-//               color: isCredit ? Colors.green : Colors.red,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-// class AllTransactionsScreen extends StatelessWidget {
-//   const AllTransactionsScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//       appBar: AppBar(
-//         elevation: 0,
-//         backgroundColor: Colors.white,
-//         leading: IconButton(
-//           icon: const Icon(Icons.arrow_back, color: Colors.black),
-//           onPressed: () => Navigator.pop(context),
-//         ),
-//         centerTitle: true,
-//         title: const Text(
-//           "All Transactions",
-//           style: TextStyle(
-//             color: Colors.black,
-//             fontWeight: FontWeight.w600,
-//           ),
-//         ),
-//       ),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             /// TOTAL EARNINGS
-//             Container(
-//               width: double.infinity,
-//               padding: const EdgeInsets.all(20),
-//               decoration: BoxDecoration(
-//                 color: const Color(0xFFFFF2FD),
-//                 borderRadius: BorderRadius.circular(16),
-//               ),
-//               child: Column(
-//                 children: const [
-//                   Text(
-//                     "₹12,400.00",
-//                     style: TextStyle(
-//                       fontSize: 26,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   SizedBox(height: 4),
-//                   Text(
-//                     "My Total Earnings",
-//                     style: TextStyle(fontSize: 13, color: Colors.black54),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//
-//             const SizedBox(height: 24),
-//
-//             const Text(
-//               "Withdraw History",
-//               style: TextStyle(fontWeight: FontWeight.w600),
-//             ),
-//             const SizedBox(height: 12),
-//
-//             _historyTile(isCredit: false),
-//             _historyTile(isCredit: false),
-//
-//             const SizedBox(height: 24),
-//
-//             const Text(
-//               "Credited History",
-//               style: TextStyle(fontWeight: FontWeight.w600),
-//             ),
-//             const SizedBox(height: 12),
-//
-//             _historyTile(isCredit: true),
-//             _historyTile(isCredit: true),
-//             _historyTile(isCredit: true),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _historyTile({required bool isCredit}) {
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 10),
-//       padding: const EdgeInsets.all(14),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: const [
-//           BoxShadow(
-//             color: Color(0x0D000000),
-//             offset: Offset(0, 4),
-//             blurRadius: 4,
-//           ),
-//         ],
-//       ),
-//       child: Row(
-//         children: [
-//           const CircleAvatar(
-//             radius: 18,
-//             backgroundColor: Color(0xFFF6F7FF),
-//             child: Icon(Icons.home, size: 18),
-//           ),
-//           const SizedBox(width: 12),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: const [
-//                 Text(
-//                   "Utensils Washing",
-//                   style: TextStyle(fontWeight: FontWeight.w600),
-//                 ),
-//                 SizedBox(height: 2),
-//                 Text(
-//                   "2 Feb 2026",
-//                   style: TextStyle(fontSize: 12, color: Colors.black54),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           Text(
-//             isCredit ? "+ ₹6,500.00" : "- ₹6,500.00",
-//             style: TextStyle(
-//               fontWeight: FontWeight.w600,
-//               color: isCredit ? Colors.green : Colors.red,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:hobit_worker/screens/personal_info.dart';
 import 'package:shimmer/shimmer.dart';
 import '../api_services/api_services.dart';
@@ -343,8 +13,32 @@ import '../utils/app_bar.dart';
 
 /// ================= API =================
 class WithdrawalApi {
-  static Future<List<WithdrawalHistoryModel>> getHistory(int workerId) async {
+  // static Future<List<WithdrawalHistoryModel>> getHistory(int workerId) async {
+  //   final token = AppPreference().getString(PreferencesKey.token);
+  //   final res = await ApiService.getRequest(
+  //     "/api/withdrawal/$workerId/history",
+  //     options: Options(
+  //       headers: {
+  //         "Authorization": "Bearer $token",
+  //         "Accept": "application/json",
+  //       },
+  //     ),
+  //   );
+  //
+  //   final List data = res.data['data'];
+  //   return data
+  //       .map((e) => WithdrawalHistoryModel.fromJson(e))
+  //       .toList();
+  // }
+
+  static Future<List<WithdrawalHistoryModel>> getHistory() async {
+
     final token = AppPreference().getString(PreferencesKey.token);
+
+    final workerId =
+    AppPreference().getString(PreferencesKey.userId);
+    debugPrint("API Worker IDddddddddddddddddddddddddddddddd: $workerId");
+
     final res = await ApiService.getRequest(
       "/api/withdrawal/$workerId/history",
       options: Options(
@@ -355,11 +49,13 @@ class WithdrawalApi {
       ),
     );
 
-    final List data = res.data['data'];
-    return data
+    final List list = res.data["data"] ?? [];
+
+    return list
         .map((e) => WithdrawalHistoryModel.fromJson(e))
         .toList();
   }
+
 
   static Future<String> submitWithdraw({
     required int amount,
@@ -405,17 +101,29 @@ class _MyEarningsScreenState extends State<MyEarningsScreen> {
     loadHistory();
   }
 
+    // Future<void> loadHistory() async {
+    //   try {
+    //     history = await WithdrawalApi.getHistory(
+    //       AppPreference().getInt(PreferencesKey.userId),
+    //     );
+    //   } catch (e) {
+    //     debugPrint("History error: $e");
+    //   }
+    //   setState(() => loading = false);
+    // }
   Future<void> loadHistory() async {
     try {
-      history = await WithdrawalApi.getHistory(
-        AppPreference().getInt(PreferencesKey.userId),
-      );
+
+      history = await WithdrawalApi.getHistory();
+
     } catch (e) {
+
       debugPrint("History error: $e");
+
     }
+
     setState(() => loading = false);
   }
-
   /// STATUS COLOR
   Color statusColor(String status) {
     switch (status) {
@@ -498,7 +206,7 @@ class _MyEarningsScreenState extends State<MyEarningsScreen> {
                     height: 42,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: kkblack,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
@@ -524,7 +232,7 @@ class _MyEarningsScreenState extends State<MyEarningsScreen> {
                        loc.withdrawRequest,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -805,7 +513,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
               child: ElevatedButton(
 
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: kkblack,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
@@ -817,7 +525,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
                     : Text(
                   loc.submitRequest,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

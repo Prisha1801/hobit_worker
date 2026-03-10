@@ -36,75 +36,92 @@ class WorkerApi {
       options: Options(
         headers: {
           'Authorization': 'Bearer $token',
-          'Accept': 'application/json', // 🔥 IMPORTANT
+          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
         followRedirects: false,
         validateStatus: (status) =>
-            status != null && status < 500,
+        status != null && status < 500,
       ),
     );
   }
+
   static Future uploadKycDocuments({
     required int workerId,
-    required String aadhaarNumber,
-    required String policeNumber,
-    required String aadhaarFrontPath,
-    required String aadhaarBackPath,
-    required String policeFrontPath,
-    required String policeBackPath,
+    String? aadhaarNumber,
+    String? policeNumber,
+    String? aadhaarFrontPath,
+    String? aadhaarBackPath,
+    String? policeFrontPath,
+    String? policeBackPath,
   }) async {
+
     final token = AppPreference().getString(PreferencesKey.token);
 
     FormData formData = FormData();
 
-    /// ---------- Aadhaar ----------
-    formData.fields.addAll([
-      const MapEntry('id_type[]', 'aadhar'),
-      MapEntry('id_number[]', aadhaarNumber),
-    ]);
 
-    formData.files.addAll([
-      MapEntry(
-        'id_front[]',
-        await MultipartFile.fromFile(aadhaarFrontPath),
-      ),
-      MapEntry(
-        'id_back[]',
-        await MultipartFile.fromFile(aadhaarBackPath),
-      ),
-    ]);
+    /// Aadhaar
 
-    /// ---------- Police Verification ----------
-    formData.fields.addAll([
-      const MapEntry('id_type[]', 'police_verification'),
-      MapEntry('id_number[]', policeNumber),
-    ]);
+    if (aadhaarNumber != null && aadhaarNumber.isNotEmpty) {
 
-    formData.files.addAll([
-      MapEntry(
-        'id_front[]',
-        await MultipartFile.fromFile(policeFrontPath),
-      ),
-      MapEntry(
-        'id_back[]',
-        await MultipartFile.fromFile(policeBackPath),
-      ),
-    ]);
+      formData.fields.add(const MapEntry('id_type[]', 'aadhar'));
+      formData.fields.add(MapEntry('id_number[]', aadhaarNumber));
+
+      if (aadhaarFrontPath != null) {
+        formData.files.add(
+          MapEntry(
+            'id_front[]',
+            await MultipartFile.fromFile(aadhaarFrontPath),
+          ),
+        );
+      }
+
+      if (aadhaarBackPath != null) {
+        formData.files.add(
+          MapEntry(
+            'id_back[]',
+            await MultipartFile.fromFile(aadhaarBackPath),
+          ),
+        );
+      }
+    }
+    /// Police Verification
+    if (policeNumber != null && policeNumber.isNotEmpty) {
+
+      formData.fields.add(const MapEntry('id_type[]', 'police_verification'));
+      formData.fields.add(MapEntry('id_number[]', policeNumber));
+
+      if (policeFrontPath != null) {
+        formData.files.add(
+          MapEntry(
+            'id_front[]',
+            await MultipartFile.fromFile(policeFrontPath),
+          ),
+        );
+      }
+
+      if (policeBackPath != null) {
+        formData.files.add(
+          MapEntry(
+            'id_back[]',
+            await MultipartFile.fromFile(policeBackPath),
+          ),
+        );
+      }
+    }
 
     return await ApiService.postRequest(
       '/api/worker/$workerId/docs',
-      formData ,
+      formData,
       options: Options(
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
-
         },
       ),
     );
   }
-
 }
 
 class PersonalInformationScreen extends StatefulWidget {
@@ -154,6 +171,23 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
   List<String> availableDates = [];
   List<Map<String, String>> availableTimes = [];
+
+
+  Color getKycColor(String status) {
+    switch (status) {
+      case "approved":
+        return Colors.green;
+
+      case "rejected":
+        return Colors.red;
+
+      case "pending":
+        return Colors.orange;
+
+      default:
+        return Colors.grey;
+    }
+  }
 
   Future<void> fetchAllData() async {
     categories = await SignupApi.getCategories();
@@ -218,19 +252,29 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       }
 
       // 🔥 CALL API IMMEDIATELY
+
       await WorkerApi.uploadKycDocuments(
         workerId: profile!.id,
         aadhaarNumber: _aadhaarController.text,
         policeNumber: _policeIdController.text,
-        aadhaarFrontPath:
-        aadhaarFrontFile?.path ?? "",
-        aadhaarBackPath:
-        aadhaarBackFile?.path ?? "",
-        policeFrontPath:
-        policeFrontFile?.path ?? "",
-        policeBackPath:
-        policeBackFile?.path ?? "",
+        aadhaarFrontPath: aadhaarFrontFile?.path,
+        aadhaarBackPath: aadhaarBackFile?.path,
+        policeFrontPath: policeFrontFile?.path,
+        policeBackPath: policeBackFile?.path,
       );
+      // await WorkerApi.uploadKycDocuments(
+      //   workerId: profile!.id,
+      //   aadhaarNumber: _aadhaarController.text,
+      //   policeNumber: _policeIdController.text,
+      //   aadhaarFrontPath:
+      //   aadhaarFrontFile?.path ?? "",
+      //   aadhaarBackPath:
+      //   aadhaarBackFile?.path ?? "",
+      //   policeFrontPath:
+      //   policeFrontFile?.path ?? "",
+      //   policeBackPath:
+      //   policeBackFile?.path ?? "",
+      // );
 
       await fetchProfile();
 
@@ -332,81 +376,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     }
   }
 
-
-  /// For both categories and services, we can use the same multi-select bottom sheet
-  // Future<void> showMultiSelectSheet({
-  //   required String title,
-  //   required List<IdNameModel> items,
-  //   required List<IdNameModel> selectedItems,
-  //   required Function(List<IdNameModel>) onDone,
-  // }) async {
-  //   final tempSelected = List<IdNameModel>.from(selectedItems);
-  //
-  //   await showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-  //     ),
-  //     builder: (_) {
-  //       return StatefulBuilder(
-  //         builder: (context, setModalState) {
-  //           return Padding(
-  //             padding: const EdgeInsets.all(16),
-  //             child: Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(title,
-  //                     style: const TextStyle(
-  //                         fontSize: 16, fontWeight: FontWeight.w600)),
-  //                 const SizedBox(height: 12),
-  //
-  //                 Expanded(
-  //                   child: ListView.builder(
-  //                     itemCount: items.length,
-  //                     itemBuilder: (_, index) {
-  //                       final item = items[index];
-  //                       final isChecked =
-  //                       tempSelected.any((e) => e.id == item.id);
-  //
-  //                       return CheckboxListTile(
-  //                         value: isChecked,
-  //                         title: Text(item.name),
-  //                         onChanged: (val) {
-  //                           setModalState(() {
-  //                             if (val == true) {
-  //                               tempSelected.add(item);
-  //                             } else {
-  //                               tempSelected
-  //                                   .removeWhere((e) => e.id == item.id);
-  //                             }
-  //                           });
-  //                         },
-  //                       );
-  //                     },
-  //                   ),
-  //                 ),
-  //
-  //                 SizedBox(
-  //                   width: double.infinity,
-  //                   child: ElevatedButton(
-  //                     onPressed: () {
-  //                       onDone(tempSelected);
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: const Text("Done"),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   /// For both categories and services, we can use the same multi-select bottom sheet
   Future<void> showMultiSelectSheet({
     required String title,
@@ -461,7 +430,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                       itemBuilder: (_, index) {
                         final item = items[index];
                         final isSelected = tempSelected.any(
-                          (e) => e.id == item.id,
+                              (e) => e.id == item.id,
                         );
 
                         return ListTile(
@@ -473,7 +442,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                             setModalState(() {
                               if (isSelected) {
                                 tempSelected.removeWhere(
-                                  (e) => e.id == item.id,
+                                      (e) => e.id == item.id,
                                 );
                               } else {
                                 tempSelected.add(item);
@@ -499,7 +468,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         onDone(tempSelected);
                         Navigator.pop(context);
                       },
-                      child: Text(loc.done, style: const TextStyle(color: kWhite),),
+                      child: Text(loc.done, style: const TextStyle(color: Colors.black),),
                     ),
                   ),
                 ),
@@ -555,7 +524,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   ),
                 )
               else
-                /// List
+              /// List
                 Expanded(
                   child: ListView.builder(
                     itemCount: items.length,
@@ -624,7 +593,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               children: [
                 const SizedBox(height: 20),
                 Text(
-                loc.selectAvailableDates,
+                  loc.selectAvailableDates,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16),
@@ -684,7 +653,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             loc.done,
-                            style: const TextStyle(color: kWhite),
+                            style: const TextStyle(color: Colors.black),
                           ),
                         ),
                       ),
@@ -753,7 +722,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   child: availableTimes.isEmpty
                       ? Center(
                     child: Text(
-            loc.noTimeSlots,
+                      loc.noTimeSlots,
                       style: const TextStyle(color: Colors.grey),
                     ),
                   )
@@ -810,7 +779,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: const Text(
                             "Done",
-                            style: TextStyle(color: kWhite),
+                            style: TextStyle(color: Colors.black),
                           ),
                         ),
                       ),
@@ -827,49 +796,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
 
   /// For City, Zone, Area selection - single select bottom sheet
-  // Future<IdNameModel?> showSingleSelectSheet({
-  //   required String title,
-  //   required List<IdNameModel> items,
-  //   IdNameModel? selectedItem,
-  // }) async {
-  //   return await showModalBottomSheet<IdNameModel>(
-  //     context: context,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-  //     ),
-  //     builder: (_) {
-  //       return Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           const SizedBox(height: 12),
-  //           Text(title,
-  //               style:
-  //               const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-  //           const SizedBox(height: 12),
-  //
-  //           Flexible(
-  //             child: ListView.builder(
-  //               shrinkWrap: true,
-  //               itemCount: items.length,
-  //               itemBuilder: (_, index) {
-  //                 final item = items[index];
-  //                 final isSelected = selectedItem?.id == item.id;
-  //
-  //                 return ListTile(
-  //                   title: Text(item.name),
-  //                   trailing: isSelected
-  //                       ? const Icon(Icons.check, color: Colors.green)
-  //                       : null,
-  //                   onTap: () => Navigator.pop(context, item),
-  //                 );
-  //               },
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<void> updateProfile() async {
     final loc = AppLocalizations.of(context)!;
@@ -893,8 +819,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       "available_times": availableTimes.isNotEmpty
           ? availableTimes
           : profile!.workerAvailability.first.availableTimes
-                .map((e) => {"start": e.start, "end": e.end})
-                .toList(),
+          .map((e) => {"start": e.start, "end": e.end})
+          .toList(),
     };
 
     try {
@@ -913,42 +839,96 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     }
   }
 
+
   Future<void> uploadKyc() async {
-      final loc = AppLocalizations.of(context)!;
-    if (aadhaarFrontFile == null ||
-        aadhaarBackFile == null ||
-        policeFrontFile == null ||
-        policeBackFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.uploadAllDocs)),
-      );
-      return;
-    }
+    final loc = AppLocalizations.of(context)!;
 
     try {
       setState(() => isLoading = true);
 
       await WorkerApi.uploadKycDocuments(
         workerId: profile!.id,
-        aadhaarNumber: _aadhaarController.text,
-        policeNumber: _policeIdController.text,
-        aadhaarFrontPath: aadhaarFrontFile!.path,
-        aadhaarBackPath: aadhaarBackFile!.path,
-        policeFrontPath: policeFrontFile!.path,
-        policeBackPath: policeBackFile!.path,
+
+        /// numbers (optional)
+        aadhaarNumber: _aadhaarController.text.isNotEmpty
+            ? _aadhaarController.text
+            : null,
+
+        policeNumber: _policeIdController.text.isNotEmpty
+            ? _policeIdController.text
+            : null,
+
+        /// files (optional)
+        aadhaarFrontPath: aadhaarFrontFile?.path,
+        aadhaarBackPath: aadhaarBackFile?.path,
+        policeFrontPath: policeFrontFile?.path,
+        policeBackPath: policeBackFile?.path,
       );
 
-      await fetchProfile(); // 🔥 documents refresh
+      /// refresh profile
+      await fetchProfile();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.kycUploaded)),
       );
+
     } catch (e) {
       debugPrint("KYC Upload Error: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update KYC")),
+      );
+
     } finally {
       setState(() => isLoading = false);
     }
   }
+  // Future<void> uploadKyc() async {
+  //     final loc = AppLocalizations.of(context)!;
+  //   // if (aadhaarFrontFile == null ||
+  //   //     aadhaarBackFile == null ||
+  //   //     policeFrontFile == null ||
+  //   //     policeBackFile == null) {
+  //   //   ScaffoldMessenger.of(context).showSnackBar(
+  //   //     SnackBar(content: Text(loc.uploadAllDocs)),
+  //   //   );
+  //   //   return;
+  //   // }
+  //     if (aadhaarFrontFile == null &&
+  //         aadhaarBackFile == null &&
+  //         policeFrontFile == null &&
+  //         policeBackFile == null) {
+  //
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text("Please upload at least one document")),
+  //       );
+  //       return;
+  //     }
+  //
+  //   try {
+  //     setState(() => isLoading = true);
+  //
+  //     await WorkerApi.uploadKycDocuments(
+  //       workerId: profile!.id,
+  //       aadhaarNumber: _aadhaarController.text,
+  //       policeNumber: _policeIdController.text,
+  //       aadhaarFrontPath: aadhaarFrontFile!.path,
+  //       aadhaarBackPath: aadhaarBackFile!.path,
+  //       policeFrontPath: policeFrontFile!.path,
+  //       policeBackPath: policeBackFile!.path,
+  //     );
+  //
+  //     await fetchProfile(); // 🔥 documents refresh
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(loc.kycUploaded)),
+  //     );
+  //   } catch (e) {
+  //     debugPrint("KYC Upload Error: $e");
+  //   } finally {
+  //     setState(() => isLoading = false);
+  //   }
+  // }
 
   // ---------------- UI HELPERS ----------------
 
@@ -1036,9 +1016,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text(
-    loc.workerAvailability,
-    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          loc.workerAvailability,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
 
@@ -1069,7 +1049,37 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   }) {
     final loc = AppLocalizations.of(context)!;
 
-    final hasFile = fileUrl != null && fileUrl.isNotEmpty;
+    // final hasFile = fileUrl != null && fileUrl.isNotEmpty;
+    File? localFile;
+
+    if (docType == "aadhar") {
+      localFile = isFront ? aadhaarFrontFile : aadhaarBackFile;
+    } else {
+      localFile = isFront ? policeFrontFile : policeBackFile;
+    }
+
+    final hasServerFile = fileUrl != null && fileUrl.isNotEmpty;
+
+    String displayText;
+
+    // if (localFile != null) {
+    //   displayText = localFile.path.split('/').last; // file name
+    // } else if (hasServerFile) {
+    //   displayText = loc.documentUploaded;
+    // } else {
+    //   displayText = loc.uploadDocument;
+    // }
+
+    if (localFile != null) {
+      displayText = localFile.path.split('/').last;
+    } else if (hasServerFile) {
+
+      /// extract file name from URL
+      displayText = fileUrl!.split('/').last;
+
+    } else {
+      displayText = loc.uploadDocument;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1089,24 +1099,37 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  hasFile ? loc.documentUploaded : loc.uploadDocument,
-                  style: TextStyle(
-                    color: hasFile ? Colors.black : Colors.grey,
-                  ),
-                ),
+                  child:
+                  // Text(
+                  //   hasFile ? loc.documentUploaded : loc.uploadDocument,
+                  //   style: TextStyle(
+                  //     color: hasFile ? Colors.black : Colors.grey,
+                  //   ),
+                  // ),
+                  Text(
+                    displayText,
+                    style: TextStyle(
+                      color: (localFile != null || hasServerFile)
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  )
               ),
 
               /// 👁 Preview
-              if (hasFile)
+              // if (hasFile)
+              //   IconButton(
+              //     icon: const Icon(Icons.visibility, color: kBlack),
+              //     onPressed: () => openImagePreview(fileUrl!),
+              //   ),
+              if (hasServerFile)
                 IconButton(
-                  icon: const Icon(Icons.visibility, color: kBlack),
+                  icon:  Icon(Icons.visibility, color: kkblack),
                   onPressed: () => openImagePreview(fileUrl!),
                 ),
-
               /// ⬆ Upload Icon
               IconButton(
-                icon: const Icon(Icons.upload, color: kBlack),
+                icon:  Icon(Icons.upload, color: kkblack ),
                 onPressed: () =>
                     pickAndUpload(docType: docType, isFront: isFront),
               ),
@@ -1117,89 +1140,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       ],
     );
   }
-
-
-  // Widget _filePicker({
-  //   required String label,
-  //   String? fileUrl,
-  // }) {
-  //   final hasFile = fileUrl != null && fileUrl.isNotEmpty;
-  //
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-  //       ),
-  //       const SizedBox(height: 6),
-  //       Container(
-  //         height: 48,
-  //         padding: const EdgeInsets.symmetric(horizontal: 12),
-  //         decoration: BoxDecoration(
-  //           color: const Color(0xFFF6F7FF),
-  //           borderRadius: BorderRadius.circular(8),
-  //         ),
-  //         child: Row(
-  //           children: [
-  //             Expanded(
-  //               child: Text(
-  //                 hasFile ? "Document uploaded" : "Choose file",
-  //                 style: TextStyle(
-  //                   color: hasFile ? Colors.black : Colors.grey,
-  //                 ),
-  //               ),
-  //             ),
-  //
-  //             if (hasFile)
-  //               IconButton(
-  //                 icon: const Icon(Icons.visibility, color: kBlack),
-  //                 onPressed: () => openImagePreview(fileUrl),
-  //               )
-  //             else
-  //               const Icon(Icons.upload_file),
-  //           ],
-  //         ),
-  //       ),
-  //       const SizedBox(height: 16),
-  //     ],
-  //   );
-  // }
-
-  // Widget _filePicker(String label) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-  //       ),
-  //       const SizedBox(height: 6),
-  //       Container(
-  //         height: 48,
-  //         padding: const EdgeInsets.symmetric(horizontal: 12),
-  //         decoration: BoxDecoration(
-  //           color: const Color(0xFFF6F7FF),
-  //           borderRadius: BorderRadius.circular(8),
-  //         ),
-  //         child: Row(
-  //           children: const [
-  //             Expanded(
-  //               child: Text(
-  //                 "Choose file",
-  //                 style: TextStyle(color: Colors.grey),
-  //               ),
-  //             ),
-  //             Icon(Icons.upload_file),
-  //           ],
-  //         ),
-  //       ),
-  //       const SizedBox(height: 16),
-  //     ],
-  //   );
-  // }
-
-  // ---------------- BUILD ----------------
 
   @override
   Widget build(BuildContext context) {
@@ -1227,7 +1167,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             /// PROFILE CARD
             SizedBox(
               width:
-                  MediaQuery.of(context).size.width -
+              MediaQuery.of(context).size.width -
                   40, // left + right padding
               height: 125,
               child: Container(
@@ -1273,14 +1213,63 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                           child: const Icon(Icons.person, size: 26),
                         ),
                         const SizedBox(width: 12),
+                        // Expanded(
+                        //   child: Text(
+                        //     profile!.name,
+                        //     style: const TextStyle(
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w500,
+                        //       color: Colors.black,
+                        //     ),
+                        //   ),
+                        // ),
                         Expanded(
-                          child: Text(
-                            profile!.name,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+
+                              /// NAME
+                              Text(
+                                profile!.name,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              /// KYC STATUS
+                              Row(
+                                children: [
+
+                                  const Text(
+                                    "KYC Status : ",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: getKycColor(profile!.kycStatus).withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      profile!.kycStatus.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: getKycColor(profile!.kycStatus),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -1292,7 +1281,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
             const SizedBox(height: 24),
             Text(
-                loc.basicInformation,
+              loc.basicInformation,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
 
@@ -1373,48 +1362,48 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             _buildDropdown(
               label: loc.availabilityStatus,
               value: profile!.isActive == 1 ? "Available" : "Unavailable",
-               //onTap: () {},
-                onTap: () {
-                  showSingleSelectSheet(
-                    title:loc.selectAvailability,
-                    items:  [
-                      IdNameModel(id: 1, name: "Available"),
-                      IdNameModel(id: 0, name: "Unavailable"),
-                    ],
-                    selectedItem: profile!.isActive == 1
-                        ? IdNameModel(id: 1, name: "Available")
-                        : IdNameModel(id: 0, name: "Unavailable"),
-                  )
-                      .then((result) {
-                    if (result != null) {
-                      setState(() {
-                        profile = WorkerProfileModel(
-                          id: profile!.id,
-                          workerId: profile!.workerId,
-                          name: profile!.name,
-                          email: profile!.email,
-                          phone: profile!.phone,
-                          isActive: result.id,
-                          isAssigned: profile!.isAssigned,
-                          categories: profile!.categories,
-                          services: profile!.services,
-                          city: profile!.city,
-                          zone: profile!.zone,
-                          area: profile!.area,
-                          walletBalance: profile!.walletBalance,
-                          kycStatus: profile!.kycStatus,
-                          documents: profile!.documents,
-                          workerAvailability:
-                          profile!.workerAvailability,
-                          averageRatings:
-                          profile!.averageRatings,
-                          ratingCount:
-                          profile!.ratingCount,
-                          jobsCompleted: profile!.jobsCompleted,
-                        );
-                      });
-                    }
-                  });
+              //onTap: () {},
+              onTap: () {
+                showSingleSelectSheet(
+                  title:loc.selectAvailability,
+                  items:  [
+                    IdNameModel(id: 1, name: "Available"),
+                    IdNameModel(id: 0, name: "Unavailable"),
+                  ],
+                  selectedItem: profile!.isActive == 1
+                      ? IdNameModel(id: 1, name: "Available")
+                      : IdNameModel(id: 0, name: "Unavailable"),
+                )
+                    .then((result) {
+                  if (result != null) {
+                    setState(() {
+                      profile = WorkerProfileModel(
+                        id: profile!.id,
+                        workerId: profile!.workerId,
+                        name: profile!.name,
+                        email: profile!.email,
+                        phone: profile!.phone,
+                        isActive: result.id,
+                        isAssigned: profile!.isAssigned,
+                        categories: profile!.categories,
+                        services: profile!.services,
+                        city: profile!.city,
+                        zone: profile!.zone,
+                        area: profile!.area,
+                        walletBalance: profile!.walletBalance,
+                        kycStatus: profile!.kycStatus,
+                        documents: profile!.documents,
+                        workerAvailability:
+                        profile!.workerAvailability,
+                        averageRatings:
+                        profile!.averageRatings,
+                        ratingCount:
+                        profile!.ratingCount,
+                        jobsCompleted: profile!.jobsCompleted,
+                      );
+                    });
+                  }
+                });
               },
             ),
 
@@ -1563,7 +1552,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: kBlack, shape: RoundedRectangleBorder(
+                style: ElevatedButton.styleFrom(backgroundColor: kkblack, shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),),
                 // onPressed: updateProfile,
@@ -1573,8 +1562,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 },
 
                 child: Text(
-                    loc.saveChanges,
-                  style: const TextStyle(color: Colors.white),
+                  loc.saveChanges,
+                  style: const TextStyle(fontSize:18,color: Colors.black,fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -1656,7 +1645,6 @@ class PersonalInfoShimmer extends StatelessWidget {
               height: 48,
               radius: BorderRadius.circular(5),
             ),
-
             const SizedBox(height: 24),
           ],
         ),

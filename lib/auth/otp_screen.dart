@@ -24,6 +24,36 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<FocusNode> _focusNodes =
   List.generate(6, (_) => FocusNode());
 
+  Future<void> resendOtp() async {
+    final loc = AppLocalizations.of(context)!;
+
+    try {
+      final res = await ApiService.postRequest(
+        "/api/worker/login/send-otp",
+        {
+          "phone": widget.phone,
+        },
+      );
+
+      final data = res.data;
+
+      if (data != null && data["status"] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data["message"] ?? loc.otpSent),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.somethingWentWrong),
+        ),
+      );
+    }
+  }
+
+
   @override
   void dispose() {
     for (final c in _controllers) {
@@ -250,7 +280,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -259,17 +289,40 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             const SizedBox(height: 16),
 
             /// 🔹 RESEND
+            // Center(
+            //   child: RichText(
+            //     text: TextSpan(
+            //       text: loc.didntReceiveOtp,
+            //       style: const TextStyle(color: Colors.black),
+            //       children: [
+            //         TextSpan(
+            //           text: loc.resend,
+            //           style: const TextStyle(
+            //             color: Color(0xFF4F3CC9),
+            //             fontWeight: FontWeight.w600,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+
             Center(
               child: RichText(
                 text: TextSpan(
                   text: loc.didntReceiveOtp,
                   style: const TextStyle(color: Colors.black),
                   children: [
-                    TextSpan(
-                      text: loc.resend,
-                      style: const TextStyle(
-                        color: Color(0xFF4F3CC9),
-                        fontWeight: FontWeight.w600,
+                    WidgetSpan(
+                      child: GestureDetector(
+                        onTap: resendOtp,
+                        child: Text(
+                          loc.resend,
+                          style: const TextStyle(
+                            color: Color(0xFF4F3CC9),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ],

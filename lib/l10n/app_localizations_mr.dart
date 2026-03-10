@@ -583,4 +583,22 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get confirmLocation => 'स्थान निश्चित करा';
+
+  @override
+  String get referAndEarn => 'मित्रांना आमंत्रित करा आणि कमवा';
+
+  @override
+  String get referAndEarnSubtitle => 'मित्रांना रेफर करा आणि बक्षिसे मिळवा';
+
+  @override
+  String get reviewRatings => 'पुनरावलोकन आणि रेटिंग';
+
+  @override
+  String get reviewRatingsSubtitle => 'आपले पुनरावलोकन आणि रेटिंग पहा';
+
+  @override
+  String get subscription => 'सदस्यत्व';
+
+  @override
+  String get viewDirection => 'दिशा पहा';
 }

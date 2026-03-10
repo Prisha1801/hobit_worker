@@ -287,5 +287,13 @@
 
           "confirmYourAddress": "Confirm Your Address",
             "fetchingLocation": "Fetching location...",
-            "confirmLocation": "Confirm location"
+            "confirmLocation": "Confirm location",
+
+             "referAndEarn": "Refer and Earn",
+              "referAndEarnSubtitle": "Refer friends and earn rewards",
+               "reviewRatings": "Review and Ratings",
+                "reviewRatingsSubtitle": "View your reviews and ratings",
+
+                 "subscription": "Subscription",
+                  "viewDirection": "View Direction"
 }

@@ -47,14 +47,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? loc.otpSent)),
         );
-        /// 🔥 SAVE PHONE IF CHECKED
-        if (keepSignedIn) {
-          await AppPreference().setBool(PreferencesKey.isLoggedIn, true);
-          await AppPreference().setString(PreferencesKey.phone, phone);
-        } else {
-          await AppPreference().setBool(PreferencesKey.isLoggedIn, false);
-          await AppPreference().remove(PreferencesKey.phone);
-        }
+        // /// 🔥 SAVE PHONE IF CHECKED
+        // if (keepSignedIn) {
+        //   await AppPreference().setBool(PreferencesKey.isLoggedIn, true);
+        //   await AppPreference().setString(PreferencesKey.phone, phone);
+        // } else {
+        //   await AppPreference().setBool(PreferencesKey.isLoggedIn, false);
+        //   await AppPreference().remove(PreferencesKey.phone);
+        // }
 
         Navigator.push(
           context,
@@ -77,24 +77,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    loadSavedPhone();
-  }
-
-  void loadSavedPhone() {
-    final isSaved =
-    AppPreference().getBool(PreferencesKey.isLoggedIn);
-
-    if (isSaved) {
-      final savedPhone =
-      AppPreference().getString(PreferencesKey.phone);
-      _phoneController.text = savedPhone;
-      keepSignedIn = true;
-      setState(() {});
-    }
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   loadSavedPhone();
+  // }
+  //
+  // void loadSavedPhone() {
+  //   final isSaved =
+  //   AppPreference().getBool(PreferencesKey.isLoggedIn);
+  //
+  //   if (isSaved) {
+  //     final savedPhone =
+  //     AppPreference().getString(PreferencesKey.phone);
+  //     _phoneController.text = savedPhone;
+  //     keepSignedIn = true;
+  //     setState(() {});
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
               ),

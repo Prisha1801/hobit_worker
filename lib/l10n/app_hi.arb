@@ -290,6 +290,14 @@
 
                  "confirmYourAddress": "अपना पता पुष्टि करें",
                   "fetchingLocation": "स्थान प्राप्त किया जा रहा है...",
-                  "confirmLocation": "स्थान की पुष्टि करें"
+                  "confirmLocation": "स्थान की पुष्टि करें",
+
+          "referAndEarn": "रेफर करें और कमाएं",
+           "referAndEarnSubtitle": "दोस्तों को रेफर करें और रिवॉर्ड पाएं",
+            "reviewRatings": "रिव्यू और रेटिंग",
+             "reviewRatingsSubtitle": "अपने रिव्यू और रेटिंग देखें",
+             "subscription": "सदस्यता",
+
+              "viewDirection": "दिशा देखें"
 
 }

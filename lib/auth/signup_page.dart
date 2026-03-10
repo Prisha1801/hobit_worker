@@ -456,24 +456,54 @@ class _SignupScreenState extends State<SignupScreen> {
       ],
     );
   }
-
   Future<void> pickDate() async {
-    final d = await showDatePicker(
 
+    DateTime start = DateTime.now();
+    DateTime end = DateTime(2026, 12, 31);
+
+    final range = await showDateRangePicker(
       context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-      initialDate: DateTime.now(),
+      firstDate: start,
+      lastDate: end,
+      initialDateRange: DateTimeRange(
+        start: start,
+        end: end,
+      ),
     );
 
-    if (d != null) {
-      final f = DateFormat("yyyy-MM-dd").format(d);
-      if (!availableDates.contains(f)) {
-        availableDates.add(f);
-        _date.text = availableDates.join(", ");
+    if (range != null) {
+
+      availableDates.clear();
+
+      DateTime current = range.start;
+
+      while (!current.isAfter(range.end)) {
+        availableDates.add(DateFormat("yyyy-MM-dd").format(current));
+        current = current.add(const Duration(days: 1));
       }
+
+      setState(() {
+        _date.text = availableDates.join(", ");
+      });
     }
   }
+  // Future<void> pickDate() async {
+  //   final d = await showDatePicker(
+  //
+  //     context: context,
+  //     firstDate: DateTime.now(),
+  //     lastDate: DateTime(2030),
+  //     initialDate: DateTime.now(),
+  //   );
+  //
+  //   if (d != null) {
+  //     final f = DateFormat("yyyy-MM-dd").format(d);
+  //     if (!availableDates.contains(f)) {
+  //       availableDates.add(f);
+  //       _date.text = availableDates.join(", ");
+  //     }
+  //   }
+  // }
 
   String formatTime(TimeOfDay t) {
     final now = DateTime.now();
@@ -535,6 +565,13 @@ class _SignupScreenState extends State<SignupScreen> {
       );
     } catch (e) {
       if (e is ApiException) {
+        // Handle 302 redirect — user already exists
+        if (e.statusCode == 302) {
+          showSnack("User already exists");
+          setState(() => loading = false);
+          return;
+        }
+
         final data = e.details;
 
         if (data is Map && data["errors"] != null) {
@@ -551,9 +588,33 @@ class _SignupScreenState extends State<SignupScreen> {
           showSnack(e.message);
         }
       } else {
-        showSnack("Email or phone already exists");
+        showSnack("User already exists");
       }
     }
+
+    // catch (e) {
+    //
+    //
+    //   if (e is ApiException) {
+    //     final data = e.details;
+    //
+    //     if (data is Map && data["errors"] != null) {
+    //       final errors = data["errors"];
+    //
+    //       if (errors["email"] != null && errors["email"].isNotEmpty) {
+    //         showSnack(errors["email"][0]);
+    //       } else if (errors["phone"] != null && errors["phone"].isNotEmpty) {
+    //         showSnack(errors["phone"][0]);
+    //       } else {
+    //         showSnack(data["message"] ?? e.message);
+    //       }
+    //     } else {
+    //       showSnack(e.message);
+    //     }
+    //   } else {
+    //     showSnack("Email or phone already exists");
+    //   }
+    // }
     setState(() => loading = false);
   }
 
@@ -711,7 +772,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     : Text(loc.signUp,   style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),),
               ),
             ),

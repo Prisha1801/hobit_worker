@@ -1,4 +1,4 @@
-package com.example.hobit_worker
+package com.hobit.hobit_worker
 
 import io.flutter.embedding.android.FlutterActivity
 

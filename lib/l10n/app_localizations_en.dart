@@ -583,4 +583,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmLocation => 'Confirm location';
+
+  @override
+  String get referAndEarn => 'Refer and Earn';
+
+  @override
+  String get referAndEarnSubtitle => 'Refer friends and earn rewards';
+
+  @override
+  String get reviewRatings => 'Review and Ratings';
+
+  @override
+  String get reviewRatingsSubtitle => 'View your reviews and ratings';
+
+  @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get viewDirection => 'View Direction';
 }

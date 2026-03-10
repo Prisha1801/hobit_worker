@@ -13,7 +13,7 @@ class HelpSupportScreen extends StatefulWidget {
 Future<void> _callSupport() async {
   final Uri phoneUri = Uri(
     scheme: 'tel',
-    path: '77578720230',
+    path: '7261959596',
   );
 
   if (await canLaunchUrl(phoneUri)) {
@@ -26,7 +26,7 @@ Future<void> _callSupport() async {
 Future<void> _emailSupport() async {
   final Uri emailUri = Uri(
     scheme: 'mailto',
-    path: 'rathodprathamesh23@gmail.com',
+    path: 'support@hobit.club',
     queryParameters: {
       'subject': 'Help & Support',
       'body': 'Hello Support Team,',

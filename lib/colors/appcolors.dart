@@ -7,6 +7,6 @@ final Color kGreen = HexColor('#52B46B');
 final Color kGrey = HexColor('#D9DDDF80');
 final Color kBlue = HexColor('#15253F');
 final Color kCyan = HexColor('#00C0E8');
-final Color kkblack = HexColor('#000000');
+final Color kkblack = HexColor('#FFEB5B');
 const Color kWhite = Colors.white;
 const Color kBlack = Colors.black;

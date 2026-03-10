@@ -25,21 +25,6 @@ class AssignedBookingModel {
     required this.service,
   });
 
-  // factory AssignedBookingModel.fromJson(Map<String, dynamic> json) {
-  //   return AssignedBookingModel(
-  //     id: json['id'],
-  //     customerName: json['customer_name'] ?? '',
-  //     customerPhone: json['customer_phone'] ?? '',
-  //     bookingDate: json['booking_date'] ?? '',
-  //     timeSlot: json['time_slot'] ?? '',
-  //     address: json['address'] ?? '',
-  //     city: json['city'] ?? '',
-  //     latitude: double.parse(json['latitude']),
-  //     longitude: double.parse(json['longitude']),
-  //     status: json['status'] ?? '',
-  //     service: ServiceModel.fromJson(json['service']),
-  //   );
-  // }
 
   factory AssignedBookingModel.fromJson(Map<String, dynamic> json) {
     return AssignedBookingModel(

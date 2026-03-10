@@ -317,7 +317,7 @@ class _KycScreenState extends State<KycScreen> {
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kBlack,
+                  backgroundColor: kkblack,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
@@ -325,7 +325,7 @@ class _KycScreenState extends State<KycScreen> {
                 onPressed: uploadKycDocuments,
                 child: const Text(
                   "Submit KYC",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
             ),

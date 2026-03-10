@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:hobit_worker/utils/app_bar.dart';
 import '../api_services/location_service.dart';
 import '../l10n/app_localizations.dart';
@@ -80,11 +81,11 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: CommonAppBar(title: loc.confirmYourAddress),
       body: Stack(
         children: [
           /// 🗺 GOOGLE MAP
-
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: currentLatLng!,
@@ -144,7 +145,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black, // 🖤 BLACK BUTTON
+                  backgroundColor: kkblack, // 🖤 BLACK BUTTON
                   foregroundColor: Colors.white, // 🤍 WHITE TEXT
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -159,6 +160,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                 child: Text(
                   loc.confirmLocation,
                   style: const TextStyle(
+                    color: Colors.black,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
