@@ -193,7 +193,7 @@ void showLogoutDialog(BuildContext context ,  WidgetRef ref) {
                         loc.logout,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          color: Colors.white,
                         ),
                       ),
                     ),

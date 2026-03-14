@@ -289,7 +289,20 @@
                "reviewRatings": "पुनरावलोकन आणि रेटिंग",
                 "reviewRatingsSubtitle": "आपले पुनरावलोकन आणि रेटिंग पहा",
                  "subscription": "सदस्यत्व",
-                  "viewDirection": "दिशा पहा"
+                  "viewDirection": "दिशा पहा",
+
+             "exitApp": "अ‍ॅप बंद करा",
+              "exitMessage": "तुम्हाला खरोखर अ‍ॅपमधून बाहेर पडायचे आहे का?",
+              "yes": "हो",
+              "no": "नाही",
+
+               "noRatingsFound": "कोणतीही रेटिंग सापडली नाही",
+                "ratingsCount": "{count} रेटिंग",
+
+
+            "languageEnglish": "इंग्रजी",
+              "languageHindi": "हिंदी",
+              "languageMarathi": "मराठी"
 
 
 }

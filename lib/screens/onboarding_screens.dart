@@ -3,6 +3,7 @@ import 'package:hobit_worker/colors/appcolors.dart';
 
 import '../auth/permission_screen.dart';
 import '../auth/login_page.dart';
+import '../colors/appcolors.dart';
 import '../l10n/app_localizations.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
@@ -158,10 +159,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // },
                 child: Text(
                   loc.getStarted,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),

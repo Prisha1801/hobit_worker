@@ -292,7 +292,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),

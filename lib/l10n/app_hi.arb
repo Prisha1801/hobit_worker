@@ -298,6 +298,18 @@
              "reviewRatingsSubtitle": "अपने रिव्यू और रेटिंग देखें",
              "subscription": "सदस्यता",
 
-              "viewDirection": "दिशा देखें"
+              "viewDirection": "दिशा देखें",
+
+          "exitApp": "ऐप से बाहर निकलें",
+           "exitMessage": "क्या आप वाकई बाहर निकलना चाहते हैं?",
+           "yes": "हाँ",
+           "no": "नहीं",
+
+            "noRatingsFound": "कोई रेटिंग नहीं मिली",
+             "ratingsCount": "{count} रेटिंग",
+
+         "languageEnglish": "अंग्रेज़ी",
+           "languageHindi": "हिंदी",
+           "languageMarathi": "मराठी"
 
 }

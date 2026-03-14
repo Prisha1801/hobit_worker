@@ -27,6 +27,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   late Future<WorkerProfileModel> _profileFuture;
 
+  bool isRefreshing = false;
+
 
   @override
   void initState() {
@@ -47,9 +49,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: CommonAppBar(title: loc.profile, showBackButton: false),
       body:
       RefreshIndicator(
+        color: kkblack,
+        // onRefresh: () async {
+        //   refreshProfile();
+        //   await _profileFuture;
+        // },
         onRefresh: () async {
+          setState(() {
+            isRefreshing = true;
+          });
+
           refreshProfile();
           await _profileFuture;
+
+          setState(() {
+            isRefreshing = false;
+          });
         },
         child: Column(
           children: [
@@ -58,7 +73,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             //  future: WorkerApi.getMyProfile(),
               builder: (context, snapshot) {
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                // if (snapshot.connectionState == ConnectionState.waiting) {
+                //   return const Padding(
+                //     padding: EdgeInsets.all(20),
+                //     child: CircularProgressIndicator(),
+                //   );
+                // }
+                if (snapshot.connectionState == ConnectionState.waiting && !isRefreshing) {
                   return const Padding(
                     padding: EdgeInsets.all(20),
                     child: CircularProgressIndicator(),

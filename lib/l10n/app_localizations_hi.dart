@@ -601,4 +601,33 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get viewDirection => 'दिशा देखें';
+
+  @override
+  String get exitApp => 'ऐप से बाहर निकलें';
+
+  @override
+  String get exitMessage => 'क्या आप वाकई बाहर निकलना चाहते हैं?';
+
+  @override
+  String get yes => 'हाँ';
+
+  @override
+  String get no => 'नहीं';
+
+  @override
+  String get noRatingsFound => 'कोई रेटिंग नहीं मिली';
+
+  @override
+  String ratingsCount(Object count) {
+    return '$count रेटिंग';
+  }
+
+  @override
+  String get languageEnglish => 'अंग्रेज़ी';
+
+  @override
+  String get languageHindi => 'हिंदी';
+
+  @override
+  String get languageMarathi => 'मराठी';
 }

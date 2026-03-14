@@ -468,7 +468,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         onDone(tempSelected);
                         Navigator.pop(context);
                       },
-                      child: Text(loc.done, style: const TextStyle(color: Colors.black),),
+                      child: Text(loc.done, style: const TextStyle(color: Colors.white, fontSize: 15),),
                     ),
                   ),
                 ),
@@ -653,7 +653,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             loc.done,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
                           ),
                         ),
                       ),
@@ -777,9 +777,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                             ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            "Done",
-                            style: TextStyle(color: Colors.black),
+                          child: Text(
+                            loc.done,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
                           ),
                         ),
                       ),
@@ -1478,7 +1478,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               },
             ),
 
-            // _buildDropdown("Serviceable Area", profile!.area?.name ?? ""),
             _buildDropdown(
               label: loc.area,
               value: selectedArea?.name ?? "Select Area",
@@ -1622,7 +1621,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
                 child: Text(
                   loc.saveChanges,
-                  style: const TextStyle(fontSize:18,color: Colors.black,fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize:15,color: Colors.white,fontWeight: FontWeight.w600),
                 ),
               ),
             ),

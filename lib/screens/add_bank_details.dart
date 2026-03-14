@@ -680,7 +680,7 @@ class _AddBankScreenState extends State<AddBankScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       ),

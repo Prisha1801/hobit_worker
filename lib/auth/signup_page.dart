@@ -770,9 +770,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(loc.signUp,   style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: Colors.white,
                 ),),
               ),
             ),

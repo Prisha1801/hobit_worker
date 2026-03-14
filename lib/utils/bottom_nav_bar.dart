@@ -13,6 +13,9 @@ class MainScreen extends ConsumerWidget {
   const MainScreen({Key? key}) : super(key: key);
 
   Future<bool> _onWillPop(BuildContext context) async {
+
+    final loc = AppLocalizations.of(context)!;
+
     bool? exitApp = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -20,30 +23,35 @@ class MainScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        title: const Text(
-          "Exit App",
-          style: TextStyle(
+
+        title: Text(
+          loc.exitApp,
+          style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: const Text(
-          "Are you sure you want to exit?",
-          style: TextStyle(color: Colors.black87),
+
+        content: Text(
+          loc.exitMessage,
+          style: const TextStyle(color: Colors.black87),
         ),
+
         actions: [
+
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
-            child: const Text(
-              "No",
-              style: TextStyle(
+            child: Text(
+              loc.no,
+              style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
+
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: kkblack,
@@ -55,7 +63,7 @@ class MainScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.of(context).pop(true);
             },
-            child: const Text("Yes"),
+            child: Text(loc.yes),
           ),
         ],
       ),

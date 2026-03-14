@@ -172,30 +172,30 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
 
             /// 🔹 BLACK CHECKBOX
-            Row(
-              children: [
-                Checkbox(
-                  value: keepSignedIn,
-                  activeColor: Colors.black,
-                  checkColor: Colors.white,
-                  side: const BorderSide(
-                    color: Colors.black,
-                    width: 1.5,
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      keepSignedIn = value!;
-                    });
-                  },
-                ),
-                Text(
-                 loc.keepSignedIn,
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
-                ),
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     Checkbox(
+            //       value: keepSignedIn,
+            //       activeColor: Colors.black,
+            //       checkColor: Colors.white,
+            //       side: const BorderSide(
+            //         color: Colors.black,
+            //         width: 1.5,
+            //       ),
+            //       onChanged: (value) {
+            //         setState(() {
+            //           keepSignedIn = value!;
+            //         });
+            //       },
+            //     ),
+            //     Text(
+            //      loc.keepSignedIn,
+            //       style: const TextStyle(fontSize: 14, color: Colors.black),
+            //     ),
+            //   ],
+            // ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             /// LOGIN BUTTON
             SizedBox(
@@ -214,9 +214,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     : Text(
                 loc.sendOtp,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),

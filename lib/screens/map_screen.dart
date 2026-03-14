@@ -160,7 +160,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                 child: Text(
                   loc.confirmLocation,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),

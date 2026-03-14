@@ -568,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       loc.verifyOtp,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1605,7 +1605,7 @@ class _OtpDialogState extends State<OtpDialog> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),

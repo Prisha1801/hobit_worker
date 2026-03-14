@@ -167,7 +167,7 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                 child: Text(
                   loc.allowLocationButton,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),

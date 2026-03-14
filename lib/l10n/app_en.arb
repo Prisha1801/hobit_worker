@@ -295,5 +295,18 @@
                 "reviewRatingsSubtitle": "View your reviews and ratings",
 
                  "subscription": "Subscription",
-                  "viewDirection": "View Direction"
+                  "viewDirection": "View Direction",
+
+           "exitApp": "Exit App",
+            "exitMessage": "Are you sure you want to exit?",
+            "yes": "Yes",
+            "no": "No",
+
+             "noRatingsFound": "No Ratings Found",
+              "ratingsCount": "{count} ratings",
+
+
+          "languageEnglish": "English",
+            "languageHindi": "Hindi",
+            "languageMarathi": "Marathi"
 }

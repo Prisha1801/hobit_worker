@@ -601,4 +601,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewDirection => 'View Direction';
+
+  @override
+  String get exitApp => 'Exit App';
+
+  @override
+  String get exitMessage => 'Are you sure you want to exit?';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get noRatingsFound => 'No Ratings Found';
+
+  @override
+  String ratingsCount(Object count) {
+    return '$count ratings';
+  }
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageHindi => 'Hindi';
+
+  @override
+  String get languageMarathi => 'Marathi';
 }

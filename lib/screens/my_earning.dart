@@ -4,6 +4,7 @@ import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:hobit_worker/screens/personal_info.dart';
 import 'package:shimmer/shimmer.dart';
 import '../api_services/api_services.dart';
+import '../colors/appcolors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/get_profile_model.dart';
 import '../models/withdrawal_model.dart';
@@ -230,9 +231,9 @@ class _MyEarningsScreenState extends State<MyEarningsScreen> {
 
                       child: Text(
                        loc.withdrawRequest,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -525,7 +526,7 @@ class _WithdrawRequestScreenState extends State<WithdrawRequestScreen> {
                     : Text(
                   loc.submitRequest,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
