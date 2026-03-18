@@ -10,6 +10,8 @@ class AssignedBookingModel {
   final double latitude;
   final double longitude;
   final ServiceModel service;
+  final List<String> addonNames;
+  final List<int> addonQty;
 
   AssignedBookingModel({
     required this.id,
@@ -23,10 +25,27 @@ class AssignedBookingModel {
     required this.latitude,
     required this.longitude,
     required this.service,
+
+    required this.addonNames,
+    required this.addonQty,
   });
 
 
   factory AssignedBookingModel.fromJson(Map<String, dynamic> json) {
+
+
+    List services = json['services'] ?? [];
+
+    List<String> addonNames = [];
+    List<int> addonQty = [];
+
+    for (var s in services) {
+      if (s['is_addon'] == true) {
+        addonNames.add(s['addon_name'] ?? '');
+        addonQty.add(s['addon_qty'] ?? 0);
+      }
+    }
+
     return AssignedBookingModel(
       id: json['id'] ?? 0,
       customerName: json['customer_name'] ?? '',
@@ -48,6 +67,9 @@ class AssignedBookingModel {
         description: '',
         price: '0',
       ),
+      addonNames: addonNames,
+      addonQty: addonQty,
+
     );
   }
 }

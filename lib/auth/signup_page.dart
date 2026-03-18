@@ -11,45 +11,31 @@ class SignupApi {
 
   static Future<List<IdNameModel>> getCategories() async {
     final res = await ApiService.getRequest(serviceCategoriesUrl);
-    return (res.data as List)
-        .map((e) => IdNameModel.fromJson(e))
-        .toList();
+    return (res.data as List).map((e) => IdNameModel.fromJson(e)).toList();
   }
 
   static Future<List<IdNameModel>> getServices() async {
     final res = await ApiService.getRequest(serviceUrl);
-    return (res.data as List)
-        .map((e) => IdNameModel.fromJson(e))
-        .toList();
+    return (res.data as List).map((e) => IdNameModel.fromJson(e)).toList();
   }
 
   static Future<List<IdNameModel>> getCities() async {
     final res = await ApiService.getRequest(citiesUrl);
-    return (res.data as List)
-        .map((e) => IdNameModel.fromJson(e))
-        .toList();
+    return (res.data as List).map((e) => IdNameModel.fromJson(e)).toList();
   }
 
   static Future<List<IdNameModel>> getZones() async {
     final res = await ApiService.getRequest(zonesUrl);
-    return (res.data as List)
-        .map((e) => IdNameModel.fromJson(e))
-        .toList();
+    return (res.data as List).map((e) => IdNameModel.fromJson(e)).toList();
   }
 
   static Future<List<IdNameModel>> getAreas() async {
     final res = await ApiService.getRequest(serviceAreaUrl);
-    return (res.data as List)
-        .map((e) => IdNameModel.fromJson(e))
-        .toList();
+    return (res.data as List).map((e) => IdNameModel.fromJson(e)).toList();
   }
 
   static Future registerWorker(Map<String, dynamic> body) async {
-    return await ApiService.postRequest(
-      signUpUrl,
-      body,
-    );
-
+    return await ApiService.postRequest(signUpUrl, body);
   }
 }
 
@@ -77,12 +63,11 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.black,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
     );
   }
+
   bool validateForm() {
     if (_name.text.trim().isEmpty) {
       showSnack("Please enter your name");
@@ -162,7 +147,6 @@ class _SignupScreenState extends State<SignupScreen> {
     return true;
   }
 
-
   bool obscure = true;
   bool accept = false;
   bool loading = false;
@@ -208,8 +192,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    filteredZones =
-        zones.where((z) => z.cityId == selectedCity!.id).toList();
+    filteredZones = zones.where((z) => z.cityId == selectedCity!.id).toList();
 
     selectedZone = null;
     selectedArea = null;
@@ -225,8 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    filteredAreas =
-        areas.where((a) => a.zoneId == selectedZone!.id).toList();
+    filteredAreas = areas.where((a) => a.zoneId == selectedZone!.id).toList();
 
     selectedArea = null;
     setState(() {});
@@ -250,18 +232,15 @@ class _SignupScreenState extends State<SignupScreen> {
   void filterServices() {
     final ids = selectedCategories.map((e) => e.id).toList();
 
-    filteredServices =
-        services.where((s) => ids.contains(s.categoryId)).toList();
+    filteredServices = services
+        .where((s) => ids.contains(s.categoryId))
+        .toList();
 
     // ❗ Reset invalid selected services
-    selectedServices.removeWhere(
-          (s) => !filteredServices.contains(s),
-    );
+    selectedServices.removeWhere((s) => !filteredServices.contains(s));
 
     serviceIds = selectedServices.map((e) => e.id).toList();
   }
-
-
 
   Widget serviceMultiDropdown() {
     final loc = AppLocalizations.of(context)!;
@@ -293,9 +272,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                Icon(serviceOpen
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down),
+                Icon(
+                  serviceOpen
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                ),
               ],
             ),
           ),
@@ -322,8 +303,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       } else {
                         selectedServices.remove(s);
                       }
-                      serviceIds =
-                          selectedServices.map((e) => e.id).toList();
+                      serviceIds = selectedServices.map((e) => e.id).toList();
                     });
                   },
                 );
@@ -336,8 +316,15 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   // UI helpers
-  Widget input(String label, TextEditingController c,
-      {String? hint, bool readOnly = false, VoidCallback? onTap, Widget? suffix}) {
+  Widget input(
+      String label,
+      TextEditingController c, {
+        String? hint,
+        bool readOnly = false,
+        bool obscureText = false,
+        VoidCallback? onTap,
+        Widget? suffix,
+      }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -346,12 +333,18 @@ class _SignupScreenState extends State<SignupScreen> {
         TextField(
           controller: c,
           readOnly: readOnly,
+          obscureText: obscureText,
           onTap: onTap,
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffix,
             fillColor: Colors.white,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black, width: 1.5),
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -415,9 +408,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                Icon(categoryOpen
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down),
+                Icon(
+                  categoryOpen
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                ),
               ],
             ),
           ),
@@ -443,8 +438,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       } else {
                         selectedCategories.remove(c);
                       }
-                      categoryIds =
-                          selectedCategories.map((e) => e.id).toList();
+                      categoryIds = selectedCategories
+                          .map((e) => e.id)
+                          .toList();
                       filterServices();
                     });
                   },
@@ -456,8 +452,8 @@ class _SignupScreenState extends State<SignupScreen> {
       ],
     );
   }
-  Future<void> pickDate() async {
 
+  Future<void> pickDate() async {
     DateTime start = DateTime.now();
     DateTime end = DateTime(2026, 12, 31);
 
@@ -465,14 +461,10 @@ class _SignupScreenState extends State<SignupScreen> {
       context: context,
       firstDate: start,
       lastDate: end,
-      initialDateRange: DateTimeRange(
-        start: start,
-        end: end,
-      ),
+      initialDateRange: DateTimeRange(start: start, end: end),
     );
 
     if (range != null) {
-
       availableDates.clear();
 
       DateTime current = range.start;
@@ -507,21 +499,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
   String formatTime(TimeOfDay t) {
     final now = DateTime.now();
-    return DateFormat("HH:mm")
-        .format(DateTime(now.year, now.month, now.day, t.hour, t.minute));
+    return DateFormat(
+      "HH:mm",
+    ).format(DateTime(now.year, now.month, now.day, t.hour, t.minute));
   }
 
   Future<void> pickTime() async {
     final s = await showTimePicker(
-        context: context, initialTime: TimeOfDay.now());
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (s == null) return;
     final e = await showTimePicker(context: context, initialTime: s);
     if (e == null) return;
 
-    availableTimes.add({
-      "start": formatTime(s),
-      "end": formatTime(e),
-    });
+    availableTimes.add({"start": formatTime(s), "end": formatTime(e)});
 
     _time.text = availableTimes
         .map((e) => "${e['start']} - ${e['end']}")
@@ -559,9 +551,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     } catch (e) {
       if (e is ApiException) {
@@ -665,15 +655,14 @@ class _SignupScreenState extends State<SignupScreen> {
             input(loc.phone, _phone, hint: "10 digit mobile number"),
 
             input(
-             loc.password,
+              loc.password,
               _password,
-
+              obscureText: obscure,
               suffix: IconButton(
-                icon:
-                Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
                 onPressed: () => setState(() => obscure = !obscure),
               ),
-                hint:loc.minPassword
+              hint: loc.minPassword,
             ),
 
             categoryMultiDropdown(),
@@ -695,8 +684,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hint: loc.selectCity,
               value: selectedCity,
               items: cities
-                  .map((e) =>
-                  DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onChanged: (v) {
                 setState(() {
@@ -711,8 +699,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hint: loc.selectZone,
               value: selectedZone,
               items: filteredZones
-                  .map((e) =>
-                  DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onChanged: (v) {
                 setState(() {
@@ -727,8 +714,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hint: loc.selectArea,
               value: selectedArea,
               items: filteredAreas
-                  .map((e) =>
-                  DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onChanged: (v) {
                 setState(() {
@@ -736,22 +722,29 @@ class _SignupScreenState extends State<SignupScreen> {
                 });
               },
             ),
-            input(loc.availableDates, _date,
-                hint: loc.selectDates,
-                readOnly: true,
-                onTap: pickDate,
-                suffix: const Icon(Icons.calendar_today)),
+            input(
+              loc.availableDates,
+              _date,
+              hint: loc.selectDates,
+              readOnly: true,
+              onTap: pickDate,
+              suffix: const Icon(Icons.calendar_today),
+            ),
 
-            input(loc.availableTimeSlots, _time,
-                hint: loc.selectTimeSlots,
-                readOnly: true,
-                onTap: pickTime,
-                suffix: const Icon(Icons.access_time)),
+            input(
+              loc.availableTimeSlots,
+              _time,
+              hint: loc.selectTimeSlots,
+              readOnly: true,
+              onTap: pickTime,
+              suffix: const Icon(Icons.access_time),
+            ),
             Row(
               children: [
                 Checkbox(
-                    value: accept,
-                    onChanged: (v) => setState(() => accept = v!)),
+                  value: accept,
+                  onChanged: (v) => setState(() => accept = v!),
+                ),
                 Expanded(child: Text(loc.acceptTerms)),
               ],
             ),
@@ -769,11 +762,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: loading ? null : register,
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(loc.signUp,   style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),),
+                    : Text(
+                  loc.signUp,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
 
@@ -784,11 +780,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 Text(loc.haveAccount),
                 GestureDetector(
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LoginScreen())),
-                  child:
-                  Text(loc.login, style: TextStyle(color: kkblack)),
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  ),
+                  child: Text(loc.login, style: TextStyle(color: kkblack)),
                 ),
               ],
             ),

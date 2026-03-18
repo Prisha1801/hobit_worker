@@ -308,5 +308,12 @@
 
           "languageEnglish": "English",
             "languageHindi": "Hindi",
-            "languageMarathi": "Marathi"
+            "languageMarathi": "Marathi",
+             "noReferralsFound": "No referrals found",
+
+          "yourReferralCode": "Your Referral Code",
+            "pointsEarned": "Points Earned",
+            "shareCode": "Share Code",
+            "referralHistory": "Referral History",
+            "totalReferrals": "Total Referrals"
 }

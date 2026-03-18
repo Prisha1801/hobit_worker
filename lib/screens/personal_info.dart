@@ -216,7 +216,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       return null;
     }
   }
-
   @override
   void initState() {
     super.initState();
@@ -229,32 +228,37 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     required String docType,
     required bool isFront,
   }) async {
-    final XFile? picked =
-    await _picker.pickImage(source: ImageSource.gallery);
-
-    if (picked == null) return;
-
-    setState(() => isLoading = true);
 
     try {
+      // Pick image from gallery
+      final XFile? picked =
+      await _picker.pickImage(source: ImageSource.gallery);
+
+      if (picked == null) return;
+
+      setState(() => isLoading = true);
+
+      File file = File(picked.path);
+
+      // Assign file based on document type
       if (docType == "aadhar") {
         if (isFront) {
-          aadhaarFrontFile = File(picked.path);
+          aadhaarFrontFile = file;
         } else {
-          aadhaarBackFile = File(picked.path);
+          aadhaarBackFile = file;
         }
       } else {
         if (isFront) {
-          policeFrontFile = File(picked.path);
+          policeFrontFile = file;
         } else {
-          policeBackFile = File(picked.path);
+          policeBackFile = file;
         }
       }
 
-      // 🔥 CALL API IMMEDIATELY
-
+      // Upload API
       await WorkerApi.uploadKycDocuments(
-        workerId: profile!.id,
+        workerId: int.parse(profile!.id.toString()),
+        // workerId: profile?.id ?? "",
         aadhaarNumber: _aadhaarController.text,
         policeNumber: _policeIdController.text,
         aadhaarFrontPath: aadhaarFrontFile?.path,
@@ -262,31 +266,108 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         policeFrontPath: policeFrontFile?.path,
         policeBackPath: policeBackFile?.path,
       );
-      // await WorkerApi.uploadKycDocuments(
-      //   workerId: profile!.id,
-      //   aadhaarNumber: _aadhaarController.text,
-      //   policeNumber: _policeIdController.text,
-      //   aadhaarFrontPath:
-      //   aadhaarFrontFile?.path ?? "",
-      //   aadhaarBackPath:
-      //   aadhaarBackFile?.path ?? "",
-      //   policeFrontPath:
-      //   policeFrontFile?.path ?? "",
-      //   policeBackPath:
-      //   policeBackFile?.path ?? "",
-      // );
 
+      // Refresh profile
       await fetchProfile();
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Document uploaded successfully")),
+        const SnackBar(
+          content: Text("Document uploaded successfully"),
+        ),
       );
+
     } catch (e) {
+
       debugPrint("Upload error: $e");
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Upload failed. Try again."),
+        ),
+      );
+
     } finally {
-      setState(() => isLoading = false);
+
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+
     }
   }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchProfile();
+  // }
+  //
+  // final ImagePicker _picker = ImagePicker();
+  //
+  // Future<void> pickAndUpload({
+  //   required String docType,
+  //   required bool isFront,
+  // }) async {
+  //   final XFile? picked =
+  //   await _picker.pickImage(source: ImageSource.gallery);
+  //
+  //   if (picked == null) return;
+  //
+  //   setState(() => isLoading = true);
+  //
+  //   try {
+  //     if (docType == "aadhar") {
+  //       if (isFront) {
+  //         aadhaarFrontFile = File(picked.path);
+  //       } else {
+  //         aadhaarBackFile = File(picked.path);
+  //       }
+  //     } else {
+  //       if (isFront) {
+  //         policeFrontFile = File(picked.path);
+  //       } else {
+  //         policeBackFile = File(picked.path);
+  //       }
+  //     }
+  //
+  //     // 🔥 CALL API IMMEDIATELY
+  //
+  //     await WorkerApi.uploadKycDocuments(
+  //       workerId: profile!.id,
+  //       aadhaarNumber: _aadhaarController.text,
+  //       policeNumber: _policeIdController.text,
+  //       aadhaarFrontPath: aadhaarFrontFile?.path,
+  //       aadhaarBackPath: aadhaarBackFile?.path,
+  //       policeFrontPath: policeFrontFile?.path,
+  //       policeBackPath: policeBackFile?.path,
+  //     );
+  //     // await WorkerApi.uploadKycDocuments(
+  //     //   workerId: profile!.id,
+  //     //   aadhaarNumber: _aadhaarController.text,
+  //     //   policeNumber: _policeIdController.text,
+  //     //   aadhaarFrontPath:
+  //     //   aadhaarFrontFile?.path ?? "",
+  //     //   aadhaarBackPath:
+  //     //   aadhaarBackFile?.path ?? "",
+  //     //   policeFrontPath:
+  //     //   policeFrontFile?.path ?? "",
+  //     //   policeBackPath:
+  //     //   policeBackFile?.path ?? "",
+  //     // );
+  //
+  //     await fetchProfile();
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Document uploaded successfully")),
+  //     );
+  //   } catch (e) {
+  //     debugPrint("Upload error: $e");
+  //   } finally {
+  //     setState(() => isLoading = false);
+  //   }
+  // }
 
   void openImagePreview(String url) {
     Navigator.push(

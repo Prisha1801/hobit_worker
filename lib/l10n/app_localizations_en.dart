@@ -630,4 +630,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageMarathi => 'Marathi';
+
+  @override
+  String get noReferralsFound => 'No referrals found';
+
+  @override
+  String get yourReferralCode => 'Your Referral Code';
+
+  @override
+  String get pointsEarned => 'Points Earned';
+
+  @override
+  String get shareCode => 'Share Code';
+
+  @override
+  String get referralHistory => 'Referral History';
+
+  @override
+  String get totalReferrals => 'Total Referrals';
 }

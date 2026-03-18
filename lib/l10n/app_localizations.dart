@@ -1338,6 +1338,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Marathi'**
   String get languageMarathi;
+
+  /// No description provided for @noReferralsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No referrals found'**
+  String get noReferralsFound;
+
+  /// No description provided for @yourReferralCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Referral Code'**
+  String get yourReferralCode;
+
+  /// No description provided for @pointsEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Points Earned'**
+  String get pointsEarned;
+
+  /// No description provided for @shareCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Code'**
+  String get shareCode;
+
+  /// No description provided for @referralHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral History'**
+  String get referralHistory;
+
+  /// No description provided for @totalReferrals.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Referrals'**
+  String get totalReferrals;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

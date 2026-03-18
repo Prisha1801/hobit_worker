@@ -302,7 +302,15 @@
 
             "languageEnglish": "इंग्रजी",
               "languageHindi": "हिंदी",
-              "languageMarathi": "मराठी"
+              "languageMarathi": "मराठी",
+
+              "noReferralsFound": "कोणतेही रेफरल सापडले नाही",
+
+              "yourReferralCode": "तुमचा रेफरल कोड",
+               "pointsEarned": "मिळवलेले पॉइंट्स",
+               "shareCode": "कोड शेअर करा",
+               "referralHistory": "रेफरल इतिहास",
+               "totalReferrals": "एकूण रेफरल"
 
 
 }
