@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -12,13 +13,23 @@ import 'prefs/app_preference.dart';
 import 'language_selection/language_provider.dart';
 import 'screens/splash_screen.dart';
 
+// ✅ Outside main(), outside any class — top-level only
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await LocalNotificationService.init();
+  await LocalNotificationService.show(message);
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();   // 🔥 Firebase init
-  //await FCMService.init();
+  await Firebase.initializeApp();
+
+  // ✅ Must be registered before runApp
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await AppPreference().initialAppPreference();
-  final isLoggedIn =
-  AppPreference().getBool(PreferencesKey.isLoggedIn);
+  final isLoggedIn = AppPreference().getBool(PreferencesKey.isLoggedIn);
   await FCMService.init(isLoggedIn: isLoggedIn);
   await LocalNotificationService.init();
   runApp(const ProviderScope(child: MyApp()));

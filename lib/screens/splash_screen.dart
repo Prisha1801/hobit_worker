@@ -95,7 +95,6 @@
 // }
 
 import 'dart:async';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../auth/login_page.dart';
 import '../auth/permission_screen.dart';
@@ -116,36 +115,10 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
-  // Future<void> setupFCM() async {
-  //
-  //   // Notification permission (Android 13+)
-  //   NotificationSettings settings =
-  //   await FirebaseMessaging.instance.requestPermission(
-  //     alert: true,
-  //     badge: true,
-  //     sound: true,
-  //   );
-  //
-  //   print("Permission: ${settings.authorizationStatus}");
-  //
-  //   // FCM Token
-  //   String? token = await FirebaseMessaging.instance.getToken();
-  //
-  //   print("FCM TOKENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN: $token");
-  //
-  //   // Foreground notification listener
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print("Notification received");
-  //
-  //     print(message.notification?.title);
-  //     print(message.notification?.body);
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
-   // setupFCM();
+
     /// Animation controller
     _controller = AnimationController(
       vsync: this,
@@ -156,6 +129,7 @@ class _SplashScreenState extends State<SplashScreen>
     _scaleAnimation = Tween<double>(begin: 0.6, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
+
     /// Fade animation
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
 
@@ -205,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: ScaleTransition(
             scale: _scaleAnimation,
             child: Image.asset(
-              'assets/images/img.png',
+              'assets/images/logo3.png',
               height: 170,
               width: double.infinity,
             ),
