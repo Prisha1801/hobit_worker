@@ -352,6 +352,7 @@
 
 
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:hobit_worker/auth/permission_screen.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
@@ -362,6 +363,8 @@ import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import '../utils/bottom_nav_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'fcm_service.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;
@@ -489,6 +492,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             content: Text(data["message"] ?? loc.loginSuccessful),
           ),
         );
+
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+
+        if (fcmToken != null) {
+          await FCMService.sendTokenToBackend(fcmToken);
+        }
 
         Navigator.pushAndRemoveUntil(
           context,

@@ -117,6 +117,21 @@ class AppBarHome extends StatelessWidget
           //     width: 24,
           //   ),
           // ),
+
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationScreen(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.notifications,
+              size: 24,
+            ),
+          ),
         ],
       ),
     );
