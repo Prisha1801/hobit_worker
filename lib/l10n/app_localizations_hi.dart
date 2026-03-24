@@ -630,4 +630,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get languageMarathi => 'मराठी';
+
+  @override
+  String get noReferralsFound => 'कोई रेफरल नहीं मिला';
+
+  @override
+  String get yourReferralCode => 'आपका रेफरल कोड';
+
+  @override
+  String get pointsEarned => 'कमाए गए पॉइंट्स';
+
+  @override
+  String get shareCode => 'कोड शेयर करें';
+
+  @override
+  String get referralHistory => 'रेफरल इतिहास';
+
+  @override
+  String get totalReferrals => 'कुल रेफरल';
 }

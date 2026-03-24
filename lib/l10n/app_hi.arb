@@ -310,6 +310,14 @@
 
          "languageEnglish": "अंग्रेज़ी",
            "languageHindi": "हिंदी",
-           "languageMarathi": "मराठी"
+           "languageMarathi": "मराठी",
+
+           "noReferralsFound": "कोई रेफरल नहीं मिला",
+
+            "yourReferralCode": "आपका रेफरल कोड",
+            "pointsEarned": "कमाए गए पॉइंट्स",
+            "shareCode": "कोड शेयर करें",
+            "referralHistory": "रेफरल इतिहास",
+            "totalReferrals": "कुल रेफरल"
 
 }

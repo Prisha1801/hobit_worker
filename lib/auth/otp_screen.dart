@@ -1,5 +1,359 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:hobit_worker/auth/permission_screen.dart';
+// import 'package:hobit_worker/colors/appcolors.dart';
+// import '../api_services/api_services.dart';
+// import '../api_services/urls.dart';
+// import '../l10n/app_localizations.dart';
+// import '../prefs/app_preference.dart';
+// import '../prefs/preference_key.dart';
+// import '../utils/bottom_nav_bar.dart';
+//
+// class OtpVerificationScreen extends StatefulWidget {
+//   final String phone;
+//   const OtpVerificationScreen({Key? key, required this.phone}) : super(key: key);
+//
+//   @override
+//   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+// }
+//
+// class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+//   final List<TextEditingController> _controllers =
+//   List.generate(6, (_) => TextEditingController());
+//   bool isLoading = false;
+//   final List<FocusNode> _focusNodes =
+//   List.generate(6, (_) => FocusNode());
+//
+//   Future<void> resendOtp() async {
+//     final loc = AppLocalizations.of(context)!;
+//
+//     try {
+//       final res = await ApiService.postRequest(
+//         "/api/worker/login/send-otp",
+//         {
+//           "phone": widget.phone,
+//         },
+//       );
+//
+//       final data = res.data;
+//
+//       if (data != null && data["status"] == true) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text(data["message"] ?? loc.otpSent),
+//           ),
+//         );
+//       }
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text(loc.somethingWentWrong),
+//         ),
+//       );
+//     }
+//   }
+//
+//
+//   @override
+//   void dispose() {
+//     for (final c in _controllers) {
+//       c.dispose();
+//     }
+//     for (final f in _focusNodes) {
+//       f.dispose();
+//     }
+//     super.dispose();
+//   }
+//
+//   String get otp =>
+//       _controllers.map((e) => e.text).join();
+//
+//
+//   Future<void> verifyOtp() async {
+//     final loc = AppLocalizations.of(context)!;
+//     if (otp.length != 6) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text(loc.invalidOtp)),
+//       );
+//       return;
+//     }
+//
+//     setState(() => isLoading = true);
+//
+//     try {
+//       final res = await ApiService.postRequest(
+//         verifyOtpUrl,
+//         {
+//           "phone": widget.phone,
+//           "otp": otp,
+//         },
+//       );
+//
+//       final data = res.data;
+//
+//       if (data != null && data["status"] == true) {
+//         final token = data["token"];
+//         final user = data["data"];
+//
+//         /// 🔐 SAVE DATA IN SHARED PREFERENCE
+//         await AppPreference().setString(
+//           PreferencesKey.token,
+//           token ?? "",
+//         );
+//
+//         await AppPreference().setString(
+//           PreferencesKey.userId,
+//           user["id"].toString(),
+//         );
+//
+//         await AppPreference().setString(
+//           PreferencesKey.name,
+//           user["name"] ?? "",
+//         );
+//
+//         await AppPreference().setString(
+//           PreferencesKey.phone,
+//           user["phone"] ?? "",
+//         );
+//
+//         await AppPreference().setBool(
+//           PreferencesKey.isLoggedIn,
+//           true,
+//         );
+//         debugPrint("✅ TOKEN SAVEDdddddddddddddddddddddddddddddddddddddd: ${AppPreference().getString(PreferencesKey.token)}");
+//         debugPrint("✅ WORKING IDddddddddddddddddddddddddddddddddddddddd: ${AppPreference().getString(PreferencesKey.userId)}");
+//         debugPrint("✅ worker nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${AppPreference().getString(PreferencesKey.name)}");
+//         debugPrint("✅ Worker numberrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${AppPreference().getString(PreferencesKey.phone)}");
+//
+//         debugPrint("LOGIN TOKENnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn: $token");
+//
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text(data["message"] ?? loc.loginSuccessful)),
+//         );
+//
+//         // Navigator.pushAndRemoveUntil(
+//         //   context,
+//         //   MaterialPageRoute(builder: (_) => const MainScreen()),
+//         //       (_) => false,
+//         // );
+//         Navigator.pushAndRemoveUntil(
+//           context,
+//           MaterialPageRoute(
+//             builder: (_) => ProviderScope(
+//               overrides: [
+//                 bottomNavIndexProvider.overrideWith((ref) => 0),
+//               ],
+//               child: const LocationPermissionScreen(),
+//             ),
+//           ),
+//               (_) => false,
+//         );
+//
+//       }
+//     } catch (e) {
+//       String message = "Something went wrong";
+//
+//       if (e.toString().contains("401")) {
+//         message = "Invalid OTP";
+//       }
+//
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text(message)),
+//       );
+//     }
+//     // } catch (e) {
+//     //   ScaffoldMessenger.of(context).showSnackBar(
+//     //     SnackBar(content: Text(e.toString())),
+//     //   );
+//     // }
+//     finally {
+//       setState(() => isLoading = false);
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final loc = AppLocalizations.of(context)!;
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       body: Padding(
+//         padding: const EdgeInsets.symmetric(horizontal: 24),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             const SizedBox(height: 150),
+//
+//             /// 🔹 TITLE
+//             Center(
+//               child: Text(
+//                loc.otpVerification,
+//                 style: const TextStyle(
+//                   fontSize: 22,
+//                   fontWeight: FontWeight.w600,
+//                 ),
+//               ),
+//             ),
+//
+//             const SizedBox(height: 8),
+//             /// 🔹 SUBTITLE
+//             RichText(
+//               textAlign: TextAlign.center,
+//               text: TextSpan(
+//                 style: const TextStyle(fontSize: 13, color: Colors.black54),
+//                 children: [
+//                   TextSpan(
+//                     text: loc.otpSubtitle,
+//                   ),
+//                   TextSpan(
+//                     text: "please check number  +91 ${widget.phone}",
+//                     style: const TextStyle(
+//                       fontWeight: FontWeight.w600,
+//                       color: Colors.black,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//
+//
+//             const SizedBox(height: 24),
+//
+//             /// 🔹 ENTER CODE TEXT
+//             Text(
+//            loc.enterCode,
+//               style: const TextStyle(
+//                 fontSize: 14,
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//
+//             const SizedBox(height: 16),
+//
+//             /// 🔹 OTP BOXES
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: List.generate(6, (index) {
+//                 return SizedBox(
+//                   width: 45,
+//                   height: 50,
+//                   child: TextField(
+//                     controller: _controllers[index],
+//                     focusNode: _focusNodes[index],
+//                     keyboardType: TextInputType.number,
+//                     textAlign: TextAlign.center,
+//                     maxLength: 1,
+//                     style: const TextStyle(
+//                       fontSize: 18,
+//                       fontWeight: FontWeight.w600,
+//                     ),
+//                     decoration: InputDecoration(
+//                       counterText: "",
+//                       border: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(8),
+//                       ),
+//                       focusedBorder: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(8),
+//                         borderSide: const BorderSide(
+//                           color: Color(0xFF4F3CC9),
+//                         ),
+//                       ),
+//                     ),
+//                     onChanged: (value) {
+//                       if (value.isNotEmpty && index < 5) {
+//                         _focusNodes[index + 1].requestFocus();
+//                       }
+//                       if (value.isEmpty && index > 0) {
+//                         _focusNodes[index - 1].requestFocus();
+//                       }
+//                     },
+//                   ),
+//                 );
+//               }),
+//             ),
+//
+//             const SizedBox(height: 32),
+//
+//             /// 🔹 SUBMIT BUTTON
+//             SizedBox(
+//               width: double.infinity,
+//               height: 50,
+//               child: ElevatedButton(
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: kkblack,
+//                   shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                 ),
+//                 onPressed: isLoading ? null : verifyOtp,
+//                 child: isLoading
+//                     ? const CircularProgressIndicator(color: Colors.white)
+//                     : Text(
+//                   loc.submit,
+//                   style: const TextStyle(
+//                     fontSize: 16,
+//                     fontWeight: FontWeight.w600,
+//                     color: Colors.white,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//
+//             const SizedBox(height: 16),
+//
+//             /// 🔹 RESEND
+//             // Center(
+//             //   child: RichText(
+//             //     text: TextSpan(
+//             //       text: loc.didntReceiveOtp,
+//             //       style: const TextStyle(color: Colors.black),
+//             //       children: [
+//             //         TextSpan(
+//             //           text: loc.resend,
+//             //           style: const TextStyle(
+//             //             color: Color(0xFF4F3CC9),
+//             //             fontWeight: FontWeight.w600,
+//             //           ),
+//             //         ),
+//             //       ],
+//             //     ),
+//             //   ),
+//             // ),
+//
+//             Center(
+//               child: RichText(
+//                 text: TextSpan(
+//                   text: loc.didntReceiveOtp,
+//                   style: const TextStyle(color: Colors.black),
+//                   children: [
+//                     WidgetSpan(
+//                       child: GestureDetector(
+//                         onTap: resendOtp,
+//                         child: Text(
+//                           loc.resend,
+//                           style: const TextStyle(
+//                             color: Color(0xFF4F3CC9),
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
+
+
+
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/auth/permission_screen.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
@@ -8,10 +362,15 @@ import '../l10n/app_localizations.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import '../utils/bottom_nav_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'fcm_service.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;
-  const OtpVerificationScreen({Key? key, required this.phone}) : super(key: key);
+
+  const OtpVerificationScreen({Key? key, required this.phone})
+      : super(key: key);
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -20,10 +379,25 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<TextEditingController> _controllers =
   List.generate(6, (_) => TextEditingController());
-  bool isLoading = false;
+
   final List<FocusNode> _focusNodes =
   List.generate(6, (_) => FocusNode());
 
+  bool isLoading = false;
+
+  /// OTP String
+  String get otp => _controllers.map((e) => e.text).join();
+
+  /// Clear OTP Fields
+  void clearOtpFields() {
+    for (var c in _controllers) {
+      c.clear();
+    }
+
+    FocusScope.of(context).requestFocus(_focusNodes[0]);
+  }
+
+  /// RESEND OTP
   Future<void> resendOtp() async {
     final loc = AppLocalizations.of(context)!;
 
@@ -38,6 +412,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       final data = res.data;
 
       if (data != null && data["status"] == true) {
+        clearOtpFields();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(data["message"] ?? loc.otpSent),
@@ -46,31 +422,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.somethingWentWrong),
-        ),
+        SnackBar(content: Text(loc.somethingWentWrong)),
       );
     }
   }
 
-
-  @override
-  void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
-    super.dispose();
-  }
-
-  String get otp =>
-      _controllers.map((e) => e.text).join();
-
-
+  /// VERIFY OTP
   Future<void> verifyOtp() async {
     final loc = AppLocalizations.of(context)!;
+
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.invalidOtp)),
@@ -95,7 +455,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         final token = data["token"];
         final user = data["data"];
 
-        /// 🔐 SAVE DATA IN SHARED PREFERENCE
         await AppPreference().setString(
           PreferencesKey.token,
           token ?? "",
@@ -120,22 +479,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           PreferencesKey.isLoggedIn,
           true,
         );
+
         debugPrint("✅ TOKEN SAVEDdddddddddddddddddddddddddddddddddddddd: ${AppPreference().getString(PreferencesKey.token)}");
         debugPrint("✅ WORKING IDddddddddddddddddddddddddddddddddddddddd: ${AppPreference().getString(PreferencesKey.userId)}");
         debugPrint("✅ worker nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${AppPreference().getString(PreferencesKey.name)}");
         debugPrint("✅ Worker numberrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ${AppPreference().getString(PreferencesKey.phone)}");
-
         debugPrint("LOGIN TOKENnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn: $token");
 
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? loc.loginSuccessful)),
+          SnackBar(
+            content: Text(data["message"] ?? loc.loginSuccessful),
+          ),
         );
 
-        // Navigator.pushAndRemoveUntil(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const MainScreen()),
-        //       (_) => false,
-        // );
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+
+        if (fcmToken != null) {
+          await FCMService.sendTokenToBackend(fcmToken);
+        }
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -148,179 +511,179 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           ),
               (_) => false,
         );
-
       }
     } catch (e) {
-      String message = "Something went wrong";
-
-      if (e.toString().contains("401")) {
-        message = "Invalid OTP";
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        const SnackBar(content: Text("Invalid OTP")),
       );
-    }
-    // } catch (e) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text(e.toString())),
-    //   );
-    // }
-    finally {
+    } finally {
       setState(() => isLoading = false);
     }
   }
 
   @override
+  void dispose() {
+    for (var c in _controllers) {
+      c.dispose();
+    }
+
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 150),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
 
-            /// 🔹 TITLE
-            Center(
-              child: Text(
-               loc.otpVerification,
+              const SizedBox(height: 120),
+
+              /// TITLE
+              Text(
+                loc.otpVerification,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
 
-            const SizedBox(height: 8),
-            /// 🔹 SUBTITLE
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: const TextStyle(fontSize: 13, color: Colors.black54),
-                children: [
-                  TextSpan(
-                    text: loc.otpSubtitle,
-                  ),
-                  TextSpan(
-                    text: "please check number  +91 ${widget.phone}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              const SizedBox(height: 10),
 
-
-            const SizedBox(height: 24),
-
-            /// 🔹 ENTER CODE TEXT
-            Text(
-           loc.enterCode,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            /// 🔹 OTP BOXES
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(6, (index) {
-                return SizedBox(
-                  width: 45,
-                  height: 50,
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    maxLength: 1,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: "",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF4F3CC9),
-                        ),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty && index < 5) {
-                        _focusNodes[index + 1].requestFocus();
-                      }
-                      if (value.isEmpty && index > 0) {
-                        _focusNodes[index - 1].requestFocus();
-                      }
-                    },
-                  ),
-                );
-              }),
-            ),
-
-            const SizedBox(height: 32),
-
-            /// 🔹 SUBMIT BUTTON
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kkblack,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+              /// SUBTITLE
+              Text(
+                "${loc.otpSubtitle} +91 ${widget.phone}",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black54,
                 ),
-                onPressed: isLoading ? null : verifyOtp,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                  loc.submit,
+              ),
+
+              const SizedBox(height: 40),
+
+              /// ENTER CODE
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  loc.enterCode,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            /// 🔹 RESEND
-            // Center(
-            //   child: RichText(
-            //     text: TextSpan(
-            //       text: loc.didntReceiveOtp,
-            //       style: const TextStyle(color: Colors.black),
-            //       children: [
-            //         TextSpan(
-            //           text: loc.resend,
-            //           style: const TextStyle(
-            //             color: Color(0xFF4F3CC9),
-            //             fontWeight: FontWeight.w600,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+              /// OTP INPUT BOXES
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  double boxWidth = constraints.maxWidth / 7;
 
-            Center(
-              child: RichText(
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(6, (index) {
+                      return SizedBox(
+                        width: boxWidth,
+                        height: 60,
+                        child: TextField(
+                          controller: _controllers[index],
+                          focusNode: _focusNodes[index],
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          textAlignVertical: TextAlignVertical.center,
+                          maxLength: 1,
+
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                          ),
+
+                          decoration: InputDecoration(
+                            counterText: "",
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
+
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: kkblack,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+
+                          onChanged: (value) {
+                            if (value.isNotEmpty && index < 5) {
+                              _focusNodes[index + 1].requestFocus();
+                            }
+
+                            if (value.isEmpty && index > 0) {
+                              _focusNodes[index - 1].requestFocus();
+                            }
+                          },
+                        ),
+                      );
+                    }),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 40),
+
+              /// SUBMIT BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kkblack,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: isLoading ? null : verifyOtp,
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                    color: Colors.white,
+                  )
+                      : Text(
+                    loc.submit,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// RESEND
+              RichText(
                 text: TextSpan(
                   text: loc.didntReceiveOtp,
                   style: const TextStyle(color: Colors.black),
@@ -340,8 +703,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

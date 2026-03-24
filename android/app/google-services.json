@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "561096346016",
-    "project_id": "hobitapp",
-    "storage_bucket": "hobitapp.firebasestorage.app"
+    "project_number": "217990691063",
+    "project_id": "hobitpartner",
+    "storage_bucket": "hobitpartner.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:561096346016:android:942aadaf34343f93c5fcc5",
+        "mobilesdk_app_id": "1:217990691063:android:bce93abc0f2ce696c5bbf2",
         "android_client_info": {
           "package_name": "com.hobit.hobit_worker"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAGNSkwzG99HurvkqNKbeMZ6Op_k0_qzsE"
+          "current_key": "AIzaSyCAVyycngkzcmOcmT59jrreWK3nzYMDVdo"
         }
       ],
       "services": {

@@ -253,5 +253,4 @@ class ApiService {
       throw Exception("Multipart Error: $e");
     }
   }
-
 }

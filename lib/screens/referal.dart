@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../api_services/api_services.dart';
+import '../models/referal_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import 'package:share_plus/share_plus.dart';
@@ -29,6 +30,32 @@ class ReferralApi {
 
     return null;
   }
+
+
+  static Future<ReferralEarningModel?> getReferralEarnings() async {
+
+    try {
+
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.getRequest(
+        "/api/referral/earnings",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      return ReferralEarningModel.fromJson(res.data);
+
+    } catch (e) {
+      debugPrint("Referral earnings error: $e");
+      return null;
+    }
+  }
+
 }
 
 Future<void> shareReferralCode(BuildContext context) async {

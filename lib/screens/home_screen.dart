@@ -333,14 +333,47 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 2),
 
-                    Text(
-                      booking.service.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    // Text(
+                    //   booking.service.name,
+                    //   maxLines: 2,
+                    //   overflow: TextOverflow.ellipsis,
+                    //   style: const TextStyle(
+                    //     fontSize: 14,
+                    //     fontWeight: FontWeight.w600,
+                    //   ),
+                    // ),
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// SERVICE NAME
+                        Text(
+                          booking.service.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
+                        /// ADDON
+                        if (booking.addonNames.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              "Addon: ${List.generate(
+                                booking.addonNames.length,
+                                    (i) => "${booking.addonNames[i]} (Qty: ${booking.addonQty[i]})",
+                              ).join(", ")}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
 
                     const SizedBox(height: 4),
@@ -582,439 +615,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //
-  // Widget buildAssignedJobCard(AssignedBookingModel booking) {
-  //   final loc = AppLocalizations.of(context)!;
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: kWhite,
-  //       borderRadius: BorderRadius.circular(15),
-  //       border: Border.all(color: const Color(0xFFC8CBD0), width: 0.5),
-  //       boxShadow: const [
-  //         BoxShadow(
-  //           color: Color(0x0D000000),
-  //           offset: Offset(0, 4),
-  //           blurRadius: 4,
-  //           spreadRadius: 0,
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         // ===== TOP ROW =====
-  //         Row(
-  //           children: [
-  //             const CircleAvatar(radius: 22, child: Icon(Icons.person)),
-  //             const SizedBox(width: 12),
-  //             Expanded(
-  //               child: Text(
-  //                 booking.customerName,
-  //                 style: const TextStyle(
-  //                   fontSize: 15,
-  //                   fontWeight: FontWeight.w600,
-  //                 ),
-  //               ),
-  //             ),
-  //             Container(
-  //               padding: const EdgeInsets.symmetric(
-  //                 horizontal: 14,
-  //                 vertical: 6,
-  //               ),
-  //               decoration: BoxDecoration(
-  //                 color: getStatusColor(booking.status).withOpacity(0.15),
-  //                 borderRadius: BorderRadius.circular(20),
-  //               ),
-  //               child: Text(
-  //                 booking.status.toUpperCase(),
-  //                 style: TextStyle(
-  //                   fontSize: 12,
-  //                   color: getStatusColor(booking.status),
-  //                   fontWeight: FontWeight.w600,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //
-  //         const SizedBox(height: 14),
-  //
-  //         // ===== MIDDLE ROW (SERVICE + DATE/TIME) =====
-  //         Row(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             /// LEFT : SERVICE (label + value in one line)
-  //             Expanded(
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   const Text(
-  //                     'Service Requested',
-  //                     style: TextStyle(fontSize: 12, color: Colors.black54),
-  //                   ),
-  //                   const SizedBox(height: 2),
-  //                   Text(
-  //                     booking.service.name,
-  //                     style: const TextStyle(
-  //                       fontSize: 14,
-  //                       fontWeight: FontWeight.w600,
-  //                     ),
-  //                   ),
-  //                   SizedBox(height: 4),
-  //                   // if (booking.service.subscription?.name != null)
-  //                   //   Container(
-  //                   //     padding: const EdgeInsets.symmetric(
-  //                   //       horizontal: 8,
-  //                   //       vertical: 3,
-  //                   //     ),
-  //                   //     decoration: BoxDecoration(
-  //                   //       color: Colors.blue.withOpacity(0.1),
-  //                   //       borderRadius: BorderRadius.circular(12),
-  //                   //     ),
-  //                   //     child: Text(
-  //                   //       booking.service.subscription!.name, // One-Time
-  //                   //       style: const TextStyle(
-  //                   //         fontSize: 11,
-  //                   //         fontWeight: FontWeight.w600,
-  //                   //         color: Colors.blue,
-  //                   //       ),
-  //                   //     ),
-  //                   //   ),
-  //
-  //                   if (booking.service.subscription?.name != null)
-  //                     Column(
-  //                       crossAxisAlignment: CrossAxisAlignment.start,
-  //                       children: [
-  //
-  //                         /// SUBSCRIPTION CHIP
-  //                         Container(
-  //                           padding: const EdgeInsets.symmetric(
-  //                             horizontal: 8,
-  //                             vertical: 3,
-  //                           ),
-  //                           decoration: BoxDecoration(
-  //                             color: Colors.blue.withOpacity(0.1),
-  //                             borderRadius: BorderRadius.circular(12),
-  //                           ),
-  //                           child: Text(
-  //                             booking.service.subscription!.name,
-  //                             style: const TextStyle(
-  //                               fontSize: 11,
-  //                               fontWeight: FontWeight.w600,
-  //                               color: Colors.blue,
-  //                             ),
-  //                           ),
-  //                         ),
-  //
-  //                         /// EXTENSION BUTTON (ONLY IF AVAILABLE)
-  //                         if (bookingExtensions[booking.id] != null &&
-  //                             bookingExtensions[booking.id]!.isNotEmpty)
-  //                           GestureDetector(
-  //                             onTap: () {
-  //                               showDialog(
-  //                                 context: context,
-  //                                 builder: (_) => ExtensionHistoryDialog(
-  //                                   bookingId: booking.id,
-  //                                 ),
-  //                               );
-  //                             },
-  //                             child: Container(
-  //                               margin: const EdgeInsets.only(top: 6),
-  //                               padding: const EdgeInsets.symmetric(
-  //                                 horizontal: 10,
-  //                                 vertical: 4,
-  //                               ),
-  //                               decoration: BoxDecoration(
-  //                                 color: Colors.black,
-  //                                 borderRadius: BorderRadius.circular(6),
-  //                               ),
-  //                               child: Text(
-  //                                 "Extensions (${bookingExtensions[booking.id]!.length})",
-  //                                 style: const TextStyle(
-  //                                   fontSize: 10,
-  //                                   color: Colors.white,
-  //                                   fontWeight: FontWeight.w600,
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                       ],
-  //                     ),
-  //                 ],
-  //               ),
-  //             ),
-  //
-  //             const SizedBox(width: 8),
-  //
-  //             /// RIGHT : DATE (top) + TIME (below)
-  //             Expanded(
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.end,
-  //                 children: [
-  //                   const Text(
-  //                     'Date & Time',
-  //                     style: TextStyle(fontSize: 12, color: Colors.black54),
-  //                   ),
-  //                   const SizedBox(height: 2),
-  //                   Text(
-  //                     booking.bookingDate,
-  //                     style: const TextStyle(
-  //                       fontSize: 13,
-  //                       fontWeight: FontWeight.w500,
-  //                     ),
-  //                     textAlign: TextAlign.right,
-  //                   ),
-  //                   const SizedBox(height: 2),
-  //                   Text(
-  //                     booking.timeSlot,
-  //                     style: const TextStyle(
-  //                       fontSize: 12,
-  //                       color: Colors.black54,
-  //                     ),
-  //                     textAlign: TextAlign.right,
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //
-  //         const SizedBox(height: 12),
-  //         const Divider(thickness: 0.6),
-  //         const SizedBox(height: 10),
-  //
-  //         // ===== BOTTOM ROW =====
-  //         Row(
-  //           children: [
-  //             const Icon(Icons.location_on, size: 16, color: Colors.green),
-  //             const SizedBox(width: 6),
-  //             Expanded(
-  //               child: Text(
-  //                 "${booking.address}, ${booking.city}",
-  //                 // style: const TextStyle(fontSize: 13),
-  //                 style: const TextStyle(
-  //                   fontSize: 13,
-  //                   color: Colors.black,
-  //                   //decoration: TextDecoration.underline,
-  //                   // decorationColor: Colors.blue,
-  //                 ),
-  //               ),
-  //             ),
-  //             // if (bookingExtensions[booking.id] != null &&
-  //             //     bookingExtensions[booking.id]!.isNotEmpty)
-  //             //   Column(
-  //             //     crossAxisAlignment: CrossAxisAlignment.start,
-  //             //     children: bookingExtensions[booking.id]!.map((ext) {
-  //             //       return Container(
-  //             //         margin: const EdgeInsets.only(top: 10),
-  //             //         padding: const EdgeInsets.all(10),
-  //             //         decoration: BoxDecoration(
-  //             //           color: Colors.orange.withOpacity(0.1),
-  //             //           borderRadius: BorderRadius.circular(8),
-  //             //         ),
-  //             //         child: Row(
-  //             //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             //           children: [
-  //             //             Text(
-  //             //               "Extension ${ext.durationMinutes} min",
-  //             //               style: const TextStyle(fontWeight: FontWeight.w600),
-  //             //             ),
-  //             //             Text(
-  //             //               "₹${ext.amount}",
-  //             //               style: const TextStyle(
-  //             //                 fontWeight: FontWeight.w600,
-  //             //                 color: Colors.orange,
-  //             //               ),
-  //             //             ),
-  //             //           ],
-  //             //         ),
-  //             //       );
-  //             //     }).toList(),
-  //             //   ),
-  //             const Text(
-  //               'Booking ID - ',
-  //               style: TextStyle(fontSize: 13, color: Colors.black54),
-  //             ),
-  //             Text(
-  //               "BK-${booking.id}",
-  //               style: const TextStyle(
-  //                 fontSize: 13,
-  //                 fontWeight: FontWeight.w600,
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         const SizedBox(height: 20),
-  //
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //           children: [
-  //             /// 🔁 RESEND OTP
-  //             SizedBox(
-  //               width: 130,
-  //               height: 35,
-  //               child: OutlinedButton(
-  //                 onPressed: () async {
-  //
-  //                   showDialog(
-  //                     context: context,
-  //                     barrierDismissible: false,
-  //                     builder: (_) => const Center(
-  //                       child: CircularProgressIndicator(),
-  //                     ),
-  //                   );
-  //
-  //                   try {
-  //                     final position = await LocationService.getCurrentLocation();
-  //
-  //                     final success = await BookingApi.sendWorkerLiveLocation(
-  //                       bookingId: booking.id,
-  //                       latitude: position.latitude,
-  //                       longitude: position.longitude,
-  //                     );
-  //
-  //                     Navigator.pop(context); // close loader
-  //
-  //                     if (success) {
-  //                       Navigator.push(
-  //                         context,
-  //                         MaterialPageRoute(
-  //                           builder: (_) => CustomerRouteMap(
-  //                             customerLat: booking.latitude,
-  //                             customerLng: booking.longitude,
-  //                             address: booking.address,
-  //                           ),
-  //                         ),
-  //                       );
-  //                     } else {
-  //                       ScaffoldMessenger.of(context).showSnackBar(
-  //                         const SnackBar(
-  //                           content: Text("Failed to send live location"),
-  //                           backgroundColor: Colors.red,
-  //                         ),
-  //                       );
-  //                     }
-  //                   } catch (e) {
-  //                     Navigator.pop(context);
-  //
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       const SnackBar(
-  //                         content: Text("Location error"),
-  //                         backgroundColor: Colors.red,
-  //                       ),
-  //                     );
-  //                   }
-  //                 },
-  //                 // onPressed: isInProgress(booking)
-  //                 //     ? null
-  //                 //     : () async {
-  //                 //         showDialog(
-  //                 //           context: context,
-  //                 //           barrierDismissible: false,
-  //                 //           builder: (_) => const Center(
-  //                 //             child: CircularProgressIndicator(),
-  //                 //           ),
-  //                 //         );
-  //                 //
-  //                 //         final success = await BookingApi.sendStartOtp(
-  //                 //           booking.id,
-  //                 //         );
-  //                 //
-  //                 //         Navigator.pop(context);
-  //                 //
-  //                 //         if (success) {
-  //                 //           ScaffoldMessenger.of(context).showSnackBar(
-  //                 //             const SnackBar(
-  //                 //               content: Text("OTP resent successfully"),
-  //                 //               backgroundColor: Colors.green,
-  //                 //             ),
-  //                 //           );
-  //                 //         } else {
-  //                 //           ScaffoldMessenger.of(context).showSnackBar(
-  //                 //             const SnackBar(
-  //                 //               content: Text("Failed to resend OTP"),
-  //                 //               backgroundColor: Colors.red,
-  //                 //             ),
-  //                 //           );
-  //                 //         }
-  //                 //       },
-  //                 style: OutlinedButton.styleFrom(
-  //                   side: BorderSide(color: kkblack),
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(5),
-  //                   ),
-  //                 ),
-  //                 // child: Row(
-  //                 //   mainAxisAlignment: MainAxisAlignment.start,
-  //                 //   children: [
-  //                 //     Icon(Icons.location_on, size: 16, color: Colors.green),
-  //                 //     Text(
-  //                 //       'View Direction',
-  //                 //       style: const TextStyle(
-  //                 //         fontSize: 12,
-  //                 //         fontWeight: FontWeight.w600,
-  //                 //         color: Colors.black,
-  //                 //       ),
-  //                 //     ),
-  //                 //   ],
-  //                 // ),
-  //                 child: FittedBox(
-  //                   child: Row(
-  //                     children: const [
-  //                       Icon(Icons.location_on, size: 16, color: Colors.green),
-  //                       SizedBox(width: 4),
-  //                       Text(
-  //                         'View Direction',
-  //                         style: TextStyle(
-  //                           fontSize: 12,
-  //                           fontWeight: FontWeight.w600,
-  //                           color: Colors.black,
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //
-  //               ),
-  //             ),
-  //             SizedBox(width: 10),
-  //             SizedBox(
-  //               width: 130,
-  //               height: 35,
-  //               child: ElevatedButton(
-  //                 onPressed: isInProgress(booking)
-  //                     ? null // 🔒 disabled
-  //                     : () {
-  //                   // _openOtpDialog(isStartService: true);
-  //                   _openOtpDialog(booking.id);
-  //                 },
-  //                 style: ElevatedButton.styleFrom(
-  //                   backgroundColor: kkblack,
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(5),
-  //                   ),
-  //                 ),
-  //                 child: Text(
-  //                   loc.verifyOtp,
-  //                   style: const TextStyle(
-  //                     fontSize: 12,
-  //                     fontWeight: FontWeight.w600,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //
-  //         SizedBox(height: 20,),
-  //
-  //
-  //       ],
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1164,6 +764,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               //     } else {
                               //       // 👉 revert back to ONLINE
                               //       isAvailable = true;
+                              //       isAvailable = true;
                               //       dragPosition = 0;
                               //     }
                               //   });
@@ -1221,7 +822,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (!isKycApproved) ...[
                       const SizedBox(height: 10),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                         decoration: BoxDecoration(
                           color: kycStatus == 'rejected'
                               ? Colors.red.withOpacity(0.1)

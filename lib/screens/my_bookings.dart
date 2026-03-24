@@ -24,6 +24,8 @@ class BookingModel {
 
   final String startDate;   // NEW
   final String endDate;     //
+  final List<String> addonNames;
+  final List<int> addonQty;
 
   BookingModel({
     required this.id,
@@ -38,9 +40,23 @@ class BookingModel {
 
     required this.startDate,
     required this.endDate,
+
+    required this.addonNames,
+    required this.addonQty,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
+    List services = json['services'] ?? [];
+    List<String> addonNames = [];
+    List<int> addonQty = [];
+
+    for (var s in services) {
+      if (s['is_addon'] == true) {
+        addonNames.add(s['addon_name'] ?? '');
+        addonQty.add(s['addon_qty'] ?? 0);
+      }
+    }
+
     return BookingModel(
       id: json['id'],
       customerName: json['customer_name'] ?? '',
@@ -53,7 +69,9 @@ class BookingModel {
       status: json['status'] ?? '',
 
       startDate: json['start_date'] ?? '',   // NEW
-      endDate: json['end_date'] ?? '',       // NEW
+      endDate: json['end_date'] ?? '', // NEW
+      addonNames: addonNames,
+      addonQty: addonQty,
     );
   }
 }
@@ -133,6 +151,38 @@ class BookingApi {
       return null;
     }
   }
+
+  static Future<int?> getBookingRating(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+      final workerId = AppPreference().getString(PreferencesKey.userId);
+
+      final res = await ApiService.getRequest(
+        "/api/workers/$workerId/ratings",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      final List ratings = res.data['ratings']['data'];
+
+      final rating = ratings.firstWhere(
+            (e) => e['booking_id'] == bookingId,
+        orElse: () => null,
+      );
+
+      if (rating == null) return null;
+
+      return rating['rating'];
+    } catch (e) {
+      debugPrint("Rating API error: $e");
+      return null;
+    }
+  }
+
 }
 /// STATUS ENUM
 enum JobStatus { all,assigned, inProgress, completed,  subscription }
@@ -463,76 +513,6 @@ class _BookingsScreenState extends State<BookingsScreen>
           const SizedBox(height: 12),
 
           /// SERVICE + DATE/TIME
-          // Row(
-          //   children: [
-          //     Expanded(
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           const Text(
-          //             'Service Requested',
-          //             style: TextStyle(
-          //                 fontSize: 12, color: Colors.black54),
-          //           ),
-          //           const SizedBox(height: 4),
-          //           Text(
-          //             booking.serviceName,
-          //             style: const TextStyle(
-          //                 fontSize: 14,
-          //                 fontWeight: FontWeight.w600),
-          //           ),
-          //
-          //           if (booking.subscriptionName.isNotEmpty)
-          //             Container(
-          //               margin: const EdgeInsets.only(top: 4),
-          //               padding: const EdgeInsets.symmetric(
-          //                 horizontal: 8,
-          //                 vertical: 3,
-          //               ),
-          //               decoration: BoxDecoration(
-          //                 color: Colors.blue.withOpacity(0.1),
-          //                 borderRadius: BorderRadius.circular(12),
-          //               ),
-          //               child: Text(
-          //                 booking.subscriptionName,
-          //                 style: const TextStyle(
-          //                   fontSize: 11,
-          //                   fontWeight: FontWeight.w600,
-          //                   color: Colors.blue,
-          //                 ),
-          //               ),
-          //             ),
-          //         ],
-          //       ),
-          //     ),
-          //     Expanded(
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.end,
-          //         children: [
-          //           const Text(
-          //             'Date & Time',
-          //             style: TextStyle(
-          //               fontSize: 12,
-          //               color: Colors.black54,
-          //             ),
-          //           ),
-          //           const SizedBox(height: 4),
-          //
-          //           Text(
-          //             booking.bookingDate,
-          //             style: const TextStyle(fontSize: 13),
-          //           ),
-          //           Text(
-          //             booking.timeSlot,
-          //             style: const TextStyle(
-          //                 fontSize: 12,
-          //                 color: Colors.black54),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ],
-          // ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -556,6 +536,49 @@ class _BookingsScreenState extends State<BookingsScreen>
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (booking.addonNames.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          /// ADDON TITLE WITH ICON
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: Row(
+                              children: [
+                                // Icon(
+                                //   Icons.add_box,
+                                //   size: 16,
+                                //   color: Colors.black87,
+                                // ),
+                                // SizedBox(width: 4),
+                                Text(
+                                  "Addon:",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          /// ADDON LIST
+                          ...List.generate(
+                            booking.addonNames.length,
+                                (index) => Text(
+                              "${booking.addonNames[index]} (Qty: ${booking.addonQty[index]})",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
                     // if (booking.subscriptionName.isNotEmpty)
                     //   Container(
@@ -725,11 +748,51 @@ class _BookingsScreenState extends State<BookingsScreen>
                     "${booking.address}, ${booking.city}"),
               ),
               //const Text('Booking ID - '),
-              Text(
-                "BK-${booking.id}",
-                style:
-                const TextStyle(fontWeight: FontWeight.w600),
-              ),
+              // Text(
+              //   "BK-${booking.id}",
+              //   style:
+              //   const TextStyle(fontWeight: FontWeight.w600),
+              // ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "BK-${booking.id}",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  /// ⭐ RATING STARS
+                  FutureBuilder<int?>(
+                    future: BookingApi.getBookingRating(booking.id),
+                    builder: (context, snapshot) {
+
+                      if (!snapshot.hasData) {
+                        return const SizedBox();
+                      }
+
+                      final rating = snapshot.data!;
+
+                      if (rating == null || rating == 0) {
+                        return const SizedBox();
+                      }
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(
+                          5,
+                              (index) => Icon(
+                            index < rating ? Icons.star : Icons.star_border,
+                            size: 16,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              )
             ],
           ),
           FutureBuilder<RescheduleHistoryModel?>(

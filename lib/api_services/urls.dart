@@ -1,6 +1,7 @@
 //const String baseUrl = "https://hobitadmin.anantkamalsoftwarelabs.com";
 //const String baseUrl = "https://backendhobit.anantkamalsoftwarelabs.com";
-const String baseUrl = "https://hobitadmin.hobit.club";
+// const String baseUrl = "https://hobitadmin.hobit.club";
+const String baseUrl = "https://uatadmin.hobit.club";
 //registrations apis
 const String signUpUrl = "/api/worker/register_app";
 const String  serviceCategoriesUrl = "/api/service-categories";
@@ -15,6 +16,7 @@ const String logoutUrl = "/api/logout";
 const String getBankDetailsUrl = "/api/worker/bank-details";
 const String putBankDetailsUrl = "/api/worker/update_bank_details";
 const String getPersonalInfoUrl = "/api/worker/me";
+const String fcmTokenUrl = "/api/user/fcm-token";
 
 
 

@@ -1,66 +1,9 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'onboarding_screens.dart';
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-
-    /// ⏳ 5 SECONDS DELAY
-    Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const OnboardingScreen(),
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // outer background
-      body: Center(
-        child: Container(
-          width: 375,
-          height: 750,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            image: const DecorationImage(
-              image: AssetImage('assets/images/Splash_screen.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              /// 🔹 LOGO
-              Image.asset(
-                'assets/images/worker_logo.png',
-                height: 220,
-                width: 500,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-//
 // import 'dart:async';
 // import 'package:flutter/material.dart';
-// import 'package:geolocator/geolocator.dart';
+// import '../auth/login_page.dart';
+// import '../auth/permission_screen.dart';
+// import '../prefs/app_preference.dart';
+// import '../prefs/preference_key.dart';
 // import 'onboarding_screens.dart';
 //
 // class SplashScreen extends StatefulWidget {
@@ -73,60 +16,202 @@ class _SplashScreenState extends State<SplashScreen> {
 // class _SplashScreenState extends State<SplashScreen> {
 //
 //   @override
+//   // void initState() {
+//   //   super.initState();
+//   //
+//   //   /// ⏳ 5 SECONDS DELAY
+//   //   Timer(const Duration(seconds: 5), () {
+//   //     Navigator.pushReplacement(
+//   //       context,
+//   //       MaterialPageRoute(
+//   //         builder: (context) => const OnboardingScreen(),
+//   //       ),
+//   //     );
+//   //   });
+//   // }
+//
+//   @override
 //   void initState() {
 //     super.initState();
-//     _checkLocation();
+//     _navigate();
 //   }
 //
-//   Future<void> _checkLocation() async {
+//   void _navigate() {
+//     Timer(const Duration(seconds: 5), () {
 //
-//     await Future.delayed(const Duration(seconds: 2));
+//       final bool isLoggedIn =
+//       AppPreference().getBool(PreferencesKey.isLoggedIn);
 //
-//     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+//       if (isLoggedIn) {
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(
+//             builder: (_) => const LocationPermissionScreen(),
+//           ),
+//         );
+//       } else {
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(
+//             builder: (_) => const LoginScreen(),
+//           ),
+//         );
+//       }
 //
-//     if (!serviceEnabled) {
-//       /// 🔥 Directly open Location Settings
-//       await Geolocator.openLocationSettings();
-//
-//       /// 🔁 Wait and re-check
-//       _checkLocation();
-//       return;
-//     }
-//
-//     /// Permission check
-//     LocationPermission permission = await Geolocator.checkPermission();
-//
-//     if (permission == LocationPermission.denied) {
-//       permission = await Geolocator.requestPermission();
-//     }
-//
-//     if (permission == LocationPermission.denied ||
-//         permission == LocationPermission.deniedForever) {
-//       await Geolocator.openAppSettings();
-//       return;
-//     }
-//
-//     /// ✅ All good → go next
-//     if (!mounted) return;
-//
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//         builder: (_) => const OnboardingScreen(),
-//       ),
-//     );
+//     });
 //   }
+//
 //
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       backgroundColor: Colors.black,
+//       backgroundColor: Colors.black, // outer background
 //       body: Center(
-//         child: Image.asset(
-//           'assets/images/Splash_screen.png',
-//           fit: BoxFit.cover,
+//         child: Container(
+//           width: 375,
+//           height: 750,
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(16),
+//             image: const DecorationImage(
+//               image: AssetImage('assets/images/Splash_screen.png'),
+//               fit: BoxFit.cover,
+//             ),
+//           ),
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               /// 🔹 LOGO
+//               Image.asset(
+//                 'assets/images/worker_logo.png',
+//                 height: 220,
+//                 width: 500,
+//               ),
+//             ],
+//           ),
 //         ),
 //       ),
 //     );
 //   }
 // }
+
+import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import '../auth/login_page.dart';
+import '../auth/permission_screen.dart';
+import '../prefs/app_preference.dart';
+import '../prefs/preference_key.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  // Future<void> setupFCM() async {
+  //
+  //   // Notification permission (Android 13+)
+  //   NotificationSettings settings =
+  //   await FirebaseMessaging.instance.requestPermission(
+  //     alert: true,
+  //     badge: true,
+  //     sound: true,
+  //   );
+  //
+  //   print("Permission: ${settings.authorizationStatus}");
+  //
+  //   // FCM Token
+  //   String? token = await FirebaseMessaging.instance.getToken();
+  //
+  //   print("FCM TOKENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN: $token");
+  //
+  //   // Foreground notification listener
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print("Notification received");
+  //
+  //     print(message.notification?.title);
+  //     print(message.notification?.body);
+  //   });
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+   // setupFCM();
+    /// Animation controller
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+
+    /// Scale animation
+    _scaleAnimation = Tween<double>(begin: 0.6, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    /// Fade animation
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
+
+    _controller.forward();
+
+    /// Navigate after splash
+    Timer(const Duration(seconds: 5), _navigate);
+  }
+
+  void _navigate() {
+    final bool isLoggedIn =
+    AppPreference().getBool(PreferencesKey.isLoggedIn);
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LocationPermissionScreen(),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      body: Center(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Image.asset(
+              'assets/images/img.png',
+              height: 170,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

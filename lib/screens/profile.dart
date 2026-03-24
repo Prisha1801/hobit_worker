@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:hobit_worker/screens/personal_info.dart';
 import 'package:hobit_worker/screens/referal.dart';
+import 'package:hobit_worker/screens/referal_screen.dart';
 import 'package:hobit_worker/screens/review_rating.dart';
 import 'package:hobit_worker/screens/support.dart';
 import 'package:hobit_worker/utils/app_bar.dart';
@@ -277,19 +278,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                     ),
 
-                    _buildMenuItem(
-                      icon: Icons.help_outline,
-                      title: loc.helpSupport,
-                      subtitle: loc.helpSupportSub,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HelpSupportScreen(),
-                          ),
-                        );
-                      },
-                    ),
 
                     _buildMenuItem(
                       icon: Icons.star,
@@ -308,9 +296,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.card_giftcard,
                       title: loc.referAndEarn,
                       subtitle: loc.referAndEarnSubtitle,
-                      onTap: () {
-                        shareReferralCode(context);
-                      },
+                      // onTap: () {
+                      //   shareReferralCode(context);
+                      // },
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ReferralScreen(),
+                            ),
+                          );
+                        }
                     ),
                     _buildMenuItem(
                       icon: Icons.language,
@@ -321,6 +317,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => LanguageSelectionScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _buildMenuItem(
+                      icon: Icons.help_outline,
+                      title: loc.helpSupport,
+                      subtitle: loc.helpSupportSub,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HelpSupportScreen(),
                           ),
                         );
                       },
@@ -339,19 +349,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                     ),
 
-                    // _buildMenuItem(
-                    //   icon: Icons.info_outline,
-                    //   title: 'kyc update',
-                    //   subtitle: 'kyc update',
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) => const KycScreen(),
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
+
                     _buildMenuItem(
                       icon: Icons.logout,
                       title: loc.logout,

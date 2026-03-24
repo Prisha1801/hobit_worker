@@ -119,64 +119,65 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const SizedBox(height: 80),
 
-            Image.asset(
-              'assets/images/Address.png',
-              height: 220,
-            ),
-
-            const SizedBox(height: 30),
-
-            Text(
-              loc.allowLocationTitle,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+              Image.asset(
+                'assets/images/Address.png',
+                height: 220,
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 30),
 
-            Text(
-              loc.allowLocationDesc,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.black54),
-            ),
-
-            const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kkblack,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-
-                /// 🔥 BUTTON PRESS → CHECK LOCATION
-                onPressed: _checkLocation,
-
-                child: Text(
-                  loc.allowLocationButton,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
+              Text(
+                loc.allowLocationTitle,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
 
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 10),
+
+              Text(
+                loc.allowLocationDesc,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.black54),
+              ),
+
+              //const Spacer(),
+              const SizedBox(height: 250),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kkblack,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+
+                  /// 🔥 BUTTON PRESS → CHECK LOCATION
+                  onPressed: _checkLocation,
+
+                  child: Text(
+                    loc.allowLocationButton,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

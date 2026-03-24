@@ -18,20 +18,8 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int currentIndex = 0;
-  //
-  // final List<Map<String, String>> onboardingData = [
-  //   {"image": "assets/images/onboard.png", "title": "We are here for you!"},
-  //   {"image": "assets/images/onboard.png", "title": "All services at one tap"},
-  //   {
-  //     "image": "assets/images/onboard.png",
-  //     "title": "Trusted professionals nearby",
-  //   },
-  // ];
+
   late List<Map<String, String>> onboardingData;
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -141,22 +129,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   }
                 },
 
-                // {
-                //   if (currentIndex < onboardingData.length - 1) {
-                //     _pageController.nextPage(
-                //       duration: const Duration(milliseconds: 300),
-                //       curve: Curves.easeInOut,
-                //     );
-                //   } else {
-                //     // Navigate to the next screen after onboarding
-                //     Navigator.pushReplacement(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) => const LoginScreen(),
-                //       ),
-                //     );
-                //   }
-                // },
                 child: Text(
                   loc.getStarted,
                   style: TextStyle(
