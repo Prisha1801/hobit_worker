@@ -648,4 +648,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalReferrals => 'Total Referrals';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get today_notifications => 'Today\'s Notifications';
+
+  @override
+  String get no_notifications => 'No notifications today';
+
+  @override
+  String get view_details => 'View Details →';
+
+  @override
+  String get assigned_title => 'New Booking Assigned';
+
+  @override
+  String get inprogress_title => 'Service In Progress';
+
+  @override
+  String get completed_title => 'Service Completed';
+
+  @override
+  String get default_title => 'Booking Update';
 }

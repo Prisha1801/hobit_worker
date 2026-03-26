@@ -310,7 +310,17 @@
                "pointsEarned": "मिळवलेले पॉइंट्स",
                "shareCode": "कोड शेअर करा",
                "referralHistory": "रेफरल इतिहास",
-               "totalReferrals": "एकूण रेफरल"
+               "totalReferrals": "एकूण रेफरल",
+
+             "notifications": "सूचना",
+              "today_notifications": "आजच्या सूचना",
+              "no_notifications": "आज कोणतीही सूचना नाही",
+              "view_details": "तपशील पहा →",
+
+              "assigned_title": "नवीन बुकिंग नियुक्त झाली",
+              "inprogress_title": "सेवा सुरू आहे",
+              "completed_title": "सेवा पूर्ण झाली",
+              "default_title": "बुकिंग अपडेट"
 
 
 }

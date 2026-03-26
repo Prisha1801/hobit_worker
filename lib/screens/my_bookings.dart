@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/screens/reschedule.dart';
 import '../api_services/api_services.dart';
 import '../l10n/app_localizations.dart';
@@ -9,7 +10,7 @@ import '../prefs/preference_key.dart';
 import '../colors/appcolors.dart';
 import '../utils/app_bar.dart';
 import '../utils/extension_history.dart';
-
+final bookingStatusProvider = StateProvider<String?>((ref) => null);
 /// MODEL
 class BookingModel {
   final int id;
@@ -187,25 +188,77 @@ class BookingApi {
 /// STATUS ENUM
 enum JobStatus { all,assigned, inProgress, completed,  subscription }
 /// SCREEN
-class BookingsScreen extends StatefulWidget {
-  const BookingsScreen({Key? key}) : super(key: key);
+// class BookingsScreen extends StatefulWidget {
+//   final String? initialStatus;
+//   const BookingsScreen({Key? key, this.initialStatus}) : super(key: key);
+//
+//   @override
+//   State<BookingsScreen> createState() => _BookingsScreenState();
+// }
+
+class BookingsScreen extends ConsumerStatefulWidget {
+  final String? initialStatus;
+
+  const BookingsScreen({Key? key, this.initialStatus}) : super(key: key);
 
   @override
-  State<BookingsScreen> createState() => _BookingsScreenState();
+  ConsumerState<BookingsScreen> createState() => _BookingsScreenState();
 }
 
-class _BookingsScreenState extends State<BookingsScreen>
+// class _BookingsScreenState extends State<BookingsScreen>
+class _BookingsScreenState extends ConsumerState<BookingsScreen>
     with WidgetsBindingObserver {
   JobStatus selectedTab = JobStatus.all;
   List<BookingModel> bookings = [];
   bool loading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    loadBookings();
-  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addObserver(this);
+  //
+  //   final status = ref.read(bookingStatusProvider);
+  //
+  //   if (status != null) {
+  //     switch (status) {
+  //       case "assigned":
+  //         selectedTab = JobStatus.assigned;
+  //         break;
+  //       case "inprogress":
+  //         selectedTab = JobStatus.inProgress;
+  //         break;
+  //       case "completed":
+  //         selectedTab = JobStatus.completed;
+  //         break;
+  //       default:
+  //         selectedTab = JobStatus.all;
+  //     }
+  //   }
+  //
+  //   loadBookings();
+  // }
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addObserver(this);
+  //
+  //   if (widget.initialStatus != null) {
+  //     switch (widget.initialStatus) {
+  //       case "assigned":
+  //         selectedTab = JobStatus.assigned;
+  //         break;
+  //       case "inprogress":
+  //         selectedTab = JobStatus.inProgress;
+  //         break;
+  //       case "completed":
+  //         selectedTab = JobStatus.completed;
+  //         break;
+  //       default:
+  //         selectedTab = JobStatus.all;
+  //     }
+  //   }
+  //   loadBookings();
+  // }
 
   @override
   void dispose() {
@@ -320,6 +373,31 @@ class _BookingsScreenState extends State<BookingsScreen>
   /// =======================
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(bookingStatusProvider, (previous, next) {
+      if (next != null) {
+        setState(() {
+          switch (next) {
+            case "assigned":
+              selectedTab = JobStatus.assigned;
+              break;
+            case "inprogress":
+              selectedTab = JobStatus.inProgress;
+              break;
+            case "completed":
+              selectedTab = JobStatus.completed;
+              break;
+            default:
+              selectedTab = JobStatus.all;
+          }
+        });
+
+        /// 🔥 reload bookings
+        loadBookings();
+
+        /// 🔥 reset
+        ref.read(bookingStatusProvider.notifier).state = null;
+      }
+    });
     final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kWhite,

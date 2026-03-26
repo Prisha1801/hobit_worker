@@ -17,6 +17,7 @@ const String getBankDetailsUrl = "/api/worker/bank-details";
 const String putBankDetailsUrl = "/api/worker/update_bank_details";
 const String getPersonalInfoUrl = "/api/worker/me";
 const String fcmTokenUrl = "/api/user/fcm-token";
+const String notificationUrl = "/api/worker/bookings";
 
 
 

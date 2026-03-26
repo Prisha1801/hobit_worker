@@ -12,7 +12,7 @@ import 'l10n/app_localizations.dart';
 import 'prefs/app_preference.dart';
 import 'language_selection/language_provider.dart';
 import 'screens/splash_screen.dart';
-
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 // ✅ Outside main(), outside any class — top-level only
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -24,7 +24,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   // ✅ Must be registered before runApp
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -42,6 +41,7 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -51,11 +51,9 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-
       home: ConnectivityWrapper(child: SplashScreen()),
       builder: (context, child) => ConnectivityWrapper(child: child!),
     );

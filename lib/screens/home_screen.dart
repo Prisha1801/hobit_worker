@@ -30,7 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool loadingAvailability = true;
   List<AssignedBookingModel> todayBookings = [];
   Map<int, List<BookingExtensionModel>> bookingExtensions = {};
-  String kycStatus = 'pending'; // add this with other state variables
+  // String kycStatus = 'pending';
+  String? kycStatus;
   bool get isKycApproved => kycStatus == 'approved';
   bool isInProgress(AssignedBookingModel booking) {
     return booking.status == "inprogress";
@@ -54,13 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // int workerId = 0;
+
   Future<void> _refreshHome() async {
     setState(() {
       loadingBooking = true;
     });
 
     // await loadAssignedBooking();
+    await loadAvailabilityFromApi();
     await loadTodayJobs();
   }
 
@@ -269,6 +271,45 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
 
           /// ===== TOP ROW =====
+          // Row(
+          //   children: [
+          //     const CircleAvatar(radius: 22, child: Icon(Icons.person)),
+          //     const SizedBox(width: 12),
+          //
+          //     Expanded(
+          //       child: Text(
+          //         booking.customerName,
+          //         maxLines: 1,
+          //         overflow: TextOverflow.ellipsis,
+          //         style: const TextStyle(
+          //           fontSize: 15,
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ),
+          //
+          //     const SizedBox(width: 6),
+          //
+          //     Container(
+          //       padding: const EdgeInsets.symmetric(
+          //         horizontal: 12,
+          //         vertical: 5,
+          //       ),
+          //       decoration: BoxDecoration(
+          //         color: getStatusColor(booking.status).withOpacity(0.15),
+          //         borderRadius: BorderRadius.circular(20),
+          //       ),
+          //       child: Text(
+          //         booking.status.toUpperCase(),
+          //         style: TextStyle(
+          //           fontSize: 11,
+          //           color: getStatusColor(booking.status),
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           Row(
             children: [
               const CircleAvatar(radius: 22, child: Icon(Icons.person)),
@@ -286,13 +327,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              const SizedBox(width: 6),
-
+              /// 🔥 STATUS CHIP
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: getStatusColor(booking.status).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -305,6 +342,51 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+
+              // const SizedBox(width: 2),
+
+              /// 🔥 3 DOT MENU (RIGHT SIDE)
+              PopupMenuButton<String>(
+                color: Colors.white,
+                icon: const Icon(Icons.more_vert, size: 20),
+                onSelected: (value) async {
+
+                  bool success = await BookingApi.updateBookingStatus(
+                    bookingId: booking.id,
+                    status: value,
+                  );
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Status updated to $value")),
+                    );
+
+                    loadTodayJobs(); // 🔥 refresh
+                  }
+                },
+                itemBuilder: (context) {
+
+                  final current = booking.status;
+
+                  return [
+                    if (current != "assigned")
+                      const PopupMenuItem(
+                        value: "assigned",
+                        child: Text("Assigned"),
+                      ),
+                    if (current != "inprogress")
+                      const PopupMenuItem(
+                        value: "inprogress",
+                        child: Text("In Progress"),
+                      ),
+                    if (current != "completed")
+                      const PopupMenuItem(
+                        value: "completed",
+                        child: Text("Completed"),
+                      ),
+                  ];
+                },
               ),
             ],
           ),
@@ -819,7 +901,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     // After the slider Container, inside the Column children:
-                    if (!isKycApproved) ...[
+                    //!isKycApproved
+                    if (kycStatus != null && !isKycApproved) ...[
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),

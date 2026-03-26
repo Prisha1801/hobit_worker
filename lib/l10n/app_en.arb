@@ -315,5 +315,15 @@
             "pointsEarned": "Points Earned",
             "shareCode": "Share Code",
             "referralHistory": "Referral History",
-            "totalReferrals": "Total Referrals"
+            "totalReferrals": "Total Referrals",
+
+           "notifications": "Notifications",
+            "today_notifications": "Today's Notifications",
+            "no_notifications": "No notifications today",
+            "view_details": "View Details →",
+
+            "assigned_title": "New Booking Assigned",
+            "inprogress_title": "Service In Progress",
+            "completed_title": "Service Completed",
+            "default_title": "Booking Update"
 }

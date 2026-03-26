@@ -1,211 +1,457 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
+import '../api_services/api_services.dart';
+import '../api_services/urls.dart';
+import '../l10n/app_localizations.dart';
+import '../prefs/app_preference.dart';
+import '../prefs/preference_key.dart';
+import '../screens/my_bookings.dart';
+import 'appBar_for_home.dart';
+import 'app_bar.dart';
+import 'bottom_nav_bar.dart';
 
-class NotificationScreen extends StatefulWidget {
+/// ================= MODEL =================
+class BookingNotificationModel {
+  final int id;
+  final String status;
+  final String customerName;
+  final String date;
+  final String time;
+
+  BookingNotificationModel({
+    required this.id,
+    required this.status,
+    required this.customerName,
+    required this.date,
+    required this.time,
+  });
+
+  factory BookingNotificationModel.fromJson(Map<String, dynamic> json) {
+    return BookingNotificationModel(
+      id: json['id'] ?? 0,
+      status: json['status'] ?? "",
+      customerName: json['customer_name'] ?? "",
+      date: json['booking_date'] ?? "",
+      time: json['time_slot'] ?? "",
+    );
+  }
+}
+
+/// ================= API =================
+Future<List<BookingNotificationModel>> getBookings(String status) async {
+  try {
+    final token = AppPreference().getString(PreferencesKey.token);
+
+    final res = await ApiService.getRequest(
+      notificationUrl,
+      queryParameters: {"status": status},
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+
+    final data = res.data;
+    final List list = data["data"] ?? [];
+
+    return list
+        .map((e) => BookingNotificationModel.fromJson(e))
+        .toList();
+
+  } catch (e) {
+    throw "Something went wrong";
+  }
+}
+
+Future<List<BookingNotificationModel>> getAllNotifications() async {
+  final assigned = await getBookings("assigned");
+  final inProgress = await getBookings("inprogress");
+  final completed = await getBookings("completed");
+
+  return [
+    ...assigned,
+    ...inProgress,
+    ...completed,
+  ];
+}
+
+/// ================= UI =================
+
+class NotificationScreen extends ConsumerStatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
 
   @override
-  State<NotificationScreen> createState() => _NotificationScreenState();
+  ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
 }
+class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
-class _NotificationScreenState extends State<NotificationScreen> {
-  bool showUnread = false;
+  bool isLoading = true;
+  List<BookingNotificationModel> bookings = [];
 
-  final List<Map<String, dynamic>> notifications = [
-    {
-      "title": "Booking Confirmed",
-      "subtitle":
-      "Your booking has been confirmed. The professional will arrive on time.",
-      "buttonText": "View Details",
-      "isUnread": true,
-    },
-    {
-      "title": "Service Started",
-      "subtitle": "Your service has started and is currently in progress.",
-      "buttonText": "Track Service",
-      "isUnread": false,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    notificationCount.value = 0;
+    fetchBookings();
+  }
+
+  /// ================= FETCH + TODAY FILTER =================
+  Future<void> fetchBookings() async {
+    try {
+      final data = await getAllNotifications();
+
+      final today = DateTime.now();
+
+      final todayBookings = data.where((item) {
+        try {
+          final bookingDate = DateTime.parse(item.date);
+
+          return bookingDate.year == today.year &&
+              bookingDate.month == today.month &&
+              bookingDate.day == today.day;
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+
+      setState(() {
+        bookings = todayBookings;
+      });
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  /// ================= STATUS COLOR =================
+  Color getStatusColor(String status) {
+    switch (status) {
+      case "assigned":
+        return Colors.orange;
+      case "inprogress":
+        return Colors.blue;
+      case "completed":
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  /// ================= TITLE =================
+  String getTitle(String status) {
+    final loc = AppLocalizations.of(context)!;
+    switch (status) {
+      case "assigned":
+        return loc.assigned_title;
+      case "inprogress":
+        return loc.inprogress_title;
+      case "completed":
+        return loc.completed_title;
+      default:
+        return loc.default_title;
+    }
+  }
+
+  /// ================= ICON =================
+  IconData getStatusIcon(String status) {
+    switch (status) {
+      case "assigned":
+        return Icons.assignment;
+      case "inprogress":
+        return Icons.build;
+      case "completed":
+        return Icons.check_circle;
+      default:
+        return Icons.notifications;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filteredNotifications = showUnread
-        ? notifications.where((n) => n['isUnread'] == true).toList()
-        : notifications;
-
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: const Text(
-          "Notifications",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+        appBar: CommonAppBar(
+          title: loc.notifications,
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      body: isLoading
+          ? const NotificationShimmer()
+          : bookings.isEmpty
+          ? _emptyState()
+          : RefreshIndicator(
+        onRefresh: fetchBookings,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            /// ===== ALL / UNREAD TABS =====
-            Row(
-              children: [
-                _tabItem(
-                  title: "All",
-                  selected: !showUnread,
-                  onTap: () {
-                    setState(() => showUnread = false);
-                  },
-                ),
-                const SizedBox(width: 8),
-                _tabItem(
-                  title: "Unread",
-                  selected: showUnread,
-                  onTap: () {
-                    setState(() => showUnread = true);
-                  },
-                ),
-              ],
-            ),
 
-            const SizedBox(height: 20),
-
-            /// ===== LIST =====
-            Expanded(
-              child: filteredNotifications.isEmpty
-                  ? const Center(
-                child: Text(
-                  "No notifications",
-                  style: TextStyle(color: Colors.black54),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: filteredNotifications.length,
-                itemBuilder: (context, index) {
-                  return _notificationCard(
-                    filteredNotifications[index],
-                  );
-                },
+            /// TITLE
+            Text(
+              loc.today_notifications,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
+
+            const SizedBox(height: 12),
+
+            /// LIST
+            ...bookings.map((item) => _notificationCard(item)).toList(),
           ],
         ),
       ),
     );
   }
 
-  /// ===== TAB =====
-  Widget _tabItem({
-    required String title,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black),
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// ===== NOTIFICATION CARD =====
-  Widget _notificationCard(Map<String, dynamic> item) {
+  /// ================= CARD =================
+  Widget _notificationCard(BookingNotificationModel item) {
+    final color = getStatusColor(item.status);
+    final loc = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// UNREAD DOT
-          if (item['isUnread'])
-            Container(
-              margin: const EdgeInsets.only(top: 6, right: 10),
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                shape: BoxShape.circle,
-              ),
-            )
-          else
-            const SizedBox(width: 18),
+
+          /// ICON
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              getStatusIcon(item.status),
+              color: color,
+              size: 20,
+            ),
+          ),
+
+          const SizedBox(width: 12),
 
           /// CONTENT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item['title'],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
+
+                /// TITLE + STATUS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        getTitle(item.status),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        item.status.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                const SizedBox(height: 4),
+
+                const SizedBox(height: 6),
+
+                /// DETAILS
                 Text(
-                  item['subtitle'],
+                  "Booking #${item.id} with ${item.customerName}",
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
-                    height: 1.4,
                   ),
                 ),
+
+                const SizedBox(height: 4),
+
+                /// DATE TIME
+                Text(
+                  "${item.date} • ${item.time}",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black45,
+                  ),
+                ),
+
                 const SizedBox(height: 10),
 
-                /// ACTION BUTTON
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
+                /// ACTION
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    // onTap: () {
+                    //   print("Open Booking 👉 ${item.id}");
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (_) => BookingsScreen(
+                    //         initialStatus: item.status,
+                    //       ),
+                    //     ),
+                    //   );
+                    //
+                    // },
+                    onTap: () {
+                      /// Bottom nav -> Bookings tab open
+                      ref.read(bottomNavIndexProvider.notifier).state = 1;
+
+                      /// Booking tab -> correct status open
+                      ref.read(bookingStatusProvider.notifier).state = item.status;
+
+                      /// Back to MainScreen
+                      Navigator.pop(context);
+                    },
+
+                    child: Text(
+                      loc.view_details,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
                     ),
                   ),
-                  onPressed: () {},
-                  child: Text(
-                    item['buttonText'],
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
+                )
               ],
             ),
-          ),
+          )
         ],
+      ),
+    );
+  }
+
+  /// ================= EMPTY =================
+  Widget _emptyState() {
+    final loc = AppLocalizations.of(context)!;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.notifications_off, size: 60, color: Colors.grey),
+          const SizedBox(height: 10),
+          Text(loc.no_notifications),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+class NotificationShimmer extends StatelessWidget {
+  const NotificationShimmer({Key? key}) : super(key: key);
+
+  Widget _shimmerBox({double height = 10, double width = double.infinity}) {
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+  }
+
+  Widget _cardShimmer() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          /// ICON
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          /// CONTENT
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _shimmerBox(height: 12)),
+                    const SizedBox(width: 10),
+                    _shimmerBox(height: 10, width: 50),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _shimmerBox(height: 10, width: 180),
+                const SizedBox(height: 6),
+                _shimmerBox(height: 10, width: 120),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _shimmerBox(height: 10, width: 80),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: 6,
+        itemBuilder: (_, __) => _cardShimmer(),
       ),
     );
   }

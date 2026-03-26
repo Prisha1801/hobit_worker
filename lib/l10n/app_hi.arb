@@ -318,6 +318,16 @@
             "pointsEarned": "कमाए गए पॉइंट्स",
             "shareCode": "कोड शेयर करें",
             "referralHistory": "रेफरल इतिहास",
-            "totalReferrals": "कुल रेफरल"
+            "totalReferrals": "कुल रेफरल",
+
+          "notifications": "सूचनाएं",
+           "today_notifications": "आज की सूचनाएं",
+           "no_notifications": "आज कोई सूचना नहीं है",
+           "view_details": "विवरण देखें →",
+
+           "assigned_title": "नई बुकिंग असाइन हुई",
+           "inprogress_title": "सेवा जारी है",
+           "completed_title": "सेवा पूर्ण हुई",
+           "default_title": "बुकिंग अपडेट"
 
 }

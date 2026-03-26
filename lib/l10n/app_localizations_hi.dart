@@ -648,4 +648,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get totalReferrals => 'कुल रेफरल';
+
+  @override
+  String get notifications => 'सूचनाएं';
+
+  @override
+  String get today_notifications => 'आज की सूचनाएं';
+
+  @override
+  String get no_notifications => 'आज कोई सूचना नहीं है';
+
+  @override
+  String get view_details => 'विवरण देखें →';
+
+  @override
+  String get assigned_title => 'नई बुकिंग असाइन हुई';
+
+  @override
+  String get inprogress_title => 'सेवा जारी है';
+
+  @override
+  String get completed_title => 'सेवा पूर्ण हुई';
+
+  @override
+  String get default_title => 'बुकिंग अपडेट';
 }

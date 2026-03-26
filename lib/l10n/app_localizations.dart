@@ -1374,6 +1374,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Referrals'**
   String get totalReferrals;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @today_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Notifications'**
+  String get today_notifications;
+
+  /// No description provided for @no_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications today'**
+  String get no_notifications;
+
+  /// No description provided for @view_details.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details →'**
+  String get view_details;
+
+  /// No description provided for @assigned_title.
+  ///
+  /// In en, this message translates to:
+  /// **'New Booking Assigned'**
+  String get assigned_title;
+
+  /// No description provided for @inprogress_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service In Progress'**
+  String get inprogress_title;
+
+  /// No description provided for @completed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Completed'**
+  String get completed_title;
+
+  /// No description provided for @default_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Update'**
+  String get default_title;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

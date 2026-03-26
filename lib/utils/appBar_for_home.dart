@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api_services/location_service.dart';
 import '../colors/appcolors.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
+import '../screens/home_screen.dart';
 import 'notification.dart';
+import 'package:flutter/cupertino.dart';
+
+ValueNotifier<int> notificationCount = ValueNotifier<int>(0);
+// final bookingTabProvider = StateProvider<JobStatus>((ref) => JobStatus.all);
 
 class AppBarHome extends StatelessWidget
     implements PreferredSizeWidget {
@@ -118,20 +124,71 @@ class AppBarHome extends StatelessWidget
           //   ),
           // ),
 
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NotificationScreen(),
-                ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => NotificationScreen(),
+          //       ),
+          //     );
+          //   },
+          //   icon: const Icon(
+          //     Icons.notifications,
+          //     size: 24,
+          //   ),
+          // ),
+
+          ValueListenableBuilder<int>(
+            valueListenable: notificationCount,
+            builder: (context, count, _) {
+              return Stack(
+                children: [
+
+                  /// 🔔 ICON
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.notifications, size: 24),
+                  ),
+
+                  /// 🔴 BADGE
+                  if (count > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            count > 9 ? '9+' : count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
-            icon: const Icon(
-              Icons.notifications,
-              size: 24,
-            ),
-          ),
+          )
         ],
       ),
     );

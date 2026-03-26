@@ -150,4 +150,33 @@ class BookingApi {
         .map((e) => BookingExtensionModel.fromJson(e))
         .toList();
   }
+
+  static Future<bool> updateBookingStatus({
+    required int bookingId,
+    required String status,
+  }) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.patchRequest(
+        "/api/bookings/$bookingId/status",
+        {
+          "status": status,
+        },
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      return res.data["success"] == true;
+
+    } catch (e) {
+      debugPrint("Status update error: $e");
+      return false;
+    }
+  }
+
 }

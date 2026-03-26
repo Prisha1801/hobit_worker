@@ -225,6 +225,18 @@ class ApiService {
     }
   }
 
+  static Future<Response> patchRequest(
+      String endpoint,
+      dynamic data, {
+        Options? options,
+      }) async {
+    try {
+      final res = await _dio.patch(endpoint, data: data, options: options);
+      return _handleResponse(res);
+    } catch (e) {
+      return _mapAndRethrow(e);
+    }
+  }
   static Future<Response> deleteRequest(
       String endpoint, {
         Map<String, dynamic>? data,
