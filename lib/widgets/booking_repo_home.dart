@@ -71,7 +71,35 @@ class BookingApi {
     }
   }
 
-  static Future<bool> verifyStartOtp({
+  // static Future<bool> verifyStartOtp({
+  //   required int bookingId,
+  //   required String otp,
+  // }) async {
+  //   try {
+  //     final token = AppPreference().getString(PreferencesKey.token);
+  //
+  //     final res = await ApiService.postRequest(
+  //       "/api/booking/verifyotp/$bookingId/start",
+  //       {
+  //         "otp": otp,
+  //       },
+  //       options: Options(
+  //         headers: {
+  //           "Authorization": "Bearer $token",
+  //           "Accept": "application/json",
+  //           "Content-Type": "application/json",
+  //         },
+  //       ),
+  //     );
+  //
+  //     return res.statusCode == 200;
+  //   } catch (e) {
+  //     debugPrint("Verify OTP Error: $e");
+  //     return false;
+  //   }
+  // }
+
+  static Future<Map<String, dynamic>> verifyStartOtp({
     required int bookingId,
     required String otp,
   }) async {
@@ -92,10 +120,16 @@ class BookingApi {
         ),
       );
 
-      return res.statusCode == 200;
+      return {
+        "success": res.data["success"] == true,
+        "message": res.data["message"] ?? "Something went wrong"
+      };
+
     } catch (e) {
-      debugPrint("Verify OTP Error: $e");
-      return false;
+      return {
+        "success": false,
+        "message": "Server error"
+      };
     }
   }
 

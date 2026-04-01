@@ -10,48 +10,76 @@ import '../prefs/preference_key.dart';
 import '../utils/appBar_for_home.dart';
 import '../utils/notification.dart';
 
-
 class FCMService {
 
   static Future<void> init({required bool isLoggedIn}) async {
+    print("🚀 [FCMService] init() called — isLoggedIn: $isLoggedIn");
 
     // Permission
-    await FirebaseMessaging.instance.requestPermission();
+    final settings = await FirebaseMessaging.instance.requestPermission();
+    print("🔐 [FCMService] Permission status: ${settings.authorizationStatus}");
 
     // iOS foreground show
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true, badge: true, sound: true,
+      alert: true,
+      badge: true,
+      sound: true,
     );
+    print("📱 [FCMService] iOS foreground options set");
 
     // Token
     String? token = await FirebaseMessaging.instance.getToken();
-    print("FCM TOKEN 👉 $token");
+    print("🔑 [FCMService] FCM TOKEN 👉 $token");
+
     if (isLoggedIn && token != null) {
+      print("📤 [FCMService] User is logged in — sending token to backend");
       await sendTokenToBackend(token);
+    } else {
+      print("⚠️ [FCMService] Skipping token send — isLoggedIn: $isLoggedIn | token: $token");
     }
 
     // Token refresh
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-      print("NEW TOKEN 👉 $newToken");
+      print("🔄 [FCMService] Token refreshed 👉 $newToken");
       if (isLoggedIn) {
+        print("📤 [FCMService] Sending refreshed token to backend");
         await sendTokenToBackend(newToken);
       }
     });
 
+    // ─── Foreground message ───────────────────────────────────────────────────
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("📩 FOREGROUND MESSAGE 👉 ${message.notification?.title}");
-      if (message.notification != null) {
-        LocalNotificationService.show(message);
+      print("─────────────────────────────────────────");
+      print("📩 [FCMService] FOREGROUND MESSAGE RECEIVED");
+      print("   ↳ Message ID  : ${message.messageId}");
+      print("   ↳ From        : ${message.from}");
+      print("   ↳ Sent time   : ${message.sentTime}");
+      print("   ↳ Notif title : ${message.notification?.title}");
+      print("   ↳ Notif body  : ${message.notification?.body}");
+      print("   ↳ Data payload: ${message.data}");
+      print("─────────────────────────────────────────");
 
-        // 🔴 Increase badge count
+      final title = message.notification?.title ?? message.data['title'];
+      final body = message.notification?.body ?? message.data['body'];
+
+      if (title != null && body != null) {
+        print("🔔 [FCMService] Triggering showCustom() for foreground message");
+        LocalNotificationService.showCustom(title, body);
         notificationCount.value++;
+        print("🔴 [FCMService] Badge count incremented 👉 ${notificationCount.value}");
+      } else {
+        print("⚠️ [FCMService] Foreground message skipped — title or body is null");
       }
     });
 
-    // ✅ App opened from background via notification tap
+    // ─── Background tap (app was in background) ───────────────────────────────
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("📲 OPENED FROM BACKGROUND 👉 ${message.notification?.title}");
-      // Add navigation here if needed
+      print("─────────────────────────────────────────");
+      print("📲 [FCMService] APP OPENED FROM BACKGROUND TAP");
+      print("   ↳ Title: ${message.notification?.title ?? message.data['title']}");
+      print("   ↳ Data : ${message.data}");
+      print("─────────────────────────────────────────");
+
       navigatorKey.currentState?.push(
         MaterialPageRoute(
           builder: (_) => const NotificationScreen(),
@@ -59,29 +87,38 @@ class FCMService {
       );
     });
 
-    // ✅ App opened from terminated state via notification tap
+    // ─── Terminated state tap ─────────────────────────────────────────────────
     RemoteMessage? initialMessage =
     await FirebaseMessaging.instance.getInitialMessage();
+
     if (initialMessage != null) {
-      print("🚀 OPENED FROM TERMINATED 👉 ${initialMessage.notification?.title}");
-      // Add navigation here if needed
+      print("─────────────────────────────────────────");
+      print("🚀 [FCMService] APP OPENED FROM TERMINATED STATE TAP");
+      print("   ↳ Title: ${initialMessage.notification?.title ?? initialMessage.data['title']}");
+      print("   ↳ Data : ${initialMessage.data}");
+      print("─────────────────────────────────────────");
 
       Future.delayed(const Duration(milliseconds: 500), () {
+        print("🧭 [FCMService] Navigating to NotificationScreen (delayed)");
         navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder: (_) => const NotificationScreen(),
           ),
         );
       });
+    } else {
+      print("ℹ️ [FCMService] No initial message — app opened normally");
     }
+
+    print("✅ [FCMService] init() complete");
   }
 
   static Future<void> sendTokenToBackend(String token) async {
+    print("📡 [FCMService] sendTokenToBackend() called");
     try {
       final authToken = AppPreference().getString(PreferencesKey.token);
-
-      print("🔥 AUTH TOKENnnnnnnnnnnnnnnnnnnnnnnn 👉 $authToken");
-      print("🔥 FCM TOKENnnnnnnnnnnnnnnnnnnnnnnn 👉 $token");
+      print("   ↳ Auth token: $authToken");
+      print("   ↳ FCM token : $token");
 
       final res = await ApiService.postRequest(
         fcmTokenUrl,
@@ -94,9 +131,9 @@ class FCMService {
         ),
       );
 
-      print("✅ FCM API SUCCESSsssssssssssssssssssssssssssss 👉 ${res.data}");
+      print("✅ [FCMService] Token sent successfully 👉 ${res.data}");
     } catch (e) {
-      print("❌ FCM API ERROR 👉 $e");
+      print("❌ [FCMService] Failed to send token 👉 $e");
     }
   }
 }

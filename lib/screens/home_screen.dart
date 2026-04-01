@@ -1018,6 +1018,11 @@ class _OtpDialogState extends State<OtpDialog> {
   int secondsRemaining = 60;
   Timer? timer;
   bool canResend = false;
+  final List<TextEditingController> controllers =
+  List.generate(6, (_) => TextEditingController());
+
+  final List<FocusNode> focusNodes =
+  List.generate(6, (_) => FocusNode());
 
   @override
   void initState() {
@@ -1055,15 +1060,51 @@ class _OtpDialogState extends State<OtpDialog> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              loc.otpVerification,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Text(
+            //   loc.otpVerification,
+            //   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                /// Empty for spacing
+                const SizedBox(width: 24),
+
+                /// Title (same as before)
+                Text(
+                  loc.otpVerification,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                /// 🔥 CLOSE BUTTON
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context); // 👉 popup close
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 6),
             Text(
@@ -1072,21 +1113,62 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
             const SizedBox(height: 16),
 
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //   children: List.generate(
+            //     6,
+            //         (index) => SizedBox(
+            //       width: 36,
+            //       height: 42,
+            //       child:
+            //       TextField(
+            //         maxLength: 1,
+            //         keyboardType: TextInputType.number,
+            //         textAlign: TextAlign.center,
+            //         textAlignVertical: TextAlignVertical.center,
+            //
+            //         // ✅ MAKE DIGITS BIG
+            //         style: const TextStyle(
+            //           fontSize: 22,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //
+            //         onChanged: (val) {
+            //           if (val.isNotEmpty) {
+            //             otp += val;
+            //             FocusScope.of(context).nextFocus();
+            //           }
+            //         },
+            //
+            //         decoration: InputDecoration(
+            //           counterText: '',
+            //           isDense: true,
+            //           contentPadding: const EdgeInsets.symmetric(
+            //             vertical: 8,
+            //           ),
+            //           border: OutlineInputBorder(
+            //             borderRadius: BorderRadius.circular(8),
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
                 6,
                     (index) => SizedBox(
-                  width: 36,
+                  width: MediaQuery.of(context).size.width * 0.1, // responsive
                   height: 42,
-                  child:
-                  TextField(
+                  child: TextField(
+                    controller: controllers[index],
+                    focusNode: focusNodes[index],
                     maxLength: 1,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     textAlignVertical: TextAlignVertical.center,
 
-                    // ✅ MAKE DIGITS BIG
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -1095,16 +1177,27 @@ class _OtpDialogState extends State<OtpDialog> {
                     onChanged: (val) {
                       if (val.isNotEmpty) {
                         otp += val;
-                        FocusScope.of(context).nextFocus();
+
+                        /// 👉 move forward
+                        if (index < 5) {
+                          FocusScope.of(context).nextFocus();
+                        }
+                      } else {
+                        /// 👉 FIX: backspace handle
+                        if (otp.isNotEmpty) {
+                          otp = otp.substring(0, otp.length - 1);
+                        }
+
+                        if (index > 0) {
+                          FocusScope.of(context).previousFocus();
+                        }
                       }
                     },
 
                     decoration: InputDecoration(
                       counterText: '',
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -1137,7 +1230,10 @@ class _OtpDialogState extends State<OtpDialog> {
 
                         if (success) {
                           otp = ""; // 🔥 reset otp
-
+                          for (var c in controllers) {
+                            c.clear();
+                          }
+                          FocusScope.of(context).requestFocus(focusNodes[0]);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("OTP resent successfully"),
@@ -1263,20 +1359,20 @@ class _OtpDialogState extends State<OtpDialog> {
 
                   setState(() => loading = true);
 
-                  final success = await BookingApi.verifyStartOtp(
+                  final result = await BookingApi.verifyStartOtp(
                     bookingId: widget.bookingId,
                     otp: otp,
                   );
 
                   setState(() => loading = false);
 
-                  if (success) {
+                  if (result["success"]) {
                     Navigator.pop(context);
                     widget.onSuccess();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(loc.invalidOtp),
+                        content: Text(result["message"]),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1284,9 +1380,10 @@ class _OtpDialogState extends State<OtpDialog> {
                 },
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                  "Verify OTP",
-                  style: TextStyle(
+                    : Text(
+                  loc.verifyOtp,
+                  // "Verify OTP",
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,

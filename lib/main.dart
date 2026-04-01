@@ -17,8 +17,29 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  await LocalNotificationService.init();
-  await LocalNotificationService.show(message);
+
+  print("─────────────────────────────────────────");
+  print("🔥 [Background] MESSAGE RECEIVED IN BACKGROUND/TERMINATED");
+  print("   ↳ Message ID  : ${message.messageId}");
+  print("   ↳ From        : ${message.from}");
+  print("   ↳ Sent time   : ${message.sentTime}");
+  print("   ↳ Notif title : ${message.notification?.title}");
+  print("   ↳ Notif body  : ${message.notification?.body}");
+  print("   ↳ Data payload: ${message.data}");
+  print("─────────────────────────────────────────");
+
+  // ✅ Background-safe init — no permission/channel calls
+  await LocalNotificationService.initBackground();
+
+  final title = message.notification?.title ?? message.data['title'];
+  final body = message.notification?.body ?? message.data['body'];
+
+  if (title != null && body != null) {
+    print("🔔 [Background] Triggering showCustom()");
+    await LocalNotificationService.showCustom(title, body);
+  } else {
+    print("⚠️ [Background] Skipped — title or body is null");
+  }
 }
 
 void main() async {

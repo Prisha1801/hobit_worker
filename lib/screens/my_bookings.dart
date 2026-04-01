@@ -211,6 +211,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   JobStatus selectedTab = JobStatus.all;
   List<BookingModel> bookings = [];
   bool loading = true;
+  bool isFirstLoad = true;
 
 
   // @override
@@ -368,11 +369,15 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   //   setState(() => loading = false);
   // }
 
-  /// =======================
+
   /// UI
-  /// =======================
   @override
   Widget build(BuildContext context) {
+
+    if (isFirstLoad) {
+      isFirstLoad = false;
+      Future.microtask(() => loadBookings());
+    }
     ref.listen<String?>(bookingStatusProvider, (previous, next) {
       if (next != null) {
         setState(() {

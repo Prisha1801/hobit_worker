@@ -43,14 +43,24 @@ class _ReferralScreenState extends State<ReferralScreen> {
     });
   }
 
+  // void shareCode() {
+  //   if (referralCode != null) {
+  //     Share.share(
+  //       "Use my Hobit referral code and earn rewards 🎁\n\nCode: $referralCode",
+  //     );
+  //   }
+  // }
   void shareCode() {
     if (referralCode != null) {
       Share.share(
-        "Use my Hobit referral code and earn rewards 🎁\n\nCode: $referralCode",
+        "🚀 Join Hobit Partner & start earning!\n\n"
+            "Use my referral code to get rewards 🎁\n\n"
+            "👉 Code: $referralCode\n\n"
+            "📲 Download App:\n"
+            "https://play.google.com/store/apps/details?id=com.hobit.hobit_worker",
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
