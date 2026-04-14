@@ -55,6 +55,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final _refer = TextEditingController();
   final _date = TextEditingController();
   final _time = TextEditingController();
+  final _permanentAddress = TextEditingController();
+  final _currentAddress = TextEditingController();
+
 
   void showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +109,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (selectedCategories.isEmpty) {
       showSnack("Please select at least one category");
+      return false;
+    }
+
+    if (_permanentAddress.text.trim().isEmpty) {
+      showSnack("Please enter permanent address");
+      return false;
+    }
+
+    if (_currentAddress.text.trim().isEmpty) {
+      showSnack("Please enter current address");
       return false;
     }
 
@@ -528,6 +541,8 @@ class _SignupScreenState extends State<SignupScreen> {
       "email": _email.text,
       "phone": _phone.text,
       "password": _password.text,
+      "permanent_address": _permanentAddress.text,
+      "current_address": _currentAddress.text,
       "category_ids": categoryIds,
       "service_ids": serviceIds,
       "city_id": selectedCity?.id,
@@ -653,6 +668,18 @@ class _SignupScreenState extends State<SignupScreen> {
             input(loc.name, _name, hint: loc.enterFullName),
             input(loc.email, _email, hint: "example@gmail.com"),
             input(loc.phone, _phone, hint: "10 digit mobile number"),
+
+            input(
+              "Permanent Address",
+              _permanentAddress,
+              hint: "Enter permanent address",
+            ),
+
+            input(
+              "Current Address",
+              _currentAddress,
+              hint: "Enter current address",
+            ),
 
             input(
               loc.password,
