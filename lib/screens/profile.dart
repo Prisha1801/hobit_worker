@@ -296,9 +296,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.card_giftcard,
                       title: loc.referAndEarn,
                       subtitle: loc.referAndEarnSubtitle,
-                      // onTap: () {
-                      //   shareReferralCode(context);
-                      // },
                         onTap: () {
                           Navigator.push(
                             context,
@@ -348,7 +345,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         );
                       },
                     ),
-
 
                     _buildMenuItem(
                       icon: Icons.logout,
