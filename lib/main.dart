@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hobit_worker/prefs/preference_key.dart';
 import 'package:hobit_worker/utils/internet_connectivity/connectivity.dart';
 import 'api_services/notification_services.dart';
 import 'auth/fcm_service.dart';
@@ -13,27 +12,37 @@ import 'prefs/app_preference.dart';
 import 'language_selection/language_provider.dart';
 import 'screens/splash_screen.dart';
 
-// ✅ Outside main(), outside any class — top-level only
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // ✅ IMPORTANT: Do NOT call requestNotificationsPermission here (NullPointerException)
   await Firebase.initializeApp();
-  await LocalNotificationService.init();
-  await LocalNotificationService.show(message);
+  print("🌙 BACKGROUND HANDLER — Processing message");
+  print("📦 DATA 👉 ${message.data}");
+
+  // ✅ Init WITHOUT permission request (avoids NPE)
+  await LocalNotificationService.init(isBackground: true);
+  
+  // ✅ Explicitly show the notification
+  await LocalNotificationService.showFromMessage(message);
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // ✅ Must be registered before runApp
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // ✅ Register background handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   await AppPreference().initialAppPreference();
-  final isLoggedIn = AppPreference().getBool(PreferencesKey.isLoggedIn);
-  await FCMService.init(isLoggedIn: isLoggedIn);
-  await LocalNotificationService.init();
+  
+  // ✅ Foreground init (requests permission safely)
+  await LocalNotificationService.init(isBackground: false);
+
   runApp(const ProviderScope(child: MyApp()));
 }
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
@@ -42,6 +51,7 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -51,14 +61,11 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-
-      home: ConnectivityWrapper(child: SplashScreen()),
+      home: ConnectivityWrapper(child: const SplashScreen()),
       builder: (context, child) => ConnectivityWrapper(child: child!),
     );
   }
 }
-

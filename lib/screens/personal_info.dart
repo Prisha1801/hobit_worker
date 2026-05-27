@@ -139,6 +139,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   final _referController = TextEditingController();
   final _aadhaarController = TextEditingController();
   final _policeIdController = TextEditingController();
+  final _permanentAddressController = TextEditingController();
+  final _currentAddressController = TextEditingController();
 
   File? aadhaarFrontFile;
   File? aadhaarBackFile;
@@ -407,6 +409,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       _mobileController.text = profile!.phone;
       _aadhaarController.text = getDocumentNumber('aadhar');
       _policeIdController.text = getDocumentNumber('police_verification');
+      _permanentAddressController.text = profile?.permanentAddress ?? "";
+      _currentAddressController.text = profile?.currentAddress ?? "";
 
 
       /// Categories
@@ -884,6 +888,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       "name": _nameController.text,
       "email": _emailController.text,
       "phone": _mobileController.text,
+      "permanent_address": _permanentAddressController.text.trim(),
+      "current_address": _currentAddressController.text.trim(),
       "category_ids": categoryIds,
       "service_ids": serviceIds,
       "is_active": profile!.isActive,
@@ -1396,6 +1402,18 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             //   controller: _referController,
             //   readOnly: true,
             // ),
+
+            _buildInput(
+              label: "Permanent Address",
+              hint: "Enter permanent address",
+              controller: _permanentAddressController,
+            ),
+
+            _buildInput(
+              label: "Current Address",
+              hint: "Enter current address",
+              controller: _currentAddressController,
+            ),
             _buildDropdown(
               label: loc.categories,
               value: selectedCategories.map((e) => e.name).join(', '),

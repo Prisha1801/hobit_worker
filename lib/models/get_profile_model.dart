@@ -18,6 +18,8 @@ class WorkerProfileModel {
   final double averageRatings;
   final int ratingCount;
   final int jobsCompleted;
+  final String? permanentAddress;
+  final String? currentAddress;
 
 
   WorkerProfileModel({
@@ -40,6 +42,8 @@ class WorkerProfileModel {
     required this.averageRatings,
     required this.ratingCount,
     required this.jobsCompleted,
+    this.permanentAddress,
+    this.currentAddress,
 
   });
 
@@ -80,6 +84,8 @@ class WorkerProfileModel {
       (json['average_ratings'] as num?)?.toDouble() ?? 0.0,
       ratingCount: json['rating_count'] ?? 0,
       jobsCompleted: json['jobs_completed'] ?? 0,
+      permanentAddress: json['permanent_address'],
+      currentAddress: json['current_address'],
 
     );
   }

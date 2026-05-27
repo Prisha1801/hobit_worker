@@ -17,6 +17,13 @@ const String getBankDetailsUrl = "/api/worker/bank-details";
 const String putBankDetailsUrl = "/api/worker/update_bank_details";
 const String getPersonalInfoUrl = "/api/worker/me";
 const String fcmTokenUrl = "/api/user/fcm-token";
+const String notificationUrl = "/api/worker/bookings";
 
-
-
+// Coordinator APIs
+const String getBookingsUrl = "/api/getbookings";
+const String getCoMyBookingUrl = "/api/coordinator/my-bookings";
+const String getAvailableWorkersUrl = "/api/admin/unassigned_worker/";
+const String assignWorkerUrl = "/api/admin/assign-booking";
+const String getSubscriptionTypesUrl = "/api/subscription-types";
+const String filterBookingsUrl = "/api/bookings/filter";
+const String coordinatorUrl = "/api/coordinators";

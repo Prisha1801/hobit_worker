@@ -21,9 +21,9 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true   // ✅ added here, inside android {}
     }
 
     kotlinOptions {
@@ -50,14 +50,14 @@ android {
 flutter {
     source = "../.."
 }
-
 dependencies {
-    // 🔥 REQUIRED for desugaring
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
-    // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
-
-    // Firebase Analytics
     implementation("com.google.firebase:firebase-analytics")
+
+    // ✅ Add explicit version
+    implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
+
+    implementation("androidx.appcompat:appcompat:1.6.1")
 }

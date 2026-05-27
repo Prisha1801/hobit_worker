@@ -71,7 +71,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           children: [
             FutureBuilder<WorkerProfileModel>(
               future: _profileFuture,
-            //  future: WorkerApi.getMyProfile(),
+              //  future: WorkerApi.getMyProfile(),
               builder: (context, snapshot) {
 
                 // if (snapshot.connectionState == ConnectionState.waiting) {
@@ -171,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                  loc.jobsCompleted,
+                                    loc.jobsCompleted,
                                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                                   ),
                                 ],
@@ -207,7 +207,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                   loc.wallet,
+                                    loc.wallet,
                                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                                   ),
                                 ],
@@ -293,12 +293,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                     ),
                     _buildMenuItem(
-                      icon: Icons.card_giftcard,
-                      title: loc.referAndEarn,
-                      subtitle: loc.referAndEarnSubtitle,
-                      // onTap: () {
-                      //   shareReferralCode(context);
-                      // },
+                        icon: Icons.card_giftcard,
+                        title: loc.referAndEarn,
+                        subtitle: loc.referAndEarnSubtitle,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -348,7 +345,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         );
                       },
                     ),
-
 
                     _buildMenuItem(
                       icon: Icons.logout,
@@ -448,10 +444,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  // Widget _buildDivider() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 20),
-  //     child: Divider(color: Colors.grey[300], height: 1, thickness: 1),
-  //   );
-  // }
+// Widget _buildDivider() {
+//   return Padding(
+//     padding: const EdgeInsets.symmetric(horizontal: 20),
+//     child: Divider(color: Colors.grey[300], height: 1, thickness: 1),
+//   );
+// }
 }

@@ -7,6 +7,7 @@ import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 
 class BookingApi {
+
   static Future<List<AssignedBookingModel>> getAssignedBookings() async {
     final token = AppPreference().getString(PreferencesKey.token);
 
@@ -46,7 +47,7 @@ class BookingApi {
     return data.map((e) => AssignedBookingModel.fromJson(e)).toList();
   }
 
-  static Future<bool> sendStartOtp(int bookingId) async {
+  static Future<bool> sendStartOtp(int bookingId, {String type = "sms"}) async {  ///resend otp
     try {
       final token = AppPreference().getString(PreferencesKey.token);
 
@@ -54,6 +55,7 @@ class BookingApi {
         "/api/booking/send-start-otp",
         {
           "booking_id": bookingId,
+          "type": type,
         },
         options: Options(
           headers: {
@@ -71,7 +73,8 @@ class BookingApi {
     }
   }
 
-  static Future<bool> verifyStartOtp({
+
+  static Future<Map<String, dynamic>> verifyStartOtp({
     required int bookingId,
     required String otp,
   }) async {
@@ -92,12 +95,19 @@ class BookingApi {
         ),
       );
 
-      return res.statusCode == 200;
+      return {
+        "success": res.data["success"] == true,
+        "message": res.data["message"] ?? "Something went wrong"
+      };
+
     } catch (e) {
-      debugPrint("Verify OTP Error: $e");
-      return false;
+      return {
+        "success": false,
+        "message": "Server error"
+      };
     }
   }
+
 
   static Future<bool> sendWorkerLiveLocation({
     required int bookingId,
@@ -150,4 +160,33 @@ class BookingApi {
         .map((e) => BookingExtensionModel.fromJson(e))
         .toList();
   }
+
+  static Future<bool> updateBookingStatus({
+    required int bookingId,
+    required String status,
+  }) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.patchRequest(
+        "/api/bookings/$bookingId/status",
+        {
+          "status": status,
+        },
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      return res.data["success"] == true;
+
+    } catch (e) {
+      debugPrint("Status update error: $e");
+      return false;
+    }
+  }
+
 }

@@ -43,14 +43,24 @@ class _ReferralScreenState extends State<ReferralScreen> {
     });
   }
 
+  // void shareCode() {
+  //   if (referralCode != null) {
+  //     Share.share(
+  //       "Use my Hobit referral code and earn rewards 🎁\n\nCode: $referralCode",
+  //     );
+  //   }
+  // }
   void shareCode() {
     if (referralCode != null) {
       Share.share(
-        "Use my Hobit referral code and earn rewards 🎁\n\nCode: $referralCode",
+        "🚀 Join Hobit Partner & start earning!\n\n"
+            "Use my referral code to get rewards 🎁\n\n"
+            "👉 Code: $referralCode\n\n"
+            "📲 Download App:\n"
+            "https://play.google.com/store/apps/details?id=com.hobit.hobit_worker",
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -64,7 +74,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
         child: FutureBuilder<ReferralEarningModel?>(
           future: referralFuture,
           builder: (context, snapshot) {
-        
+
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const ReferralShimmer();
             }
@@ -72,10 +82,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
               return Center(child: Text(loc.noReferralsFound));
             }
             final data = snapshot.data!;
-        
+
             return Column(
               children: [
-        
+
                 /// REFERRAL CODE CARD
                 Container(
                   margin: const EdgeInsets.all(16),
@@ -86,17 +96,17 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   ),
                   child: Column(
                     children: [
-        
+
                       Text(
-                  loc.yourReferralCode,
+                        loc.yourReferralCode,
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
                         ),
                       ),
-        
+
                       const SizedBox(height: 8),
-        
+
                       Text(
                         referralCode ?? "----",
                         style: const TextStyle(
@@ -106,9 +116,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           letterSpacing: 2,
                         ),
                       ),
-        
+
                       const SizedBox(height: 12),
-        
+
                       ElevatedButton.icon(
                         onPressed: shareCode,
                         icon: const Icon(Icons.share),
@@ -121,26 +131,26 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     ],
                   ),
                 ),
-        
+
                 /// POINTS + REFERRALS
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-        
+
                       Expanded(
                         child: _statCard(
-                         loc.pointsEarned,
+                          loc.pointsEarned,
                           data.referralPoints.toString(),
                           Icons.stars,
                         ),
                       ),
-        
+
                       const SizedBox(width: 12),
-        
+
                       Expanded(
                         child: _statCard(
-                        loc.totalReferrals ,
+                          loc.totalReferrals ,
                           data.referralsCount.toString(),
                           Icons.people,
                         ),
@@ -148,15 +158,15 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     ],
                   ),
                 ),
-        
+
                 const SizedBox(height: 20),
-        
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                     loc.referralHistory,
+                      loc.referralHistory,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -164,18 +174,18 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     ),
                   ),
                 ),
-        
+
                 const SizedBox(height: 10),
-        
+
                 /// REFERRAL LIST
                 Expanded(
                   child: ListView.builder(
                     itemCount: data.referrals.length,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
-        
+
                       final r = data.referrals[index];
-        
+
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(14),
@@ -195,23 +205,23 @@ class _ReferralScreenState extends State<ReferralScreen> {
                               backgroundColor: Colors.black,
                               child: Icon(Icons.person, color: Colors.white,),
                             ),
-        
+
                             const SizedBox(width: 12),
-        
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-        
+
                                   Text(
                                     r.name,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-        
+
                                   const SizedBox(height: 2),
-        
+
                                   Text(
                                     r.phone,
                                     style: const TextStyle(
@@ -222,7 +232,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                 ],
                               ),
                             ),
-        
+
                             Text(
                               "+${r.points}",
                               style: const TextStyle(

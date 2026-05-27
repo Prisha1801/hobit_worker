@@ -29,14 +29,20 @@ class ApiService {
       if (kDebugMode)
         LogInterceptor(
           requestBody: true,
-          responseBody: false,
-          requestHeader: false,
+          responseBody: true, // ✅ Enabled to see API responses
+          requestHeader: true, // ✅ Enabled to see Request Headers
+          responseHeader: false,
         ),
     ]);
 
   static Dio get dio => _dio;
 
   static Response _handleResponse(Response res) {
+    // Optional: Manual logging if LogInterceptor isn't enough
+    if (kDebugMode) {
+      log('API Response [${res.statusCode}] ${res.requestOptions.path}: ${res.data}');
+    }
+
     final httpCode = res.statusCode ?? 0;
 
     dynamic body = res.data;
@@ -136,9 +142,6 @@ class ApiService {
           }
           throw ApiException('Connection error.');
 
-        // case DioExceptionType.badResponse:
-        //   if (e.response != null) _handleResponse(e.response!);
-        //   throw ApiException('Server responded with error.');
         case DioExceptionType.badResponse:
           if (e.response != null) {
             try {
@@ -164,10 +167,6 @@ class ApiService {
     throw ApiException('Something went wrong.');
   }
 
-  // static Never _mapAndRethrow(Object e) {
-  //   log('HTTP Error: $e');
-  //   return _mapDioError(e);
-  // }
   static Never _mapAndRethrow(Object e) {
     log('HTTP Error: $e');
 
@@ -225,6 +224,18 @@ class ApiService {
     }
   }
 
+  static Future<Response> patchRequest(
+      String endpoint,
+      dynamic data, {
+        Options? options,
+      }) async {
+    try {
+      final res = await _dio.patch(endpoint, data: data, options: options);
+      return _handleResponse(res);
+    } catch (e) {
+      return _mapAndRethrow(e);
+    }
+  }
   static Future<Response> deleteRequest(
       String endpoint, {
         Map<String, dynamic>? data,
@@ -240,7 +251,7 @@ class ApiService {
 
   static Future<Response> postMultipart(String endpoint, FormData formData) async {
     try {
-      return await _dio.post(
+      final res = await _dio.post(
         endpoint.startsWith("http") ? endpoint : "$baseUrl$endpoint",
         data: formData,
         options: Options(
@@ -249,6 +260,7 @@ class ApiService {
           },
         ),
       );
+      return _handleResponse(res);
     } catch (e) {
       throw Exception("Multipart Error: $e");
     }

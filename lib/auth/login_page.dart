@@ -3,8 +3,6 @@ import 'package:hobit_worker/auth/signup_page.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
 import '../l10n/app_localizations.dart';
-import '../prefs/app_preference.dart';
-import '../prefs/preference_key.dart';
 import 'otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   bool keepSignedIn = true;
   bool isLoading = false;
+  String selectedType = "sms";
 
 
   Future<void> sendOtp() async {
@@ -35,9 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final res = await ApiService.postRequest(
-        "/api/worker/login/send-otp",
+          "/api/worker/login/send-otp",
         {
           "phone": phone,
+          "type": selectedType, // Added type parameter
         },
       );
 
@@ -47,19 +47,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? loc.otpSent)),
         );
-        // /// 🔥 SAVE PHONE IF CHECKED
-        // if (keepSignedIn) {
-        //   await AppPreference().setBool(PreferencesKey.isLoggedIn, true);
-        //   await AppPreference().setString(PreferencesKey.phone, phone);
-        // } else {
-        //   await AppPreference().setBool(PreferencesKey.isLoggedIn, false);
-        //   await AppPreference().remove(PreferencesKey.phone);
-        // }
 
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(phone: phone),
+            builder: (_) => OtpVerificationScreen(
+              phone: phone,
+              otpType: selectedType, // Pass selected type to OTP screen
+            ),
           ),
         );
       }
@@ -76,25 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => isLoading = false);
     }
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   loadSavedPhone();
-  // }
-  //
-  // void loadSavedPhone() {
-  //   final isSaved =
-  //   AppPreference().getBool(PreferencesKey.isLoggedIn);
-  //
-  //   if (isSaved) {
-  //     final savedPhone =
-  //     AppPreference().getString(PreferencesKey.phone);
-  //     _phoneController.text = savedPhone;
-  //     keepSignedIn = true;
-  //     setState(() {});
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -169,33 +145,46 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
-
-            /// 🔹 BLACK CHECKBOX
-            // Row(
-            //   children: [
-            //     Checkbox(
-            //       value: keepSignedIn,
-            //       activeColor: Colors.black,
-            //       checkColor: Colors.white,
-            //       side: const BorderSide(
-            //         color: Colors.black,
-            //         width: 1.5,
-            //       ),
-            //       onChanged: (value) {
-            //         setState(() {
-            //           keepSignedIn = value!;
-            //         });
-            //       },
-            //     ),
-            //     Text(
-            //      loc.keepSignedIn,
-            //       style: const TextStyle(fontSize: 14, color: Colors.black),
-            //     ),
-            //   ],
-            // ),
-
             const SizedBox(height: 20),
+
+            /// OTP TYPE SELECTION
+            const Text(
+              "Receive OTP via:",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("SMS", style: TextStyle(fontSize: 14)),
+                    value: "sms",
+                    groupValue: selectedType,
+                    activeColor: Colors.black,
+                    onChanged: (val) {
+                      setState(() => selectedType = val!);
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("WhatsApp", style: TextStyle(fontSize: 14)),
+                    value: "whatsapp",
+                    groupValue: selectedType,
+                    activeColor: Colors.black,
+                    onChanged: (val) {
+                      setState(() => selectedType = val!);
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
 
             /// LOGIN BUTTON
             SizedBox(

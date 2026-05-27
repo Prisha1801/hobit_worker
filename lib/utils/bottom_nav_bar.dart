@@ -1,116 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../l10n/app_localizations.dart';
 import '../screens/home_screen.dart';
 import '../screens/my_bookings.dart';
 import '../screens/profile.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../screens/coordinator_dashboard.dart';
+import '../screens/contractor_dashboard.dart';
+import '../prefs/app_preference.dart';
+import '../prefs/preference_key.dart';
 
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
 
-class MainScreen extends ConsumerWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
+  @override
+  ConsumerState<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends ConsumerState<MainScreen> {
+
   Future<bool> _onWillPop(BuildContext context) async {
-
     final loc = AppLocalizations.of(context)!;
-
     bool? exitApp = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-
-        title: Text(
-          loc.exitApp,
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        content: Text(
-          loc.exitMessage,
-          style: const TextStyle(color: Colors.black87),
-        ),
-
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(loc.exitApp,
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        content: Text(loc.exitMessage,
+            style: const TextStyle(color: Colors.black87)),
         actions: [
-
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(
-              loc.no,
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(loc.no,
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
           ),
-
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: kkblack,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
+            onPressed: () => Navigator.of(context).pop(true),
             child: Text(loc.yes),
           ),
         ],
       ),
     );
-
     return exitApp ?? false;
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final currentIndex = ref.watch(bottomNavIndexProvider);
+
+    final String savedRole = AppPreference().getString(PreferencesKey.role).toLowerCase().trim();
+    
+    debugPrint("🔍 Current User Role detected in MainScreen: '$savedRole'");
+
+    final bool isCoordinator = savedRole == 'coordinators' || 
+                               savedRole == 'coordinator' || 
+                               savedRole == 'co-ordinators' || 
+                               savedRole == 'co-ordinator';
+
+    // ✅ If Coordinator, return Dashboard WITHOUT Scaffold/BottomNav from MainScreen
+    if (isCoordinator) {
+      return const CoordinatorDashboard();
+    }
+
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    Widget getHomeScreen() {
+      if (savedRole == 'contractors' || savedRole == 'contractor') {
+        return const ContractorDashboard();
+      } else {
+        return const HomeScreen();
+      }
+    }
 
     return WillPopScope(
       onWillPop: () => _onWillPop(context),
       child: Scaffold(
         body: IndexedStack(
           index: currentIndex,
-          children: const [
-            HomeScreen(),
-            BookingsScreen(),
-            ProfileScreen(),
+          children: [
+            getHomeScreen(),
+            const BookingsScreen(),
+            const ProfileScreen(),
           ],
         ),
-
-        bottomNavigationBar: SizedBox(
-          height: 80,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.only(bottom: bottomPadding),
           child: BottomNavigationBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             currentIndex: currentIndex,
             onTap: (index) {
               ref.read(bottomNavIndexProvider.notifier).state = index;
             },
             type: BottomNavigationBarType.fixed,
             selectedItemColor: kkblack,
-            unselectedItemColor: Colors.grey,
+            //unselectedItemColor: Colors.grey,
+            unselectedItemColor: Colors.black,
+            selectedFontSize: screenHeight * 0.015,
+            unselectedFontSize: screenHeight * 0.013,
+            selectedIconTheme: IconThemeData(size: screenHeight * 0.035),
+            unselectedIconTheme: IconThemeData(size: screenHeight * 0.03),
             items: [
               BottomNavigationBarItem(
-                icon: const Icon(Icons.home),
+                icon: const Icon(Icons.home_outlined),
+                activeIcon: const Icon(Icons.home),
                 label: loc.home,
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.calendar_month),
+                icon: const Icon(Icons.calendar_month_outlined),
+                activeIcon: const Icon(Icons.calendar_month),
                 label: loc.bookings,
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.person),
+                icon: const Icon(Icons.person_outline),
+                activeIcon: const Icon(Icons.person),
                 label: loc.profile,
               ),
             ],
@@ -120,58 +144,3 @@ class MainScreen extends ConsumerWidget {
     );
   }
 }
-
-//
-// class MainScreen extends ConsumerWidget {
-//   const MainScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final loc = AppLocalizations.of(context)!;
-//     final currentIndex = ref.watch(bottomNavIndexProvider);
-//
-//     return Scaffold(
-//       body: IndexedStack(
-//         index: currentIndex,
-//         children: const [
-//           HomeScreen(),     // 0
-//           BookingsScreen(), // 1
-//           //WalletScreen(),   // 2
-//           ProfileScreen(),  // 3
-//         ],
-//       ),
-//
-//       bottomNavigationBar: SizedBox(
-//         height: 80,
-//         child: BottomNavigationBar(
-//           backgroundColor: Colors.white,
-//           currentIndex: currentIndex,
-//           onTap: (index) {
-//             ref.read(bottomNavIndexProvider.notifier).state = index;
-//           },
-//           type: BottomNavigationBarType.fixed,
-//           selectedItemColor: Colors.black,
-//           unselectedItemColor: Colors.grey,
-//           items: [
-//             BottomNavigationBarItem(
-//               icon: const Icon(Icons.home),
-//               label: loc.home,
-//             ),
-//             BottomNavigationBarItem(
-//               icon: const Icon(Icons.calendar_month),
-//               label: loc.bookings,
-//             ),
-//             // BottomNavigationBarItem(
-//             //   icon: Icon(Icons.account_balance_wallet),
-//             //   label: 'Wallet',
-//             // ),
-//             BottomNavigationBarItem(
-//               icon: const Icon(Icons.person),
-//               label: loc.profile,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

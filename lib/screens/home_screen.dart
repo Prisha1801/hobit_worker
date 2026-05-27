@@ -30,7 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool loadingAvailability = true;
   List<AssignedBookingModel> todayBookings = [];
   Map<int, List<BookingExtensionModel>> bookingExtensions = {};
-  String kycStatus = 'pending'; // add this with other state variables
+  // String kycStatus = 'pending';
+  String? kycStatus;
   bool get isKycApproved => kycStatus == 'approved';
   bool isInProgress(AssignedBookingModel booking) {
     return booking.status == "inprogress";
@@ -54,13 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // int workerId = 0;
+
   Future<void> _refreshHome() async {
     setState(() {
       loadingBooking = true;
     });
 
     // await loadAssignedBooking();
+    await loadAvailabilityFromApi();
     await loadTodayJobs();
   }
 
@@ -269,6 +271,45 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
 
           /// ===== TOP ROW =====
+          // Row(
+          //   children: [
+          //     const CircleAvatar(radius: 22, child: Icon(Icons.person)),
+          //     const SizedBox(width: 12),
+          //
+          //     Expanded(
+          //       child: Text(
+          //         booking.customerName,
+          //         maxLines: 1,
+          //         overflow: TextOverflow.ellipsis,
+          //         style: const TextStyle(
+          //           fontSize: 15,
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ),
+          //
+          //     const SizedBox(width: 6),
+          //
+          //     Container(
+          //       padding: const EdgeInsets.symmetric(
+          //         horizontal: 12,
+          //         vertical: 5,
+          //       ),
+          //       decoration: BoxDecoration(
+          //         color: getStatusColor(booking.status).withOpacity(0.15),
+          //         borderRadius: BorderRadius.circular(20),
+          //       ),
+          //       child: Text(
+          //         booking.status.toUpperCase(),
+          //         style: TextStyle(
+          //           fontSize: 11,
+          //           color: getStatusColor(booking.status),
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           Row(
             children: [
               const CircleAvatar(radius: 22, child: Icon(Icons.person)),
@@ -286,13 +327,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              const SizedBox(width: 6),
-
+              /// 🔥 STATUS CHIP
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: getStatusColor(booking.status).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -305,6 +342,51 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+
+              // const SizedBox(width: 2),
+
+              /// 🔥 3 DOT MENU (RIGHT SIDE)
+              PopupMenuButton<String>(
+                color: Colors.white,
+                icon: const Icon(Icons.more_vert, size: 20),
+                onSelected: (value) async {
+
+                  bool success = await BookingApi.updateBookingStatus(
+                    bookingId: booking.id,
+                    status: value,
+                  );
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Status updated to $value")),
+                    );
+
+                    loadTodayJobs(); // 🔥 refresh
+                  }
+                },
+                itemBuilder: (context) {
+
+                  final current = booking.status;
+
+                  return [
+                    if (current != "assigned")
+                      const PopupMenuItem(
+                        value: "assigned",
+                        child: Text("Assigned"),
+                      ),
+                    if (current != "inprogress")
+                      const PopupMenuItem(
+                        value: "inprogress",
+                        child: Text("In Progress"),
+                      ),
+                    if (current != "completed")
+                      const PopupMenuItem(
+                        value: "completed",
+                        child: Text("Completed"),
+                      ),
+                  ];
+                },
               ),
             ],
           ),
@@ -559,22 +641,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
-                    child: FittedBox(
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on,
-                              size: 16, color: Colors.green),
-                          const SizedBox(width: 4),
-                          Text(
-                            loc.viewDirection,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            size: 16, color: Colors.green),
+                        const SizedBox(width: 4),
+                        Text(
+                          loc.viewDirection,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            // color: Colors.black,
+                            color: Colors.blue,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -592,7 +673,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       _openOtpDialog(booking.id);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: kkblack,
+                      //backgroundColor: kkblack,
+                      backgroundColor: Colors.yellow.shade400,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),
@@ -600,8 +683,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       loc.verifyOtp,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
+                        fontSize: 13,
+                        color: Colors.blue,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -639,7 +722,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: isKycApproved ? 160 : 210, // 🔥 dynamic height
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F6FF), // ✅ background
+                  // color: const Color(0xFFF5F6FF), // ✅ background
+                  color: Colors.white,
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.white, // ✅ #FFFFFF
@@ -648,6 +732,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       spreadRadius: 0,
                     ),
                   ],
+                  border: Border.all(
+                    color: const Color(0xFFC8CBD0),
+                    width: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
@@ -819,7 +907,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     // After the slider Container, inside the Column children:
-                    if (!isKycApproved) ...[
+                    //!isKycApproved
+                    if (kycStatus != null && !isKycApproved) ...[
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
@@ -916,6 +1005,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+
 class OtpDialog extends StatefulWidget {
   final int bookingId;
   final VoidCallback onSuccess;
@@ -931,10 +1021,16 @@ class _OtpDialogState extends State<OtpDialog> {
   String otp = "";
   bool loading = false;
   bool resendLoading = false;
+  String selectedType = "sms"; // Default is SMS
 
   int secondsRemaining = 60;
   Timer? timer;
   bool canResend = false;
+  final List<TextEditingController> controllers =
+  List.generate(6, (_) => TextEditingController());
+
+  final List<FocusNode> focusNodes =
+  List.generate(6, (_) => FocusNode());
 
   @override
   void initState() {
@@ -972,15 +1068,51 @@ class _OtpDialogState extends State<OtpDialog> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              loc.otpVerification,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Text(
+            //   loc.otpVerification,
+            //   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                /// Empty for spacing
+                const SizedBox(width: 24),
+
+                /// Title (same as before)
+                Text(
+                  loc.otpVerification,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                /// 🔥 CLOSE BUTTON
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context); // 👉 popup close
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 6),
             Text(
@@ -989,21 +1121,62 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
             const SizedBox(height: 16),
 
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //   children: List.generate(
+            //     6,
+            //         (index) => SizedBox(
+            //       width: 36,
+            //       height: 42,
+            //       child:
+            //       TextField(
+            //         maxLength: 1,
+            //         keyboardType: TextInputType.number,
+            //         textAlign: TextAlign.center,
+            //         textAlignVertical: TextAlignVertical.center,
+            //
+            //         // ✅ MAKE DIGITS BIG
+            //         style: const TextStyle(
+            //           fontSize: 22,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //
+            //         onChanged: (val) {
+            //           if (val.isNotEmpty) {
+            //             otp += val;
+            //             FocusScope.of(context).nextFocus();
+            //           }
+            //         },
+            //
+            //         decoration: InputDecoration(
+            //           counterText: '',
+            //           isDense: true,
+            //           contentPadding: const EdgeInsets.symmetric(
+            //             vertical: 8,
+            //           ),
+            //           border: OutlineInputBorder(
+            //             borderRadius: BorderRadius.circular(8),
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
                 6,
                     (index) => SizedBox(
-                  width: 36,
+                  width: MediaQuery.of(context).size.width * 0.1, // responsive
                   height: 42,
-                  child:
-                  TextField(
+                  child: TextField(
+                    controller: controllers[index],
+                    focusNode: focusNodes[index],
                     maxLength: 1,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     textAlignVertical: TextAlignVertical.center,
 
-                    // ✅ MAKE DIGITS BIG
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -1012,16 +1185,27 @@ class _OtpDialogState extends State<OtpDialog> {
                     onChanged: (val) {
                       if (val.isNotEmpty) {
                         otp += val;
-                        FocusScope.of(context).nextFocus();
+
+                        /// 👉 move forward
+                        if (index < 5) {
+                          FocusScope.of(context).nextFocus();
+                        }
+                      } else {
+                        /// 👉 FIX: backspace handle
+                        if (otp.isNotEmpty) {
+                          otp = otp.substring(0, otp.length - 1);
+                        }
+
+                        if (index > 0) {
+                          FocusScope.of(context).previousFocus();
+                        }
                       }
                     },
 
                     decoration: InputDecoration(
                       counterText: '',
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -1031,7 +1215,49 @@ class _OtpDialogState extends State<OtpDialog> {
               ),
             ),
 
-            const SizedBox(height: 26),
+            const SizedBox(height: 16),
+
+            /// 🔥 OTP TYPE SELECTION (Inside Resend Logic area)
+            const Text(
+              "Resend via:",
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: RadioListTile<String>(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("SMS", style: TextStyle(fontSize: 12)),
+                    value: "sms",
+                    groupValue: selectedType,
+                    activeColor: Colors.black,
+                    onChanged: (val) {
+                      setState(() => selectedType = val!);
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 130,
+                  child: RadioListTile<String>(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("WhatsApp", style: TextStyle(fontSize: 12)),
+                    value: "whatsapp",
+                    groupValue: selectedType,
+                    activeColor: Colors.black,
+                    onChanged: (val) {
+                      setState(() => selectedType = val!);
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+
+            const SizedBox(height: 10),
 
 
             RichText(
@@ -1048,13 +1274,17 @@ class _OtpDialogState extends State<OtpDialog> {
 
                         final success = await BookingApi.sendStartOtp(
                           widget.bookingId,
+                          type: selectedType, // Pass selected type
                         );
 
                         setState(() => resendLoading = false);
 
                         if (success) {
                           otp = ""; // 🔥 reset otp
-
+                          for (var c in controllers) {
+                            c.clear();
+                          }
+                          FocusScope.of(context).requestFocus(focusNodes[0]);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("OTP resent successfully"),
@@ -1093,69 +1323,7 @@ class _OtpDialogState extends State<OtpDialog> {
               ),
             ),
 
-            // canResend
-            //     ? RichText(
-            //   text: TextSpan(
-            //     text: loc.dontReceiveCode,
-            //     style: const TextStyle(color: Colors.black54, fontSize: 13),
-            //     children: [
-            //       WidgetSpan(
-            //         child: GestureDetector(
-            //           onTap: resendLoading
-            //               ? null
-            //               : () async {
-            //
-            //             setState(() => resendLoading = true);
-            //
-            //             final success = await BookingApi.sendStartOtp(
-            //               widget.bookingId,
-            //             );
-            //
-            //             setState(() => resendLoading = false);
-            //
-            //             if (success) {
-            //               otp = "";
-            //
-            //               startTimer(); // 🔥 restart timer
-            //
-            //               ScaffoldMessenger.of(context).showSnackBar(
-            //                 const SnackBar(
-            //                   content: Text("OTP resent successfully"),
-            //                   backgroundColor: Colors.green,
-            //                 ),
-            //               );
-            //             }
-            //           },
-            //           child: Padding(
-            //             padding: const EdgeInsets.only(left: 4),
-            //             child: resendLoading
-            //                 ? const SizedBox(
-            //               width: 14,
-            //               height: 14,
-            //               child: CircularProgressIndicator(strokeWidth: 2),
-            //             )
-            //                 : Text(
-            //               loc.resend,
-            //               style: const TextStyle(
-            //                 color: Colors.green,
-            //                 fontSize: 13,
-            //                 fontWeight: FontWeight.w600,
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // )
-            //     : Text(
-            //   "Resend OTP in 00:${secondsRemaining.toString().padLeft(2, '0')}",
-            //   style: const TextStyle(
-            //     fontSize: 13,
-            //     color: Colors.grey,
-            //   ),
-            // ),
-            SizedBox(height: 26),
+            const SizedBox(height: 26),
             SizedBox(
               width: double.infinity,
               child:
@@ -1180,20 +1348,20 @@ class _OtpDialogState extends State<OtpDialog> {
 
                   setState(() => loading = true);
 
-                  final success = await BookingApi.verifyStartOtp(
+                  final result = await BookingApi.verifyStartOtp(
                     bookingId: widget.bookingId,
                     otp: otp,
                   );
 
                   setState(() => loading = false);
 
-                  if (success) {
+                  if (result["success"]) {
                     Navigator.pop(context);
                     widget.onSuccess();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(loc.invalidOtp),
+                        content: Text(result["message"]),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1201,9 +1369,10 @@ class _OtpDialogState extends State<OtpDialog> {
                 },
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                  "Verify OTP",
-                  style: TextStyle(
+                    : Text(
+                  loc.verifyOtp,
+                  // "Verify OTP",
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,

@@ -1,10 +1,10 @@
-
 class IdNameModel {
   final int id;
   final String name;
   final int? categoryId;
   final int? cityId; // for Zones
   final int? zoneId; // for Areas
+  final int? status; // for filtering active categories/services
 
   IdNameModel({
     required this.id,
@@ -12,6 +12,7 @@ class IdNameModel {
     this.categoryId,
     this.cityId,
     this.zoneId,
+    this.status,
   });
 
   factory IdNameModel.fromJson(Map<String, dynamic> json) {
@@ -19,8 +20,9 @@ class IdNameModel {
       id: json['id'],
       name: json['name'],
       categoryId: json['category_id'],
-      cityId: json['city_id'],   // zones API
-      zoneId: json['zone_id'],   // areas API
+      cityId: json['city_id'], // zones API
+      zoneId: json['zone_id'], // areas API
+      status: json['status'], // active/inactive flag
     );
   }
 }
