@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
+import '../api_services/notification_services.dart';
 import '../l10n/app_localizations.dart';
+import '../attendance/screens/attendance_history_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/my_bookings.dart';
 import '../screens/profile.dart';
@@ -20,6 +22,20 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ If the app was cold-started by tapping a notification, open the
+    // NotificationScreen on top of MainScreen once the first frame is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (LocalNotificationService.launchedFromNotification) {
+        LocalNotificationService.launchedFromNotification = false;
+        LocalNotificationService.openNotificationsPage();
+      }
+    });
+  }
 
   Future<bool> _onWillPop(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
@@ -91,6 +107,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           children: [
             getHomeScreen(),
             const BookingsScreen(),
+            const AttendanceHistoryScreen(),
             const ProfileScreen(),
           ],
         ),
@@ -131,6 +148,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 icon: const Icon(Icons.calendar_month_outlined),
                 activeIcon: const Icon(Icons.calendar_month),
                 label: loc.bookings,
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.access_time_outlined),
+                activeIcon: Icon(Icons.access_time_filled),
+                label: 'Attendance',
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.person_outline),

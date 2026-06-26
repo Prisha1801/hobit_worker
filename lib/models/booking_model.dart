@@ -12,6 +12,7 @@ class AssignedBookingModel {
   final ServiceModel service;
   final List<String> addonNames;
   final List<int> addonQty;
+  final String acceptanceStatus; // pending | accepted | declined
 
   AssignedBookingModel({
     required this.id,
@@ -28,6 +29,7 @@ class AssignedBookingModel {
 
     required this.addonNames,
     required this.addonQty,
+    required this.acceptanceStatus,
   });
 
 
@@ -69,7 +71,7 @@ class AssignedBookingModel {
       ),
       addonNames: addonNames,
       addonQty: addonQty,
-
+      acceptanceStatus: json['acceptance_status']?.toString() ?? '',
     );
   }
 }

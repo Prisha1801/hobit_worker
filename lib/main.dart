@@ -40,6 +40,9 @@ void main() async {
   // ✅ Foreground init (requests permission safely)
   await LocalNotificationService.init(isBackground: false);
 
+  // ✅ Detect if the app was cold-started by tapping a notification
+  await LocalNotificationService.checkLaunchedFromNotification();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

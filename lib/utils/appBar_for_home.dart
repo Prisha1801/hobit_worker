@@ -9,8 +9,9 @@ ValueNotifier<int> notificationCount = ValueNotifier<int>(0);
 
 class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
+  final VoidCallback? onEmergencyPressed;
 
-  const AppBarHome({super.key, this.onMenuPressed});
+  const AppBarHome({super.key, this.onMenuPressed, this.onEmergencyPressed});
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -104,52 +105,86 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
 
-          /// 🔹 RIGHT SIDE Notification
-          ValueListenableBuilder<int>(
-            valueListenable: notificationCount,
-            builder: (context, count, _) {
-              return Stack(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.notifications, size: 24),
+          /// 🔹 RIGHT SIDE Icons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// Alert / Warning Icon
+              GestureDetector(
+                onTap: onEmergencyPressed,
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
                   ),
-                  if (count > 0)
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              /// Notification Bell
+              ValueListenableBuilder<int>(
+                valueListenable: notificationCount,
+                builder: (context, count, _) {
+                  return Stack(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade300, width: 1),
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotificationScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.notifications_outlined, size: 22),
                         ),
-                        child: Center(
-                          child: Text(
-                            count > 9 ? '9+' : count.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                      ),
+                      if (count > 0)
+                        Positioned(
+                          right: 4,
+                          top: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Center(
+                              child: Text(
+                                count > 9 ? '9+' : count.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              );
-            },
+                    ],
+                  );
+                },
+              ),
+            ],
           )
         ],
       ),

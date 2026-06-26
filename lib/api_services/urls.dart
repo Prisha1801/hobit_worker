@@ -1,7 +1,10 @@
 //const String baseUrl = "https://hobitadmin.anantkamalsoftwarelabs.com";
 //const String baseUrl = "https://backendhobit.anantkamalsoftwarelabs.com";
+
 // const String baseUrl = "https://hobitadmin.hobit.club";
- const String baseUrl = "https://uatadmin.hobit.club";
+
+//const String baseUrl = "https://uatadmin.hobit.club";
+const String baseUrl = "https://testing.hobit.club";
 //registrations apis
 const String signUpUrl = "/api/worker/register_app";
 const String  serviceCategoriesUrl = "/api/service-categories";
@@ -9,6 +12,7 @@ const String  serviceUrl = "/api/services";
 const String  citiesUrl = "/api/cities";
 const String  zonesUrl = "/api/zones";
 const String  serviceAreaUrl = "/api/serviceable-areas";
+
 /// login
 const String  loginUrl = "/api/worker/login/send-otp";
 const String  verifyOtpUrl = "/api/worker/login/verify-otp";
@@ -18,6 +22,11 @@ const String putBankDetailsUrl = "/api/worker/update_bank_details";
 const String getPersonalInfoUrl = "/api/worker/me";
 const String fcmTokenUrl = "/api/user/fcm-token";
 const String notificationUrl = "/api/worker/bookings";
+
+// Attendance APIs worker
+const String checkInUrl = "/api/checkin";
+const String checkOutUrl = "/api/checkout";
+const String myAttendanceUrl = "/api/attendance/my";
 
 // Coordinator APIs
 const String getBookingsUrl = "/api/getbookings";

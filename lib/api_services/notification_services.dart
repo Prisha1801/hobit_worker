@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart';
-import '../utils/bottom_nav_bar.dart';
+import '../utils/notification.dart';
 
 class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
@@ -11,6 +11,36 @@ class LocalNotificationService {
   // ✅ Incremented version to hobit_booking_call_v6 to force refresh channel settings
   static const String _channelId = 'hobit_booking_call_v6';
   static const String _channelName = 'Urgent Booking Alerts';
+
+  /// ✅ Set to true when the app was cold-started by tapping a notification.
+  /// MainScreen reads this once it is built and opens the NotificationScreen.
+  static bool launchedFromNotification = false;
+  static String? launchPayload;
+
+  /// Opens the in-app Notifications page on top of whatever is showing.
+  /// Used for foreground / background notification taps.
+  static void openNotificationsPage() {
+    final nav = navigatorKey.currentState;
+    if (nav == null) return;
+    nav.push(
+      MaterialPageRoute(builder: (_) => const NotificationScreen()),
+    );
+  }
+
+  /// ✅ Call once from main() AFTER init() — detects if the app was launched
+  /// from a terminated state by tapping a notification.
+  static Future<void> checkLaunchedFromNotification() async {
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      if (details?.didNotificationLaunchApp == true) {
+        launchedFromNotification = true;
+        launchPayload = details?.notificationResponse?.payload;
+        print("🚀 [LocalNotificationService] App launched from notification tap. payload=$launchPayload");
+      }
+    } catch (e) {
+      print("⚠️ [LocalNotificationService] launch details error: $e");
+    }
+  }
 
   static Future<void> init({bool isBackground = false}) async {
     print("🔔 [LocalNotificationService] Initializing...");
@@ -23,20 +53,15 @@ class LocalNotificationService {
 
     await _plugin.initialize(
       settings,
-      onDidReceiveNotificationResponse: (details) async {
-        print("📲 [LocalNotificationService] Action Clicked: ${details.actionId}");
+      onDidReceiveNotificationResponse: (details) {
+        print("📲 [LocalNotificationService] Tap: actionId=${details.actionId}, payload=${details.payload}");
 
-        if (details.actionId == 'view_booking') {
-          navigatorKey.currentState?.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-            (route) => false,
-          );
-        } else if (details.actionId == 'dismiss_booking') {
-          navigatorKey.currentState?.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-            (route) => false,
-          );
-        }
+        // User explicitly dismissed — just let the notification cancel.
+        if (details.actionId == 'dismiss_booking') return;
+
+        // Body tap OR 'view_booking' action → open the Notifications page
+        // on top of the running app (MainScreen stays underneath).
+        openNotificationsPage();
       },
     );
 
@@ -123,6 +148,10 @@ class LocalNotificationService {
     final title = data['title'] ?? message.notification?.title ?? "New Booking Arrived! 🔔";
     final body = data['body'] ?? message.notification?.body ?? "Check dashboard for details.";
 
-    await showBookingCall(title: title, body: body);
+    await showBookingCall(
+      title: title,
+      body: body,
+      payload: data['booking_id']?.toString(),
+    );
   }
 }

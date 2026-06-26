@@ -27,6 +27,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   late Future<WorkerProfileModel> _profileFuture;
+  WorkerProfileModel? _profile;
 
   bool isRefreshing = false;
 
@@ -92,6 +93,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
 
                 final profile = snapshot.data!;
+                _profile = profile;
 
                 return Container(
                   width: double.infinity,
@@ -354,6 +356,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         showLogoutDialog(context,  ref);
                       },
                     ),
+                    _buildMenuItem(
+                      icon: Icons.delete_forever,
+                      title: 'Delete Account',
+                      subtitle: 'Permanently delete your account and data',
+                      isDestructive: true,
+                      onTap: () {
+                        if (_profile == null) return;
+                        showDeleteAccountDialog(
+                          context,
+                          ref,
+                          email: _profile!.email,
+                          fullName: _profile!.name,
+                          phone: _profile!.phone,
+                        );
+                      },
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -392,13 +410,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   height: 40,
                   decoration: BoxDecoration(
                     color: isDestructive
-                        ? Colors.grey.shade200
+                        ? Colors.red.withValues(alpha: 0.1)
                         : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     icon,
-                    color: isDestructive ? Colors.grey[900] : kkblack,
+                    color: isDestructive ? Colors.red : kkblack,
                     size: 22,
                   ),
                 ),
@@ -413,9 +431,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Text(
                         title,
                         style: TextStyle(
-                          color: isDestructive
-                              ? Colors.grey[700]
-                              : Colors.black,
+                          color: isDestructive ? Colors.red : Colors.black,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),

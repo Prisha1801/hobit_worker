@@ -1,19 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../api_services/api_services.dart';
 import '../api_services/location_service.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
-import '../maps/customer_route_map.dart';
 import '../models/booking_model.dart';
 import '../models/extend_service_model.dart';
 import '../models/get_profile_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
+import '../attendance/screens/attendance_screen.dart';
 import '../utils/appBar_for_home.dart';
 import '../utils/extension_history.dart';
 import '../widgets/booking_repo_home.dart';
+import '../widgets/service_timer_widget.dart';
 import 'dart:async';
 
 enum JobStatus { assigned, inprogress, completed }
@@ -66,6 +68,41 @@ class _HomeScreenState extends State<HomeScreen> {
     await loadTodayJobs();
   }
 
+  /// 🗺️ Open the customer location directly in the external Google Maps app
+  /// (turn-by-turn navigation). No in-app map, no worker-location send here —
+  /// the worker location is now shared only at the Confirm Location step.
+  Future<void> _openInGoogleMaps(AssignedBookingModel booking) async {
+    final lat = booking.latitude;
+    final lng = booking.longitude;
+
+    print("🗺️ [ViewMap] Clicked for BK-${booking.id} → customer: $lat,$lng");
+
+    // Native Google Maps navigation intent (Android/iOS Google Maps app).
+    final navUri = Uri.parse("google.navigation:q=$lat,$lng&mode=d");
+
+    // Universal fallback (opens Google Maps in browser / app chooser).
+    final webUri = Uri.parse(
+      "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+    );
+
+    try {
+      if (await canLaunchUrl(navUri)) {
+        print("🗺️ [ViewMap] Launching Google Maps app: $navUri");
+        await launchUrl(navUri, mode: LaunchMode.externalApplication);
+      } else {
+        print("🗺️ [ViewMap] Google Maps app not available, opening web: $webUri");
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print("🗺️ [ViewMap] Failed to open Google Maps: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not open Google Maps")),
+        );
+      }
+    }
+  }
+
   void _openOtpDialog(int bookingId) {
     showDialog(
       context: context,
@@ -82,6 +119,64 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
+  }
+
+  /// 🔥 NEW FLOW — end an in-progress service.
+  /// POST /api/booking/end-service   body: { "booking_id": id }
+  Future<void> _endService(int bookingId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text(
+          'End Service',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to mark this service as completed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('No', style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Yes, End'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final result = await BookingApi.endService(bookingId);
+    if (!mounted) return;
+
+    final success = result['success'] == true;
+    final msg = (result['message']?.toString().isNotEmpty == true)
+        ? result['message'].toString()
+        : (success ? 'Service completed' : 'Failed to end service');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+
+    if (success) {
+      setState(() => loadingBooking = true);
+      await loadTodayJobs();
+    }
   }
 
   String getStatusText() {
@@ -147,8 +242,10 @@ class _HomeScreenState extends State<HomeScreen> {
       // }
       //
       // print("Device today dateeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${DateTime.now()}");
+      // ✅ Only show assigned jobs the worker has ACCEPTED.
+      // Pending / declined bookings stay out of the home UI.
       final todayAssigned = assigned
-          .where((b) => isToday(b.bookingDate))
+          .where((b) => isToday(b.bookingDate) && b.acceptanceStatus == 'accepted')
           .toList();
 
       final todayInProgress = inProgress
@@ -602,6 +699,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 16),
 
+          /// ===== SERVICE TIMER (only while in progress) =====
+          if (isInProgress(booking)) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.timelapse, size: 18, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Service running',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  ServiceTimerWidget(bookingId: booking.id),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
           /// ===== BUTTONS =====
           Row(
             children: [
@@ -611,30 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SizedBox(
                   height: 36,
                   child: OutlinedButton(
-                    onPressed: () async {
-                      final position =
-                      await LocationService.getCurrentLocation();
-
-                      final success =
-                      await BookingApi.sendWorkerLiveLocation(
-                        bookingId: booking.id,
-                        latitude: position.latitude,
-                        longitude: position.longitude,
-                      );
-
-                      if (success) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CustomerRouteMap(
-                              customerLat: booking.latitude,
-                              customerLng: booking.longitude,
-                              address: booking.address,
-                            ),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: () => _openInGoogleMaps(booking),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: kkblack),
                       shape: RoundedRectangleBorder(
@@ -663,28 +767,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(width: 10),
 
-              /// VERIFY OTP
+              /// VERIFY OTP (assigned) / END SERVICE (inprogress)
               Expanded(
                 child: SizedBox(
                   height: 36,
                   child: ElevatedButton(
-                    onPressed:
-                    isInProgress(booking) ? null : () {
-                      _openOtpDialog(booking.id);
-                    },
+                    onPressed: isInProgress(booking)
+                        ? () => _endService(booking.id)
+                        : () => _openOtpDialog(booking.id),
                     style: ElevatedButton.styleFrom(
                       //backgroundColor: kkblack,
-                      backgroundColor: Colors.yellow.shade400,
+                      backgroundColor: isInProgress(booking)
+                          ? Colors.green.shade400
+                          : Colors.yellow.shade400,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                     child: Text(
-                      loc.verifyOtp,
-                      style: const TextStyle(
+                      isInProgress(booking) ? 'End Service' : loc.verifyOtp,
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Colors.blue,
+                        color: isInProgress(booking)
+                            ? Colors.white
+                            : Colors.blue,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -699,11 +806,85 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
+  void _showSosDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool sending = false;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: const [
+                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                SizedBox(width: 8),
+                Text(
+                  'SOS Alert',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+              ],
+            ),
+            content: const Text(
+              'Do you want to send an SOS emergency alert? This will notify the support team immediately.',
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            actions: [
+              TextButton(
+                onPressed: sending ? null : () => Navigator.pop(ctx),
+                child: const Text('No',
+                    style: TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.w600)),
+              ),
+              ElevatedButton(
+                onPressed: sending
+                    ? null
+                    : () async {
+                        setDialogState(() => sending = true);
+                        final activeBooking = todayBookings.isNotEmpty ? todayBookings.first : null;
+                        final workerName = AppPreference().getString(PreferencesKey.name);
+                        final location = LocationStore.address;
+                        final sentAt = DateTime.now();
+                        final dialogNav = Navigator.of(ctx);
+                        final rootNav = Navigator.of(context);
+                        await Future.delayed(const Duration(milliseconds: 1800));
+                        if (!mounted) return;
+                        dialogNav.pop();
+                        rootNav.push(
+                          MaterialPageRoute(
+                            builder: (_) => SosActiveScreen(
+                              workerName: workerName,
+                              sentAt: sentAt,
+                              location: location,
+                              bookingId: activeBooking?.id,
+                            ),
+                          ),
+                        );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: sending
+                    ? const SizedBox(
+                        width: 18, height: 18,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('Yes, Send SOS',
+                        style: TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBarHome(),
+      appBar: AppBarHome(onEmergencyPressed: _showSosDialog),
       backgroundColor: kWhite,
       body: RefreshIndicator(
         color: kkblack,
@@ -719,7 +900,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: double.infinity,
                 // height: 160,
-                height: isKycApproved ? 160 : 210, // 🔥 dynamic height
+                height: isKycApproved ? 196 : 246, // 🔥 dynamic height
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   // color: const Color(0xFFF5F6FF), // ✅ background
@@ -740,6 +921,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Column(
                   children: [
+                    /// Attendance chip — top right
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: AttendanceChip(
+                        label: loc.attendance,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AttendanceScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
                     Text(
                       loc.attendance,
                       style: const TextStyle(
@@ -981,20 +1179,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   )
-                else
+                else if (todayBookings.length == 1)
+                  /// 🔹 Single job → full-width card that wraps its content
+                  /// (no fixed height, so no blank space below)
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.45, // card height
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: todayBookings.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        return SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          child: buildAssignedJobCard(todayBookings[index]),
-                        );
-                      },
+                    width: double.infinity,
+                    child: buildAssignedJobCard(todayBookings.first),
+                  )
+                else
+                  /// 🔹 Multiple jobs → horizontal carousel. IntrinsicHeight makes
+                  /// every card match the tallest one; height wraps content.
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (int i = 0; i < todayBookings.length; i++) ...[
+                            if (i > 0) const SizedBox(width: 12),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.85,
+                              child: buildAssignedJobCard(todayBookings[i]),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
             ],
@@ -1021,7 +1231,8 @@ class _OtpDialogState extends State<OtpDialog> {
   String otp = "";
   bool loading = false;
   bool resendLoading = false;
-  String selectedType = "sms"; // Default is SMS
+  // ❌ OLD SMS / WhatsApp flow (kept for reference)
+  // String selectedType = "sms"; // Default is SMS
 
   int secondsRemaining = 60;
   Timer? timer;
@@ -1036,6 +1247,27 @@ class _OtpDialogState extends State<OtpDialog> {
   void initState() {
     super.initState();
     startTimer();
+    // 🔥 NEW FLOW: generate the customer start code as soon as the dialog opens
+    _generateCode();
+  }
+
+  /// 🔥 NEW FLOW — calls /api/booking/generate-codes so the customer receives
+  /// a start code, which the worker then enters below to verify.
+  Future<void> _generateCode() async {
+    final result = await BookingApi.generateStartCode(widget.bookingId);
+    if (!mounted) return;
+
+    final success = result["success"] == true;
+    final msg = (result["message"]?.toString().isNotEmpty == true)
+        ? result["message"].toString()
+        : (success ? "Start code sent to customer" : "Failed to generate code");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
   }
 
   void startTimer() {
@@ -1121,47 +1353,6 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
             const SizedBox(height: 16),
 
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //   children: List.generate(
-            //     6,
-            //         (index) => SizedBox(
-            //       width: 36,
-            //       height: 42,
-            //       child:
-            //       TextField(
-            //         maxLength: 1,
-            //         keyboardType: TextInputType.number,
-            //         textAlign: TextAlign.center,
-            //         textAlignVertical: TextAlignVertical.center,
-            //
-            //         // ✅ MAKE DIGITS BIG
-            //         style: const TextStyle(
-            //           fontSize: 22,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //
-            //         onChanged: (val) {
-            //           if (val.isNotEmpty) {
-            //             otp += val;
-            //             FocusScope.of(context).nextFocus();
-            //           }
-            //         },
-            //
-            //         decoration: InputDecoration(
-            //           counterText: '',
-            //           isDense: true,
-            //           contentPadding: const EdgeInsets.symmetric(
-            //             vertical: 8,
-            //           ),
-            //           border: OutlineInputBorder(
-            //             borderRadius: BorderRadius.circular(8),
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
@@ -1217,6 +1408,8 @@ class _OtpDialogState extends State<OtpDialog> {
 
             const SizedBox(height: 16),
 
+            // ❌ OLD SMS / WhatsApp OTP type selection (kept for reference, do not remove)
+            /*
             /// 🔥 OTP TYPE SELECTION (Inside Resend Logic area)
             const Text(
               "Resend via:",
@@ -1255,6 +1448,7 @@ class _OtpDialogState extends State<OtpDialog> {
                 ),
               ],
             ),
+            */
 
 
             const SizedBox(height: 10),
@@ -1272,14 +1466,19 @@ class _OtpDialogState extends State<OtpDialog> {
                           : () async {
                         setState(() => resendLoading = true);
 
-                        final success = await BookingApi.sendStartOtp(
-                          widget.bookingId,
-                          type: selectedType, // Pass selected type
-                        );
+                        // 🔥 NEW FLOW: regenerate the customer start code
+                        final result =
+                            await BookingApi.generateStartCode(widget.bookingId);
+
+                        // ❌ OLD SMS / WhatsApp resend (kept for reference)
+                        // final success = await BookingApi.sendStartOtp(
+                        //   widget.bookingId,
+                        //   type: selectedType, // Pass selected type
+                        // );
 
                         setState(() => resendLoading = false);
 
-                        if (success) {
+                        if (result["success"] == true) {
                           otp = ""; // 🔥 reset otp
                           for (var c in controllers) {
                             c.clear();
@@ -1287,14 +1486,14 @@ class _OtpDialogState extends State<OtpDialog> {
                           FocusScope.of(context).requestFocus(focusNodes[0]);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text("OTP resent successfully"),
+                              content: Text("New code sent to customer"),
                               backgroundColor: Colors.green,
                             ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text("Failed to resend OTP"),
+                              content: Text("Failed to send code"),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -1348,10 +1547,17 @@ class _OtpDialogState extends State<OtpDialog> {
 
                   setState(() => loading = true);
 
-                  final result = await BookingApi.verifyStartOtp(
+                  // 🔥 NEW FLOW: verify via /api/booking/verifycode/{id}/start
+                  final result = await BookingApi.verifyStartCode(
                     bookingId: widget.bookingId,
                     otp: otp,
                   );
+
+                  // ❌ OLD verify flow (kept for reference)
+                  // final result = await BookingApi.verifyStartOtp(
+                  //   bookingId: widget.bookingId,
+                  //   otp: otp,
+                  // );
 
                   setState(() => loading = false);
 
@@ -1381,6 +1587,419 @@ class _OtpDialogState extends State<OtpDialog> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// SOS Active Screen
+// ─────────────────────────────────────────────
+
+class SosActiveScreen extends StatefulWidget {
+  final String workerName;
+  final DateTime sentAt;
+  final String location;
+  final int? bookingId;
+
+  const SosActiveScreen({
+    super.key,
+    required this.workerName,
+    required this.sentAt,
+    required this.location,
+    this.bookingId,
+  });
+
+  @override
+  State<SosActiveScreen> createState() => _SosActiveScreenState();
+}
+
+class _SosActiveScreenState extends State<SosActiveScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  final List<_SosUpdate> _updates = [];
+  Timer? _updateTimer;
+  int _updateIndex = 0;
+
+  final List<String> _staticUpdates = [
+    'Alert received by support team',
+    'Locating nearest responder...',
+    'Responder assigned — ETA 8 min',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _updateTimer = Timer.periodic(const Duration(seconds: 3), (t) {
+      if (_updateIndex < _staticUpdates.length) {
+        setState(() {
+          _updates.add(_SosUpdate(
+            message: _staticUpdates[_updateIndex],
+            time: DateTime.now(),
+          ));
+          _updateIndex++;
+        });
+      } else {
+        t.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _updateTimer?.cancel();
+    super.dispose();
+  }
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    final s = dt.second.toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  void _cancelSos() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('Cancel SOS?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text(
+            'Are you sure you want to cancel the SOS alert? The support team will be notified.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('No', style: TextStyle(color: Colors.black54, fontSize: 14)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('SOS cancelled. Stay safe!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F5),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+              ),
+              child: Column(
+                children: [
+                  ScaleTransition(
+                    scale: _pulseAnimation,
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(Icons.sos, color: Colors.white, size: 48),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'SOS ALERT SENT',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Sent at ${_formatTime(widget.sentAt)}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Details
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  _InfoTile(
+                    icon: Icons.person,
+                    label: 'Worker',
+                    value: widget.workerName.isEmpty ? 'Unknown' : widget.workerName,
+                  ),
+                  const SizedBox(height: 10),
+                  _InfoTile(
+                    icon: Icons.location_on,
+                    label: 'Last Known Location',
+                    value: widget.location.isEmpty ? 'Location unavailable' : widget.location,
+                  ),
+                  if (widget.bookingId != null) ...[
+                    const SizedBox(height: 10),
+                    _InfoTile(
+                      icon: Icons.work_outline,
+                      label: 'Active Booking',
+                      value: 'BK-${widget.bookingId}',
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  _InfoTile(
+                    icon: Icons.support_agent,
+                    label: 'Support Contact',
+                    value: '+91 98765 43210',
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Live status updates
+            if (_updates.isNotEmpty)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Status Updates',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: _updates.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (_, i) {
+                            final u = _updates[i];
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.circle, size: 8, color: Colors.red),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(u.message,
+                                      style: const TextStyle(fontSize: 13)),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(_formatTime(u.time),
+                                    style: const TextStyle(fontSize: 11, color: Colors.black45)),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              const Spacer(),
+
+            // Cancel button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: _cancelSos,
+                  icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                  label: const Text(
+                    'Cancel SOS',
+                    style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SosUpdate {
+  final String message;
+  final DateTime time;
+  _SosUpdate({required this.message, required this.time});
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoTile({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC8CBD0), width: 0.6),
+        boxShadow: const [
+          BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: Colors.red),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 11, color: Colors.black45)),
+                const SizedBox(height: 2),
+                Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Animated Attendance Chip
+// ─────────────────────────────────────────────
+
+class AttendanceChip extends StatefulWidget {
+  final String label;
+  final VoidCallback? onTap;
+
+  const AttendanceChip({super.key, required this.label, this.onTap});
+
+  @override
+  State<AttendanceChip> createState() => _AttendanceChipState();
+}
+
+class _AttendanceChipState extends State<AttendanceChip>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  bool _pressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Gentle continuous pulse to draw attention
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: ScaleTransition(
+        scale: _pulseAnimation,
+        // Press feedback: shrink slightly while held
+        child: AnimatedScale(
+          scale: _pressed ? 0.92 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: _pressed ? Colors.blue.shade50 : Colors.white,
+              border: Border.all(
+                color: Colors.blue,
+                width: 1.2,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.access_time, size: 14, color: Colors.blue),
+                const SizedBox(width: 4),
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

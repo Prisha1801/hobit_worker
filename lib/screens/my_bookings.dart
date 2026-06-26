@@ -27,6 +27,7 @@ class BookingModel {
   final String endDate;     //
   final List<String> addonNames;
   final List<int> addonQty;
+  final String acceptanceStatus; // pending | accepted | declined
 
   BookingModel({
     required this.id,
@@ -44,6 +45,7 @@ class BookingModel {
 
     required this.addonNames,
     required this.addonQty,
+    required this.acceptanceStatus,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -73,6 +75,7 @@ class BookingModel {
       endDate: json['end_date'] ?? '', // NEW
       addonNames: addonNames,
       addonQty: addonQty,
+      acceptanceStatus: json['acceptance_status']?.toString() ?? '',
     );
   }
 }
@@ -109,6 +112,67 @@ class BookingApi {
 
     final List list = res.data['data'];
     return list.map((e) => BookingModel.fromJson(e)).toList();
+  }
+
+  /// POST /api/worker/bookingrequest/{id}/accept
+  static Future<Map<String, dynamic>> acceptBooking(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        '/api/worker/bookingrequest/$bookingId/accept',
+        {},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      return {
+        'success': res.data['success'] == true,
+        'message': res.data['message']?.toString() ?? '',
+        'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+      };
+    } catch (e) {
+      debugPrint("Accept booking error: $e");
+      return {'success': false, 'message': 'Something went wrong'};
+    }
+  }
+
+  /// POST /api/worker/bookingrequest/{id}/decline   body(optional): { "reason": ".." }
+  static Future<Map<String, dynamic>> declineBooking(
+    int bookingId, {
+    String? reason,
+  }) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        '/api/worker/bookingrequest/$bookingId/decline',
+        (reason != null && reason.trim().isNotEmpty)
+            ? {'reason': reason.trim()}
+            : {},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      return {
+        'success': res.data['success'] == true,
+        'message': res.data['message']?.toString() ?? '',
+        'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+      };
+    } catch (e) {
+      debugPrint("Decline booking error: $e");
+      return {'success': false, 'message': 'Something went wrong'};
+    }
   }
 
   static Future<RescheduleHistoryModel?> getRescheduleHistory(int bookingId) async {
@@ -212,6 +276,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   List<BookingModel> bookings = [];
   bool loading = true;
   bool isFirstLoad = true;
+
+  /// Booking ids currently being accepted/declined (for per-card spinner).
+  final Set<int> _processingIds = {};
 
 
   // @override
@@ -325,6 +392,125 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     setState(() => loading = false);
   }
 
+  /// =======================
+  /// ACCEPT / DECLINE
+  /// =======================
+  Future<void> _acceptBooking(BookingModel booking) async {
+    setState(() => _processingIds.add(booking.id));
+
+    final result = await BookingApi.acceptBooking(booking.id);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(booking.id));
+
+    _showActionSnack(
+      result,
+      successFallback: 'Booking accepted.',
+      failFallback: 'Failed to accept booking.',
+    );
+
+    if (result['success'] == true) {
+      loadBookings(isRefresh: true);
+    }
+  }
+
+  Future<void> _declineBooking(BookingModel booking) async {
+    final reason = await _askDeclineReason();
+    if (reason == null) return; // user cancelled the dialog
+
+    setState(() => _processingIds.add(booking.id));
+
+    final result = await BookingApi.declineBooking(booking.id, reason: reason);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(booking.id));
+
+    _showActionSnack(
+      result,
+      successFallback: 'Booking declined.',
+      failFallback: 'Failed to decline booking.',
+    );
+
+    if (result['success'] == true) {
+      loadBookings(isRefresh: true);
+    }
+  }
+
+  void _showActionSnack(
+    Map<String, dynamic> result, {
+    required String successFallback,
+    required String failFallback,
+  }) {
+    final success = result['success'] == true;
+    final msg = (result['message']?.toString().isNotEmpty == true)
+        ? result['message'].toString()
+        : (success ? successFallback : failFallback);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? kGreen : Colors.red,
+      ),
+    );
+  }
+
+  /// Optional reason dialog before declining. Returns the reason (may be empty)
+  /// or null if the worker cancelled.
+  Future<String?> _askDeclineReason() async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text(
+          'Decline Booking',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Add a reason (optional):',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'e.g. I am not available at that time',
+                hintStyle: const TextStyle(fontSize: 13),
+                contentPadding: const EdgeInsets.all(12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx), // null = cancel
+            child: const Text('Cancel',
+                style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Decline'),
+          ),
+        ],
+      ),
+    );
+  }
 
   // Future<void> loadBookings({bool isRefresh = false}) async {
   //   if (!isRefresh) {
@@ -930,6 +1116,121 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 ),
               );
             },
+          ),
+
+          /// ===== ACCEPT / DECLINE (only for assigned bookings) =====
+          if (booking.status == 'assigned') _buildAcceptDecline(booking),
+        ],
+      ),
+    );
+  }
+
+  /// =======================
+  /// ACCEPT / DECLINE WIDGET
+  /// =======================
+  Widget _buildAcceptDecline(BookingModel booking) {
+    final processing = _processingIds.contains(booking.id);
+    final st = booking.acceptanceStatus.toLowerCase();
+
+    /// Already accepted → status label
+    if (st == 'accepted') {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle, color: kGreen, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'You accepted this booking',
+              style: TextStyle(
+                color: kGreen,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    /// Already declined → status label
+    if (st == 'declined') {
+      return const Padding(
+        padding: EdgeInsets.only(top: 12),
+        child: Row(
+          children: [
+            Icon(Icons.cancel, color: Colors.red, size: 18),
+            SizedBox(width: 6),
+            Text(
+              'You declined this booking',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    /// Pending → Accept + Decline buttons
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Row(
+        children: [
+          /// DECLINE
+          Expanded(
+            child: SizedBox(
+              height: 42,
+              child: OutlinedButton(
+                onPressed: processing ? null : () => _declineBooking(booking),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Decline',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          /// ACCEPT
+          Expanded(
+            child: SizedBox(
+              height: 42,
+              child: ElevatedButton(
+                onPressed: processing ? null : () => _acceptBooking(booking),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: processing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Accept',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+              ),
+            ),
           ),
         ],
       ),

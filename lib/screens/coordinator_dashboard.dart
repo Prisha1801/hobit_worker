@@ -15,6 +15,7 @@ import '../prefs/preference_key.dart';
 import '../utils/appBar_for_home.dart';
 import '../auth/fcm_service.dart';
 import '../auth/logout.dart';
+import '../widgets/booking_repo_home.dart';
 
 class CoordinatorDashboard extends ConsumerStatefulWidget {
   const CoordinatorDashboard({super.key});
@@ -39,7 +40,7 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
 
   // Search for main dashboard
   final TextEditingController _dashboardSearchController =
-      TextEditingController();
+  TextEditingController();
   String _dashboardSearchQuery = "";
 
   @override
@@ -289,6 +290,26 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
     );
   }
 
+  void _openUpdateStatusDialog(BookingData booking) {
+    showDialog(
+      context: context,
+      builder: (context) => UpdateStatusDialog(
+        booking: booking,
+        onSuccess: () => fetchBookings(currentPage),
+      ),
+    );
+  }
+
+  void _openEditBookingDialog(BookingData booking) {
+    showDialog(
+      context: context,
+      builder: (context) => EditBookingDialog(
+        booking: booking,
+        onSuccess: () => fetchBookings(currentPage),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final stats = bookingResponse?.stats;
@@ -487,10 +508,10 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                   ),
                   child: isLoading
                       ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                       : const Text("Refresh Bookings"),
                 ),
               ),
@@ -540,7 +561,7 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: filteredBookings.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final booking = filteredBookings[index];
                     final coordinatorData =
@@ -550,12 +571,13 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                     )
                         : null;
                     return _buildBookingCard(
+                      booking: booking,
                       id: "BK-${booking.id}",
                       service: booking.service.name,
                       category: booking.service.category.name,
                       status: booking.status.isNotEmpty
                           ? booking.status[0].toUpperCase() +
-                                booking.status.substring(1)
+                          booking.status.substring(1)
                           : "",
                       paymentStatus: booking.paymentStatus,
                       customer: booking.customerName,
@@ -567,17 +589,18 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                       workerId: booking.worker?.publicId,
                       coordinator: coordinatorData?.name ?? "Not assigned",
                       hideCoordinator: selectedFilter == "My Bookings",
-
                       date: booking.bookingDate,
                       time: booking.timeSlot,
                       address: booking.address,
                       amount: "₹${booking.amount}",
                       showAssignWorker:
-                          (booking.paymentStatus ?? "").toLowerCase() ==
-                              "paid" &&
+                      (booking.paymentStatus ?? "").toLowerCase() ==
+                          "paid" &&
                           booking.status != "completed" &&
                           booking.status != "assigned",
                       onAssignTap: () => _openAssignWorkerDialog(booking),
+                      onUpdateStatusTap: () => _openUpdateStatusDialog(booking),
+                      onEditTap: () => _openEditBookingDialog(booking),
                     );
                   },
                 ),
@@ -689,6 +712,7 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
   }
 
   Widget _buildBookingCard({
+    required BookingData booking,
     required String id,
     required String service,
     required String category,
@@ -710,6 +734,8 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
     bool showAssignWorker = false,
     bool hideCoordinator = false,
     VoidCallback? onAssignTap,
+    VoidCallback? onUpdateStatusTap,
+    VoidCallback? onEditTap,
   }) {
     Color statusColor = status == "Pending"
         ? Colors.orange
@@ -1109,7 +1135,7 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                           longitude!.isNotEmpty) {
                         try {
                           final position =
-                              await LocationService.getCurrentLocation();
+                          await LocationService.getCurrentLocation();
                           final String url =
                               "https://www.google.com/maps/dir/?api=1&origin=${position.latitude},${position.longitude}&destination=$latitude,$longitude&travelmode=driving";
                           final uri = Uri.parse(url);
@@ -1160,58 +1186,82 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
           if (amount != null) ...[
             const SizedBox(height: 16),
             const Divider(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            // Amount row
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Amount",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      Text(
-                        amount!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                const Text(
+                  "Amount",
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                if (showAssignWorker)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      OutlinedButton(
-                        onPressed: onAssignTap,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue.shade700,
-                          side: const BorderSide(color: Color(0xFFBFDBFE)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                        ),
-                        child: const FittedBox(child: Text("Assign Worker")),
-                      ),
-                      const SizedBox(width: 4),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.more_vert, color: Colors.grey),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
+                const SizedBox(width: 8),
+                Text(
+                  amount!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
+            ),
+            const SizedBox(height: 12),
+            // Action buttons
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  if (showAssignWorker) ...[
+                    _actionButton(
+                      label: "Assign Worker",
+                      icon: Icons.person_add_outlined,
+                      color: Colors.blue.shade700,
+                      borderColor: const Color(0xFFBFDBFE),
+                      onTap: onAssignTap,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  _actionButton(
+                    label: "Update Status",
+                    icon: Icons.sync_outlined,
+                    color: Colors.orange.shade700,
+                    borderColor: const Color(0xFFFFD580),
+                    onTap: onUpdateStatusTap,
+                  ),
+                  const SizedBox(width: 8),
+                  _actionButton(
+                    label: "Edit",
+                    icon: Icons.edit_outlined,
+                    color: Colors.green.shade700,
+                    borderColor: const Color(0xFFA7F3D0),
+                    onTap: onEditTap,
+                  ),
+                ],
+              ),
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _actionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required Color borderColor,
+    VoidCallback? onTap,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 14, color: color),
+      label: Text(label, style: TextStyle(fontSize: 12, color: color)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: borderColor),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }
@@ -1311,7 +1361,7 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
         workerResponse?.availableWorkers.where((worker) {
           return worker.name.toLowerCase().contains(searchQuery.toLowerCase());
         }).toList() ??
-        [];
+            [];
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -1389,8 +1439,8 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
                           ),
                           decoration: BoxDecoration(
                             color:
-                                widget.booking.paymentStatus.toLowerCase() ==
-                                    "paid"
+                            widget.booking.paymentStatus.toLowerCase() ==
+                                "paid"
                                 ? Colors.green.withOpacity(0.1)
                                 : Colors.red.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(4),
@@ -1399,8 +1449,8 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
                             widget.booking.paymentStatus.toUpperCase(),
                             style: TextStyle(
                               color:
-                                  widget.booking.paymentStatus.toLowerCase() ==
-                                      "paid"
+                              widget.booking.paymentStatus.toLowerCase() ==
+                                  "paid"
                                   ? Colors.green
                                   : Colors.red,
                               fontSize: 9,
@@ -1460,23 +1510,23 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
             else if (workerResponse?.availableWorkers.isEmpty ?? true)
               const Center(child: Text("No available workers found"))
             else if (filteredWorkers.isEmpty)
-              const Center(child: Text("No matching workers found"))
-            else
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.3,
+                const Center(child: Text("No matching workers found"))
+              else
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.3,
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: filteredWorkers.length,
+                    separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final worker = filteredWorkers[index];
+                      return _buildWorkerItem(worker);
+                    },
+                  ),
                 ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: filteredWorkers.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final worker = filteredWorkers[index];
-                    return _buildWorkerItem(worker);
-                  },
-                ),
-              ),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -1640,6 +1690,419 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Update Status Dialog
+// ─────────────────────────────────────────────────────────────────────────────
+
+class UpdateStatusDialog extends StatefulWidget {
+  final BookingData booking;
+  final VoidCallback onSuccess;
+
+  const UpdateStatusDialog({
+    super.key,
+    required this.booking,
+    required this.onSuccess,
+  });
+
+  @override
+  State<UpdateStatusDialog> createState() => _UpdateStatusDialogState();
+}
+
+class _UpdateStatusDialogState extends State<UpdateStatusDialog> {
+  bool isLoading = false;
+  late String selectedStatus;
+
+  static const List<Map<String, dynamic>> _statusOptions = [
+    {'value': 'pending',    'label': 'Pending',     'color': Colors.orange},
+    {'value': 'assigned',   'label': 'Assigned',    'color': Colors.indigo},
+    {'value': 'inprogress', 'label': 'In Progress', 'color': Colors.blue},
+    {'value': 'completed',  'label': 'Completed',   'color': Colors.green},
+    {'value': 'cancelled',  'label': 'Cancelled',   'color': Colors.red},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedStatus = widget.booking.status;
+  }
+
+  Future<void> _submit() async {
+    if (selectedStatus == widget.booking.status) {
+      Navigator.pop(context);
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final success = await BookingApi.updateBookingStatus(
+      bookingId: widget.booking.id,
+      status: selectedStatus,
+    );
+
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    if (success) {
+      Navigator.pop(context);
+      widget.onSuccess();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Booking status updated successfully")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update status. Please try again.")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Update Status",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              "BK-${widget.booking.id} · ${widget.booking.service.name}",
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+
+            // Status options
+            ..._statusOptions.map((opt) {
+              final isSelected = selectedStatus == opt['value'];
+              final color = opt['color'] as Color;
+              return GestureDetector(
+                onTap: () => setState(() => selectedStatus = opt['value'] as String),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color.withValues(alpha: 0.07) : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected ? color : Colors.grey.shade200,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        opt['label'] as String,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? color : Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (isSelected) Icon(Icons.check_circle, color: color, size: 18),
+                    ],
+                  ),
+                ),
+              );
+            }),
+
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text("Cancel"),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4F46E5),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                        : const Text("Update"),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit Booking Dialog
+// ─────────────────────────────────────────────────────────────────────────────
+
+class EditBookingDialog extends StatefulWidget {
+  final BookingData booking;
+  final VoidCallback onSuccess;
+
+  const EditBookingDialog({
+    super.key,
+    required this.booking,
+    required this.onSuccess,
+  });
+
+  @override
+  State<EditBookingDialog> createState() => _EditBookingDialogState();
+}
+
+class _EditBookingDialogState extends State<EditBookingDialog> {
+  bool isLoading = false;
+  late TextEditingController _dateCtrl;
+  late TextEditingController _timeCtrl;
+  late TextEditingController _addressCtrl;
+  late TextEditingController _amountCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateCtrl    = TextEditingController(text: widget.booking.bookingDate);
+    _timeCtrl    = TextEditingController(text: widget.booking.timeSlot);
+    _addressCtrl = TextEditingController(text: widget.booking.address);
+    _amountCtrl  = TextEditingController(text: widget.booking.amount);
+  }
+
+  @override
+  void dispose() {
+    _dateCtrl.dispose();
+    _timeCtrl.dispose();
+    _addressCtrl.dispose();
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    DateTime initial;
+    try {
+      initial = DateFormat('yyyy-MM-dd').parse(_dateCtrl.text);
+    } catch (_) {
+      initial = DateTime.now();
+    }
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      _dateCtrl.text = DateFormat('yyyy-MM-dd').format(picked);
+    }
+  }
+
+  Future<void> _submit() async {
+    final date    = _dateCtrl.text.trim();
+    final time    = _timeCtrl.text.trim();
+    final address = _addressCtrl.text.trim();
+    final amount  = _amountCtrl.text.trim();
+
+    if (date.isEmpty || time.isEmpty || address.isEmpty || amount.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final success = await BookingApi.editBooking(
+      bookingId: widget.booking.id,
+      bookingDate: date,
+      timeSlot: time,
+      address: address,
+      amount: amount,
+    );
+
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    if (success) {
+      Navigator.pop(context);
+      widget.onSuccess();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Booking updated successfully")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update booking. Please try again.")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Edit Booking",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            Text(
+              "BK-${widget.booking.id} · ${widget.booking.service.name}",
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 20),
+
+            // Booking Date
+            _fieldLabel("Booking Date"),
+            TextFormField(
+              controller: _dateCtrl,
+              readOnly: true,
+              onTap: _pickDate,
+              decoration: _inputDecoration(
+                hint: "yyyy-MM-dd",
+                suffix: const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // Time Slot
+            _fieldLabel("Time Slot"),
+            TextFormField(
+              controller: _timeCtrl,
+              decoration: _inputDecoration(
+                hint: "e.g. 10:00 AM - 12:00 PM",
+                suffix: const Icon(Icons.access_time, size: 18, color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // Address
+            _fieldLabel("Address"),
+            TextFormField(
+              controller: _addressCtrl,
+              maxLines: 2,
+              decoration: _inputDecoration(hint: "Enter address"),
+            ),
+            const SizedBox(height: 14),
+
+            // Amount
+            _fieldLabel("Amount (₹)"),
+            TextFormField(
+              controller: _amountCtrl,
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration(hint: "Enter amount", prefix: "₹ "),
+            ),
+            const SizedBox(height: 24),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text("Cancel"),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4F46E5),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                        : const Text("Save Changes"),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _fieldLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+  );
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    Widget? suffix,
+    String? prefix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixText: prefix,
+      suffixIcon: suffix,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 }

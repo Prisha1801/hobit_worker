@@ -122,6 +122,33 @@ class WorkerApi {
       ),
     );
   }
+
+  static Future<Map<String, dynamic>> deleteAccount({
+    required String email,
+    required String fullName,
+    required String phone,
+  }) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+      final res = await ApiService.postRequest(
+        '/api/delete-account-request',
+        {'email': email, 'full_name': fullName, 'phone': phone, 'role': 'worker'},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (res.data is Map<String, dynamic>) {
+        return res.data as Map<String, dynamic>;
+      }
+      return {'success': true, 'message': 'Request submitted'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
 
 class PersonalInformationScreen extends StatefulWidget {

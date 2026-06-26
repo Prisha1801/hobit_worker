@@ -9,6 +9,7 @@ import 'package:hobit_worker/utils/app_bar.dart';
 import '../api_services/location_service.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/bottom_nav_bar.dart';
+import '../widgets/booking_repo_home.dart';
 
 class ConfirmLocationScreen extends StatefulWidget {
   const ConfirmLocationScreen({super.key});
@@ -151,7 +152,20 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  print("✅ [ConfirmLocation] Confirm Location pressed");
+                  print(
+                    "📍 [ConfirmLocation] Confirmed worker location: "
+                    "${LocationStore.lat}, ${LocationStore.lng}",
+                  );
+
+                  // 🔥 Share the worker's location with the customer(s) now.
+                  await BookingApi.broadcastWorkerLocation(
+                    latitude: LocationStore.lat,
+                    longitude: LocationStore.lng,
+                  );
+
+                  if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const MainScreen()),
