@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hobit_worker/screens/reschedule.dart';
 import '../api_services/api_services.dart';
+import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
+import '../models/available_booking_model.dart';
 import '../models/extend_service_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
@@ -112,6 +114,54 @@ class BookingApi {
 
     final List list = res.data['data'];
     return list.map((e) => BookingModel.fromJson(e)).toList();
+  }
+
+  /// GET /api/worker/available-bookings — unclaimed bookings the worker can claim
+  static Future<List<AvailableBookingModel>> getAvailableBookings() async {
+    final token = AppPreference().getString(PreferencesKey.token);
+
+    final res = await ApiService.getRequest(
+      availableBookingsUrl,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    final List list = res.data['data'] ?? [];
+    return list.map((e) => AvailableBookingModel.fromJson(e)).toList();
+  }
+
+  /// POST /api/worker/bookingrequest/{id}/claim
+  static Future<Map<String, dynamic>> claimBooking(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        claimBookingUrl(bookingId),
+        {},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      return {
+        'success': res.data['success'] == true,
+        'message': res.data['message']?.toString() ?? '',
+        'booking_id': res.data['booking_id'],
+        'status': res.data['status']?.toString() ?? '',
+        'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+      };
+    } catch (e) {
+      debugPrint("Claim booking error: $e");
+      return {'success': false, 'message': 'Something went wrong'};
+    }
   }
 
   /// POST /api/worker/bookingrequest/{id}/accept
@@ -250,7 +300,7 @@ class BookingApi {
 
 }
 /// STATUS ENUM
-enum JobStatus { all,assigned, inProgress, completed,  subscription }
+enum JobStatus { all, available, assigned, inProgress, completed,  subscription }
 /// SCREEN
 // class BookingsScreen extends StatefulWidget {
 //   final String? initialStatus;
@@ -274,10 +324,14 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     with WidgetsBindingObserver {
   JobStatus selectedTab = JobStatus.all;
   List<BookingModel> bookings = [];
+
+  /// Unclaimed bookings shown under the "Available" tab.
+  List<AvailableBookingModel> availableBookings = [];
+
   bool loading = true;
   bool isFirstLoad = true;
 
-  /// Booking ids currently being accepted/declined (for per-card spinner).
+  /// Booking ids currently being accepted/declined/claimed (for per-card spinner).
   final Set<int> _processingIds = {};
 
 
@@ -350,6 +404,13 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     }
 
     try {
+      /// Available (unclaimed) bookings use a separate endpoint.
+      if (selectedTab == JobStatus.available) {
+        availableBookings = await BookingApi.getAvailableBookings();
+        setState(() => loading = false);
+        return;
+      }
+
       String? status;
 
       switch (selectedTab) {
@@ -369,6 +430,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
           status = null;
           break;
 
+        case JobStatus.available:
         case JobStatus.all:
           status = null;
           break;
@@ -432,6 +494,30 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     );
 
     if (result['success'] == true) {
+      loadBookings(isRefresh: true);
+    }
+  }
+
+  /// =======================
+  /// CLAIM
+  /// =======================
+  Future<void> _claimBooking(AvailableBookingModel booking) async {
+    setState(() => _processingIds.add(booking.id));
+
+    final result = await BookingApi.claimBooking(booking.id);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(booking.id));
+
+    _showActionSnack(
+      result,
+      successFallback: 'Booking claimed.',
+      failFallback: 'Failed to claim booking.',
+    );
+
+    if (result['success'] == true) {
+      /// Claimed bookings move to "Assigned" — jump there and reload.
+      setState(() => selectedTab = JobStatus.assigned);
       loadBookings(isRefresh: true);
     }
   }
@@ -608,6 +694,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _buildTab(loc.allRequests, JobStatus.all),
+                _buildTab('Available', JobStatus.available),
                 _buildTab(loc.assigned, JobStatus.assigned),
                 _buildTab(loc.inProgress, JobStatus.inProgress),
                 _buildTab(loc.completed, JobStatus.completed),
@@ -631,6 +718,26 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                   Center(child: CircularProgressIndicator()),
                 ],
               )
+                  : selectedTab == JobStatus.available
+                  ? (availableBookings.isEmpty
+                  ? ListView(
+                children: [
+                  const SizedBox(height: 200),
+                  Center(child: Text(loc.noBookingsFound)),
+                ],
+              )
+                  : ListView.builder(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: availableBookings.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding:
+                    const EdgeInsets.only(bottom: 12),
+                    child: _availableCard(availableBookings[index]),
+                  );
+                },
+              ))
                   : bookings.isEmpty
                   ? ListView(
                 children: [
@@ -1120,6 +1227,186 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
 
           /// ===== ACCEPT / DECLINE (only for assigned bookings) =====
           if (booking.status == 'assigned') _buildAcceptDecline(booking),
+        ],
+      ),
+    );
+  }
+
+  /// =======================
+  /// AVAILABLE (CLAIMABLE) CARD
+  /// =======================
+  Widget _availableCard(AvailableBookingModel booking) {
+    final processing = _processingIds.contains(booking.id);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: kWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            offset: Offset(0, 4),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// TOP ROW
+          Row(
+            children: [
+              const CircleAvatar(radius: 20, child: Icon(Icons.person)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  booking.customerName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9F8EE),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Available',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          /// SERVICE + DATE/TIME
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Service Requested',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      booking.serviceName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (booking.amount.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          "₹${booking.amount}",
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Date & Time',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      booking.bookingDate,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      booking.timeSlot,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+          const Divider(),
+
+          /// LOCATION + ID
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.green),
+              const SizedBox(width: 6),
+              Expanded(child: Text(booking.address)),
+              Text(
+                "BK-${booking.id}",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+
+          /// ===== CLAIM BUTTON =====
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: (processing || !booking.claimable)
+                    ? null
+                    : () => _claimBooking(booking),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kkblack,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: processing
+                    ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Icon(Icons.add_task, size: 18),
+                label: Text(
+                  booking.claimable ? 'Claim Booking' : 'Not Claimable',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

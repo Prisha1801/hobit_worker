@@ -1,0 +1,411 @@
+{
+  "info": {
+    "name": "Hobit — Live Tracking (Firebase RTDB)",
+    "description": "Live tracking API (On My Way mode).\n\nFlow:\n1. Worker app -> POST /tracking/start  (returns firebase_custom_token + driver_path)\n2. Worker app writes GPS straight to Firebase RTDB at driver_path (NOT tested here)\n3. Customer app -> GET /tracking/{booking_id}  (returns read token + worker + destination)\n4. Customer app listens to Firebase RTDB (NOT tested here)\n5. Worker app -> POST /booking/end-service (existing; auto-stops tracking)\n   or POST /tracking/stop (optional)\n\nSet the collection variables first:\n- base_url        : e.g. https://hobitadmin.hobit.club/api  (or http://localhost/Hobit/public/api for local)\n- worker_token    : Sanctum bearer token of a logged-in WORKER\n- customer_token  : Sanctum bearer token of the booking's CUSTOMER\n- booking_id      : a real booking id assigned to that worker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Worker — Start (On My Way)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{worker_token}}",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Worker taps 'On My Way'. Creates a tracking session and returns:\n- firebase_custom_token  -> worker app signs in (signInWithCustomToken) on hobitpartner\n- driver_path            -> where the worker app writes GPS (e.g. drivers/12)\nAlso sends the customer a 'worker on the way' FCM push.",
+        "url": {
+          "raw": "{{base_url}}/tracking/start",
+          "protocol": "",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tracking",
+            "start"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": {{booking_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Tracking started.\",\n  \"booking_id\": 44,\n  \"worker_id\": 12,\n  \"firebase_custom_token\": \"eyJ...\",\n  \"driver_path\": \"drivers/12\"\n}",
+          "_postman_previewlanguage": "json"
+        },
+        {
+          "name": "Not your booking (403)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"This booking is not assigned to you.\"\n}",
+          "_postman_previewlanguage": "json"
+        }
+      ]
+    },
+    {
+      "name": "2. Customer — Track (watch)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{customer_token}}",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": {
+            "key": "token",
+            "value": "2288|b1ucNl4iVSpXKpAOGJQfVOxJhRzpVL4deyxYTM24c692f183",
+            "type": "string"
+          }
+        },
+        "description": "Customer opens 'Track my worker'. Returns:\n- tracking (true/false)\n- firebase_custom_token  -> customer app signs in on hobitpartner (secondary app)\n- driver_path            -> node to listen on\n- worker.name, destination{lat,lng,address}\nIf the worker has not tapped 'On My Way' yet, tracking=false with a message.",
+        "url": {
+          "raw": "{{base_url}}/tracking/{{booking_id}}",
+          "protocol": "",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tracking",
+            "{{booking_id}}"
+          ],
+          "query": [],
+          "variable": []
+        }
+      },
+      "response": [
+        {
+          "name": "Worker sharing (tracking true)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"tracking\": true,\n  \"booking_id\": 44,\n  \"worker_id\": 12,\n  \"worker\": { \"name\": \"Suresh\" },\n  \"firebase_custom_token\": \"eyJ...\",\n  \"driver_path\": \"drivers/12\",\n  \"destination\": { \"latitude\": 19.119, \"longitude\": 72.847, \"address\": \"...\" }\n}",
+          "_postman_previewlanguage": "json"
+        },
+        {
+          "name": "Worker not started yet (tracking false)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"tracking\": false,\n  \"message\": \"Worker has not started sharing location yet.\",\n  \"destination\": { \"latitude\": 19.119, \"longitude\": 72.847, \"address\": \"...\" }\n}",
+          "_postman_previewlanguage": "json"
+        }
+      ]
+    },
+    {
+      "name": "3. Worker — Stop (optional)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{worker_token}}",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Optional standalone stop (e.g. worker cancels before formally ending).\nMarks the session inactive and removes drivers/{worker_id} if the worker has no other active trip.\nNOTE: the existing /booking/end-service already does this automatically.",
+        "url": {
+          "raw": "{{base_url}}/tracking/stop",
+          "protocol": "",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tracking",
+            "stop"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": {{booking_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Tracking stopped.\"\n}",
+          "_postman_previewlanguage": "json"
+        }
+      ]
+    },
+    {
+      "name": "4. Worker — End Service (existing — auto-stops tracking)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{worker_token}}",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Your EXISTING end-service endpoint (unchanged behaviour). It now ALSO stops live tracking automatically: marks the session inactive and removes the worker's Firebase node. Booking must be 'inprogress'.",
+        "url": {
+          "raw": "{{base_url}}/booking/end-service",
+          "protocol": "",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "booking",
+            "end-service"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": {{booking_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "",
+              "protocol": "",
+              "host": [],
+              "path": [],
+              "query": [],
+              "variable": []
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "name": "Content-Type",
+              "description": "",
+              "type": "text"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"✅ Service has been ended.\",\n  \"status\": \"completed\"\n}",
+          "_postman_previewlanguage": "json"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://testing.hobit.club/api",
+      "type": "default"
+    },
+    {
+      "key": "worker_token",
+      "value": "2280|ZhhvRYoRmNcO9MgaXfjzze9rGBZgDYRYANmUos1o3daac3ac",
+      "type": "default"
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "booking_id",
+      "value": "545",
+      "type": "default"
+    }
+  ]
+}

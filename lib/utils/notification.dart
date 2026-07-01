@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../api_services/api_services.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
+import '../models/available_booking_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import '../screens/my_bookings.dart';
@@ -185,8 +186,20 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   bool isLoading = true;
   List<BookingNotificationModel> bookings = [];
 
+  /// Unclaimed bookings (workers only) shown at the top with a Claim action.
+  List<AvailableBookingModel> availableBookings = [];
+
+  /// Booking ids currently being claimed (per-card spinner).
+  final Set<int> _claimingIds = {};
+
   // Coordinator-specific view: either 'today' or 'upcoming'
   String coordinatorView = 'today'; // 'today' or 'upcoming'
+
+  // Worker-specific view: either 'today' or 'claim'
+  String workerView = 'today'; // 'today' or 'claim'
+
+  /// Auto-open the Claim tab once on first load if claim bookings exist.
+  bool _didAutoSelectWorkerView = false;
 
   late final bool isCoordinator;
 
@@ -207,6 +220,23 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     setState(() => isLoading = true);
 
     try {
+      /// Workers also see unclaimed (available) bookings they can claim.
+      if (!isCoordinator) {
+        try {
+          availableBookings = await BookingApi.getAvailableBookings();
+        } catch (e) {
+          debugPrint("Available bookings error: $e");
+          availableBookings = [];
+        }
+
+        /// First load only: open the Claim tab if there are claim bookings,
+        /// else stay on Today. Manual toggles afterwards are respected.
+        if (!_didAutoSelectWorkerView) {
+          workerView = availableBookings.isNotEmpty ? 'claim' : 'today';
+          _didAutoSelectWorkerView = true;
+        }
+      }
+
       final data = await getAllNotifications();
       print("TOTAL BOOKINGS ======> ${data.length}");
 
@@ -297,6 +327,36 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
       );
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  /// ================= CLAIM =================
+  Future<void> _claimBooking(AvailableBookingModel booking) async {
+    setState(() => _claimingIds.add(booking.id));
+
+    final result = await BookingApi.claimBooking(booking.id);
+
+    if (!mounted) return;
+    setState(() => _claimingIds.remove(booking.id));
+
+    final success = result['success'] == true;
+    final msg = (result['message']?.toString().isNotEmpty == true)
+        ? result['message'].toString()
+        : (success ? 'Booking claimed.' : 'Failed to claim booking.');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+
+    if (success) {
+      /// Remove the claimed booking and refresh the lists.
+      setState(() {
+        availableBookings.removeWhere((b) => b.id == booking.id);
+      });
+      fetchBookings();
     }
   }
 
@@ -463,24 +523,51 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                 ],
               ),
             ]else ...[
+              /// TITLE
               Text(
-                loc.today_notifications,
+                workerView == 'today'
+                    ? loc.today_notifications
+                    : 'Claim Bookings',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
+              const SizedBox(height: 14),
+
+              /// TOGGLE BUTTONS (Today / Claim)
+              Row(
+                children: [
+                  Expanded(child: _workerToggle('today', 'Today')),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _workerToggle(
+                      'claim',
+                      'Claim',
+                      count: availableBookings.length,
+                    ),
+                  ),
+                ],
+              ),
             ],
 
             const SizedBox(height: 12),
 
-            /// BOOKINGS
-            if (bookings.isEmpty)
-              _emptyState()
-            else
-              ...bookings.map(
-                    (item) => _notificationCard(item),
-              ),
+            /// ===== CONTENT =====
+            if (isCoordinator || workerView == 'today') ...[
+              /// TODAY / COORDINATOR NOTIFICATIONS
+              if (bookings.isEmpty)
+                _emptyState()
+              else
+                ...bookings.map((item) => _notificationCard(item)),
+            ] else ...[
+              /// CLAIM (AVAILABLE) BOOKINGS
+              if (availableBookings.isEmpty)
+                _claimEmptyState()
+              else
+                ...availableBookings.map(_availableCard),
+            ],
           ],
         ),
       ),
@@ -628,6 +715,218 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  /// ================= WORKER TOGGLE (Today / Claim) =================
+  Widget _workerToggle(String value, String label, {int count = 0}) {
+    final selected = workerView == value;
+
+    return GestureDetector(
+      onTap: () {
+        if (workerView != value) {
+          setState(() => workerView = value);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? Colors.black : Colors.grey.shade300,
+          ),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : Colors.black87,
+                ),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: selected ? Colors.white : Colors.green,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? Colors.black : Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ================= CLAIM EMPTY STATE =================
+  Widget _claimEmptyState() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.only(top: 60),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.assignment_turned_in_outlined,
+                size: 60, color: Colors.grey),
+            SizedBox(height: 10),
+            Text('No bookings to claim right now'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ================= AVAILABLE (CLAIMABLE) CARD =================
+  Widget _availableCard(AvailableBookingModel item) {
+    final claiming = _claimingIds.contains(item.id);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// TITLE + BADGE
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  item.serviceName.isNotEmpty
+                      ? item.serviceName
+                      : 'New Booking',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'AVAILABLE',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          /// CUSTOMER + ID
+          Text(
+            "Booking #${item.id} • ${item.customerName}",
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+
+          const SizedBox(height: 4),
+
+          /// DATE TIME
+          Text(
+            "${item.bookingDate} • ${item.timeSlot}",
+            style: const TextStyle(fontSize: 11, color: Colors.black45),
+          ),
+
+          const SizedBox(height: 4),
+
+          /// ADDRESS + AMOUNT
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 14, color: Colors.green),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  item.address,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: Colors.black45),
+                ),
+              ),
+              if (item.amount.isNotEmpty)
+                Text(
+                  "₹${item.amount}",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          /// ===== CLAIM BUTTON =====
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: ElevatedButton.icon(
+              onPressed: (claiming || !item.claimable)
+                  ? null
+                  : () => _claimBooking(item),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: Colors.grey.shade400,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: claiming
+                  ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+                  : const Icon(Icons.add_task, size: 16),
+              label: Text(
+                item.claimable ? 'Claim Booking' : 'Not Claimable',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
         ],
       ),
     );

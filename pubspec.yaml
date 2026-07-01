@@ -50,7 +50,10 @@ dependencies:
   share_plus: ^7.2.1
   firebase_core: ^3.8.0
   firebase_messaging: ^15.1.5
+  firebase_auth: ^5.3.3
+  firebase_database: ^11.1.6
   flutter_local_notifications: ^19.0.0
+  smart_auth: ^3.2.0
   connectivity_plus:
   google_fonts:
 dev_dependencies:

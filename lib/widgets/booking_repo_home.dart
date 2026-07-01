@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import '../api_services/api_services.dart';
+import '../api_services/urls.dart';
 import '../models/booking_model.dart';
 import '../models/booking_timer_model.dart';
 import '../models/extend_service_model.dart';
@@ -8,6 +9,68 @@ import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 
 class BookingApi {
+
+  /// 🔥 LIVE TRACKING — worker taps "On My Way".
+  /// POST /api/tracking/start  body: { "booking_id": id }
+  /// Returns the Firebase custom token + driver_path the worker app writes GPS to.
+  static Future<Map<String, dynamic>> startTracking(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        trackingStartUrl,
+        {"booking_id": bookingId},
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      return {
+        "success": res.data["success"] == true,
+        "message": res.data["message"]?.toString() ?? "",
+        "worker_id": res.data["worker_id"],
+        "firebase_custom_token":
+            res.data["firebase_custom_token"]?.toString() ?? "",
+        "driver_path": res.data["driver_path"]?.toString() ?? "",
+      };
+    } catch (e) {
+      debugPrint("Start tracking error: $e");
+      return {"success": false, "message": "Failed to start tracking"};
+    }
+  }
+
+  /// 🔥 LIVE TRACKING — optional standalone stop.
+  /// POST /api/tracking/stop  body: { "booking_id": id }
+  /// (end-service already auto-stops tracking on the backend.)
+  static Future<Map<String, dynamic>> stopTracking(int bookingId) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        trackingStopUrl,
+        {"booking_id": bookingId},
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      return {
+        "success": res.data["success"] == true,
+        "message": res.data["message"]?.toString() ?? "",
+      };
+    } catch (e) {
+      debugPrint("Stop tracking error: $e");
+      return {"success": false, "message": "Failed to stop tracking"};
+    }
+  }
 
   static Future<List<AssignedBookingModel>> getAssignedBookings() async {
     final token = AppPreference().getString(PreferencesKey.token);

@@ -23,6 +23,20 @@ const String getPersonalInfoUrl = "/api/worker/me";
 const String fcmTokenUrl = "/api/user/fcm-token";
 const String notificationUrl = "/api/worker/bookings";
 
+// Available (unclaimed) bookings — worker can claim these
+const String availableBookingsUrl = "/api/worker/available-bookings";
+String claimBookingUrl(int bookingId) =>
+    "/api/worker/bookingrequest/$bookingId/claim";
+
+// Live tracking ("On My Way") — worker streams GPS to Firebase RTDB
+const String trackingStartUrl = "/api/tracking/start";
+const String trackingStopUrl = "/api/tracking/stop";
+
+// Firebase Realtime Database URL for the "hobitpartner" project.
+// (Not present in google-services.json, so it must be set explicitly.)
+const String hobitRtdbUrl =
+    "https://hobitpartner-default-rtdb.asia-southeast1.firebasedatabase.app";
+
 // Attendance APIs worker
 const String checkInUrl = "/api/checkin";
 const String checkOutUrl = "/api/checkout";

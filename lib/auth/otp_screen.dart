@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_auth/smart_auth.dart';
 import 'package:hobit_worker/auth/permission_screen.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import '../api_services/api_services.dart';
@@ -32,8 +33,69 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   bool isLoading = false;
 
+  /// 🔥 SMS auto-fetch (User Consent API — no SMS permission needed)
+  final SmartAuth _smartAuth = SmartAuth.instance;
+
   /// OTP String
   String get otp => _controllers.map((e) => e.text).join();
+
+  @override
+  void initState() {
+    super.initState();
+    // Start listening for the incoming OTP SMS as soon as the screen opens.
+    _listenForOtpSms();
+  }
+
+  /// 🔥 Auto-read the OTP from an incoming SMS via the SMS User Consent API.
+  /// NOTE: auto-fetch works only for SMS. WhatsApp OTPs cannot be auto-read,
+  /// so we skip listening when the worker chose WhatsApp.
+  Future<void> _listenForOtpSms() async {
+    if (widget.otpType != "sms") {
+      debugPrint("📩 [OTP] Auto-fetch skipped (type = ${widget.otpType})");
+      return;
+    }
+
+    debugPrint("📩 [OTP] Waiting for OTP SMS (User Consent)...");
+
+    try {
+      final res = await _smartAuth.getSmsWithUserConsentApi();
+      if (!mounted) return;
+
+      if (res.hasData) {
+        final code = res.requireData.code;
+        debugPrint("📩 [OTP] SMS received → extracted code: $code");
+        if (code != null && code.isNotEmpty) {
+          _fillOtp(code);
+        }
+      } else if (res.isCanceled) {
+        debugPrint("📩 [OTP] Auto-fetch canceled by user");
+      } else {
+        debugPrint("📩 [OTP] Auto-fetch failed / no code");
+      }
+    } catch (e) {
+      debugPrint("📩 [OTP] Auto-fetch error: $e");
+    }
+  }
+
+  /// 🔥 Fill the 6 boxes from an auto-fetched code, then auto-submit.
+  void _fillOtp(String code) {
+    final digits = code.replaceAll(RegExp(r'[^0-9]'), '');
+    debugPrint("📩 [OTP] Filling boxes with: $digits");
+
+    if (digits.length < 6) {
+      debugPrint("📩 [OTP] Code shorter than 6 digits — ignored");
+      return;
+    }
+
+    final otp6 = digits.substring(0, 6);
+    for (int i = 0; i < 6; i++) {
+      _controllers[i].text = otp6[i];
+    }
+    setState(() {});
+
+    // Auto-verify once the code is filled.
+    verifyOtp();
+  }
 
   /// Clear OTP Fields
   void clearOtpFields() {
@@ -61,6 +123,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
       if (data != null && data["status"] == true) {
         clearOtpFields();
+
+        // 🔥 Re-arm the SMS auto-fetch listener for the new OTP.
+        _listenForOtpSms();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -177,6 +242,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   void dispose() {
+    // 🔥 Stop the SMS User Consent listener.
+    _smartAuth.removeUserConsentApiListener();
+
     for (var c in _controllers) {
       c.dispose();
     }

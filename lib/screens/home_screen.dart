@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api_services/api_services.dart';
+import '../api_services/live_tracking_service.dart';
 import '../api_services/location_service.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
@@ -42,6 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // AssignedBookingModel? assignedBooking;
   bool loadingBooking = true;
   bool resendLoading = false;
+
+  /// Booking ids whose "On My Way" / stop action is in flight (per-card spinner).
+  final Set<int> _trackingBusy = {};
 
 
   Future<void> loadExtensions(int bookingId) async {
@@ -174,9 +178,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (success) {
+      // end-service auto-stops tracking server-side; just clear it locally.
+      await LiveTrackingService.instance
+          .stop(bookingId: bookingId, notifyBackend: false);
       setState(() => loadingBooking = true);
       await loadTodayJobs();
     }
+  }
+
+  /// 🔥 LIVE TRACKING — worker taps "On My Way".
+  Future<void> _onMyWay(int bookingId) async {
+    setState(() => _trackingBusy.add(bookingId));
+
+    final result = await LiveTrackingService.instance.start(bookingId);
+
+    if (!mounted) return;
+    setState(() => _trackingBusy.remove(bookingId));
+
+    final success = result['success'] == true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result['message']?.toString() ??
+            (success ? 'Sharing your location.' : 'Failed to start tracking.')),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
+  /// 🔥 LIVE TRACKING — worker stops sharing before ending the service.
+  Future<void> _stopSharing(int bookingId) async {
+    setState(() => _trackingBusy.add(bookingId));
+
+    await LiveTrackingService.instance.stop(bookingId: bookingId);
+
+    if (!mounted) return;
+    setState(() => _trackingBusy.remove(bookingId));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Stopped sharing location.')),
+    );
   }
 
   String getStatusText() {
@@ -729,6 +769,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
           ],
 
+          /// ===== ON MY WAY / LIVE LOCATION SHARING =====
+          _buildTrackingButton(booking),
+
           /// ===== BUTTONS =====
           Row(
             children: [
@@ -805,6 +848,99 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+  /// "On My Way" button (starts live location sharing) / active-sharing pill.
+  Widget _buildTrackingButton(AssignedBookingModel booking) {
+    final busy = _trackingBusy.contains(booking.id);
+    final isTracking =
+        LiveTrackingService.instance.isTrackingBooking(booking.id);
+
+    // Currently sharing → show status + stop control.
+    if (isTracking) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.green.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.my_location, size: 18, color: Colors.green),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Sharing your live location',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+              busy
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : TextButton(
+                      onPressed: () => _stopSharing(booking.id),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Stop',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Not sharing yet → "On My Way" button.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SizedBox(
+        width: double.infinity,
+        height: 40,
+        child: ElevatedButton.icon(
+          onPressed: busy ? null : () => _onMyWay(booking.id),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: kkblack,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          icon: busy
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Icon(Icons.navigation, size: 18),
+          label: const Text(
+            'On My Way',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _showSosDialog() {
     showDialog(
@@ -900,7 +1036,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: double.infinity,
                 // height: 160,
-                height: isKycApproved ? 196 : 246, // 🔥 dynamic height
+                height: isKycApproved ? 210 : 260, // 🔥 dynamic height (extra headroom to avoid bottom overflow)
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   // color: const Color(0xFFF5F6FF), // ✅ background
@@ -1238,10 +1374,10 @@ class _OtpDialogState extends State<OtpDialog> {
   Timer? timer;
   bool canResend = false;
   final List<TextEditingController> controllers =
-  List.generate(6, (_) => TextEditingController());
+  List.generate(4, (_) => TextEditingController());
 
   final List<FocusNode> focusNodes =
-  List.generate(6, (_) => FocusNode());
+  List.generate(4, (_) => FocusNode());
 
   @override
   void initState() {
@@ -1354,56 +1490,55 @@ class _OtpDialogState extends State<OtpDialog> {
             const SizedBox(height: 16),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                6,
-                    (index) => SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.1, // responsive
-                  height: 42,
-                  child: TextField(
-                    controller: controllers[index],
-                    focusNode: focusNodes[index],
-                    maxLength: 1,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    textAlignVertical: TextAlignVertical.center,
+              children: List.generate(4, (index) {
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: AspectRatio(
+                      aspectRatio: 1, // perfect square, scales to width
+                      child: TextField(
+                        controller: controllers[index],
+                        focusNode: focusNodes[index],
+                        maxLength: 1,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
 
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        onChanged: (val) {
+                          // Rebuild OTP straight from the boxes so edits /
+                          // backspace anywhere stay correct.
+                          otp = controllers.map((c) => c.text).join();
 
-                    onChanged: (val) {
-                      if (val.isNotEmpty) {
-                        otp += val;
+                          if (val.isNotEmpty && index < 3) {
+                            FocusScope.of(context).nextFocus();
+                          } else if (val.isEmpty && index > 0) {
+                            FocusScope.of(context).previousFocus();
+                          }
+                        },
 
-                        /// 👉 move forward
-                        if (index < 5) {
-                          FocusScope.of(context).nextFocus();
-                        }
-                      } else {
-                        /// 👉 FIX: backspace handle
-                        if (otp.isNotEmpty) {
-                          otp = otp.substring(0, otp.length - 1);
-                        }
-
-                        if (index > 0) {
-                          FocusScope.of(context).previousFocus();
-                        }
-                      }
-                    },
-
-                    decoration: InputDecoration(
-                      counterText: '',
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: kkblack, width: 2),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
 
             const SizedBox(height: 16),
@@ -1538,7 +1673,7 @@ class _OtpDialogState extends State<OtpDialog> {
                 onPressed: loading
                     ? null
                     : () async {
-                  if (otp.length != 6) {
+                  if (otp.length != 4) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(loc.enterValidOtp)),
                     );
