@@ -358,8 +358,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.delete_forever,
-                      title: 'Delete Account',
-                      subtitle: 'Permanently delete your account and data',
+                      title: loc.profDeleteAccount,
+                      subtitle: loc.profDeleteAccountSub,
                       isDestructive: true,
                       onTap: () {
                         if (_profile == null) return;

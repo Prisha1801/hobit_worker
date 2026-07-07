@@ -9,6 +9,7 @@ import '../../models/get_profile_model.dart';
 import '../../prefs/app_preference.dart';
 import '../../prefs/preference_key.dart';
 import '../../utils/app_bar.dart';
+import '../l10n/app_localizations.dart';
 
 class KycScreen extends StatefulWidget {
   const KycScreen({Key? key}) : super(key: key);
@@ -106,8 +107,9 @@ class _KycScreenState extends State<KycScreen> {
       await uploadKycDocuments();
       await fetchProfile();
 
+      final loc = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Document uploaded successfully")),
+        SnackBar(content: Text(loc.kycDocumentUploadedSuccess)),
       );
     } catch (e) {
       debugPrint("Upload error: $e");
@@ -201,6 +203,7 @@ class _KycScreenState extends State<KycScreen> {
     String? fileUrl,
   }) {
     final hasFile = fileUrl != null && fileUrl.isNotEmpty;
+    final loc = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +223,7 @@ class _KycScreenState extends State<KycScreen> {
             children: [
               Expanded(
                 child: Text(
-                  hasFile ? "Document uploaded" : "Upload document",
+                  hasFile ? loc.documentUploaded : loc.uploadDocument,
                   style: TextStyle(
                       color: hasFile ? Colors.black : Colors.grey),
                 ),
@@ -262,50 +265,51 @@ class _KycScreenState extends State<KycScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     if (isLoading) {
-      return const Scaffold(
-        appBar: CommonAppBar(title: 'KYC Verification'),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: CommonAppBar(title: loc.kycTitle),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       backgroundColor: kWhite,
-      appBar: CommonAppBar(title: 'KYC Verification'),
+      appBar: CommonAppBar(title: loc.kycTitle),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _input(
-              label: "Aadhaar Number",
+              label: loc.aadhaarNumber,
               controller: _aadhaarController,
             ),
             _input(
-              label: "Police Verification ID",
+              label: loc.kycPoliceVerificationId,
               controller: _policeController,
             ),
 
             _filePicker(
-              label: "Aadhaar Card (Front)",
+              label: loc.kycAadhaarCardFront,
               docType: "aadhar",
               isFront: true,
               fileUrl: getDocumentUrl("aadhar", true),
             ),
             _filePicker(
-              label: "Aadhaar Card (Back)",
+              label: loc.kycAadhaarCardBack,
               docType: "aadhar",
               isFront: false,
               fileUrl: getDocumentUrl("aadhar", false),
             ),
             _filePicker(
-              label: "Police Verification (Front)",
+              label: loc.kycPoliceVerificationFront,
               docType: "police_verification",
               isFront: true,
               fileUrl: getDocumentUrl("police_verification", true),
             ),
             _filePicker(
-              label: "Police Verification (Back)",
+              label: loc.kycPoliceVerificationBack,
               docType: "police_verification",
               isFront: false,
               fileUrl: getDocumentUrl("police_verification", false),
@@ -323,9 +327,9 @@ class _KycScreenState extends State<KycScreen> {
                   ),
                 ),
                 onPressed: uploadKycDocuments,
-                child: const Text(
-                  "Submit KYC",
-                  style: TextStyle(color: Colors.black),
+                child: Text(
+                  loc.kycSubmit,
+                  style: const TextStyle(color: Colors.black),
                 ),
               ),
             ),

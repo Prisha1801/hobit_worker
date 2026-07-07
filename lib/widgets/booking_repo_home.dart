@@ -10,6 +10,69 @@ import '../prefs/preference_key.dart';
 
 class BookingApi {
 
+  // NOTE: Accept / Decline API integration disabled as per backend developer's
+  // request (accept/decline API not to be integrated).
+  // /// POST /api/worker/bookingrequest/{id}/accept
+  // static Future<Map<String, dynamic>> acceptBooking(int bookingId) async {
+  //   try {
+  //     final token = AppPreference().getString(PreferencesKey.token);
+  //
+  //     final res = await ApiService.postRequest(
+  //       '/api/worker/bookingrequest/$bookingId/accept',
+  //       {},
+  //       options: Options(
+  //         headers: {
+  //           'Authorization': 'Bearer $token',
+  //           'Accept': 'application/json',
+  //           'Content-Type': 'application/json',
+  //         },
+  //       ),
+  //     );
+  //
+  //     return {
+  //       'success': res.data['success'] == true,
+  //       'message': res.data['message']?.toString() ?? '',
+  //       'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+  //     };
+  //   } catch (e) {
+  //     debugPrint("Accept booking error: $e");
+  //     return {'success': false, 'message': 'Something went wrong'};
+  //   }
+  // }
+  //
+  // /// POST /api/worker/bookingrequest/{id}/decline   body(optional): { "reason": ".." }
+  // static Future<Map<String, dynamic>> declineBooking(
+  //   int bookingId, {
+  //   String? reason,
+  // }) async {
+  //   try {
+  //     final token = AppPreference().getString(PreferencesKey.token);
+  //
+  //     final res = await ApiService.postRequest(
+  //       '/api/worker/bookingrequest/$bookingId/decline',
+  //       (reason != null && reason.trim().isNotEmpty)
+  //           ? {'reason': reason.trim()}
+  //           : {},
+  //       options: Options(
+  //         headers: {
+  //           'Authorization': 'Bearer $token',
+  //           'Accept': 'application/json',
+  //           'Content-Type': 'application/json',
+  //         },
+  //       ),
+  //     );
+  //
+  //     return {
+  //       'success': res.data['success'] == true,
+  //       'message': res.data['message']?.toString() ?? '',
+  //       'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+  //     };
+  //   } catch (e) {
+  //     debugPrint("Decline booking error: $e");
+  //     return {'success': false, 'message': 'Something went wrong'};
+  //   }
+  // }
+
   /// 🔥 LIVE TRACKING — worker taps "On My Way".
   /// POST /api/tracking/start  body: { "booking_id": id }
   /// Returns the Firebase custom token + driver_path the worker app writes GPS to.

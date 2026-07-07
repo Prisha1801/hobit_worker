@@ -70,8 +70,9 @@
     }
   
     bool validateForm() {
+      final loc = AppLocalizations.of(context)!;
       if (_name.text.trim().isEmpty) {
-        showSnack("Please enter your name");
+        showSnack(loc.errName);
         return false;
       }
   
@@ -86,12 +87,12 @@
       // }
   
       if (_phone.text.trim().isEmpty) {
-        showSnack("Please enter phone number");
+        showSnack(loc.errPhone);
         return false;
       }
   
       if (_phone.text.length < 10) {
-        showSnack("Phone number must be 10 digits");
+        showSnack(loc.errPhoneLen);
         return false;
       }
   
@@ -106,52 +107,52 @@
       // }
   
       if (selectedCategories.isEmpty) {
-        showSnack("Please select at least one category");
+        showSnack(loc.errCategory);
         return false;
       }
   
       if (_permanentAddress.text.trim().isEmpty) {
-        showSnack("Please enter permanent address");
+        showSnack(loc.suEnterPermanentAddressErr);
         return false;
       }
   
       if (_currentAddress.text.trim().isEmpty) {
-        showSnack("Please enter current address");
+        showSnack(loc.suEnterCurrentAddressErr);
         return false;
       }
   
       if (selectedServices.isEmpty) {
-        showSnack("Please select at least one service");
+        showSnack(loc.errService);
         return false;
       }
   
       if (selectedCity == null) {
-        showSnack("Please select city");
+        showSnack(loc.errCity);
         return false;
       }
   
       if (selectedZone == null) {
-        showSnack("Please select zone");
+        showSnack(loc.errZone);
         return false;
       }
   
       if (selectedArea == null) {
-        showSnack("Please select area");
+        showSnack(loc.errArea);
         return false;
       }
   
       if (availableDates.isEmpty) {
-        showSnack("Please select available dates");
+        showSnack(loc.errDates);
         return false;
       }
   
       if (availableTimes.isEmpty) {
-        showSnack("Please select available time slots");
+        showSnack(loc.errTimes);
         return false;
       }
   
       if (!accept) {
-        showSnack("Please accept Terms & Conditions");
+        showSnack(loc.errTerms);
         return false;
       }
   
@@ -308,9 +309,9 @@
                   // Select All checkbox
                   CheckboxListTile(
                     dense: true,
-                    title: const Text(
-                      "Select All",
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    title: Text(
+                      loc.suSelectAll,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     value:
                         filteredServices.isNotEmpty &&
@@ -467,9 +468,9 @@
                   // Select All checkbox
                   CheckboxListTile(
                     dense: true,
-                    title: const Text(
-                      "Select All",
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    title: Text(
+                      loc.suSelectAll,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     value:
                         categories.isNotEmpty &&
@@ -586,6 +587,7 @@
     }
   
     Future<void> register() async {
+      final loc = AppLocalizations.of(context)!;
       if (!validateForm()) return;
   
       final body = {
@@ -614,7 +616,7 @@
   
       try {
         await SignupApi.registerWorker(body);
-        showSnack("Registration successful");
+        showSnack(loc.signupSuccess);
   
         Navigator.push(
           context,
@@ -624,7 +626,7 @@
         if (e is ApiException) {
           // Handle 302 redirect — user already exists
           if (e.statusCode == 302) {
-            showSnack("User already exists");
+            showSnack(loc.suUserExists);
             setState(() => loading = false);
             return;
           }
@@ -645,7 +647,7 @@
             showSnack(e.message);
           }
         } else {
-          showSnack("User already exists");
+          showSnack(loc.suUserExists);
         }
       }
   
@@ -719,18 +721,18 @@
               Text(loc.signUp, style: const TextStyle(fontSize: 22)),
               input(loc.name, _name, hint: loc.enterFullName),
               // input(loc.email, _email, hint: "example@gmail.com"),
-              input(loc.phone, _phone, hint: "10 digit mobile number"),
+              input(loc.phone, _phone, hint: loc.suMobileHint),
   
               input(
-                "Permanent Address",
+                loc.suPermanentAddress,
                 _permanentAddress,
-                hint: "Enter permanent address",
+                hint: loc.suPermanentAddressHint,
               ),
   
               input(
-                "Current Address",
+                loc.suCurrentAddress,
                 _currentAddress,
-                hint: "Enter current address",
+                hint: loc.suCurrentAddressHint,
               ),
   
               // input(

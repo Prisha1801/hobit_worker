@@ -330,11 +330,13 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     }
   }
 
-  /// ================= CLAIM =================
-  Future<void> _claimBooking(AvailableBookingModel booking) async {
+  /// ================= ACCEPT / REJECT =================
+  /// Accept reuses the existing claim API — only the button text differs.
+  Future<void> _acceptBooking(AvailableBookingModel booking) async {
+    final loc = AppLocalizations.of(context)!;
     setState(() => _claimingIds.add(booking.id));
 
-    final result = await BookingApi.claimBooking(booking.id);
+    final result = await BookingApi.claimBooking(booking.id, loc);
 
     if (!mounted) return;
     setState(() => _claimingIds.remove(booking.id));
@@ -342,7 +344,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     final success = result['success'] == true;
     final msg = (result['message']?.toString().isNotEmpty == true)
         ? result['message'].toString()
-        : (success ? 'Booking claimed.' : 'Failed to claim booking.');
+        : (success ? loc.mbBookingAccepted : loc.mbFailedAccept);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -352,7 +354,37 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     );
 
     if (success) {
-      /// Remove the claimed booking and refresh the lists.
+      /// Remove the accepted booking and refresh the lists.
+      setState(() {
+        availableBookings.removeWhere((b) => b.id == booking.id);
+      });
+      fetchBookings();
+    }
+  }
+
+  Future<void> _rejectBooking(AvailableBookingModel booking) async {
+    final loc = AppLocalizations.of(context)!;
+    setState(() => _claimingIds.add(booking.id));
+
+    final result = await BookingApi.rejectBooking(booking.id, loc);
+
+    if (!mounted) return;
+    setState(() => _claimingIds.remove(booking.id));
+
+    final success = result['success'] == true;
+    final msg = (result['message']?.toString().isNotEmpty == true)
+        ? result['message'].toString()
+        : (success ? loc.mbBookingRejected : loc.mbFailedReject);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+
+    if (success) {
+      /// Remove the rejected booking and refresh the lists.
       setState(() {
         availableBookings.removeWhere((b) => b.id == booking.id);
       });
@@ -527,7 +559,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               Text(
                 workerView == 'today'
                     ? loc.today_notifications
-                    : 'Claim Bookings',
+                    : loc.notifAvailableBookings,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -536,15 +568,15 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
               const SizedBox(height: 14),
 
-              /// TOGGLE BUTTONS (Today / Claim)
+              /// TOGGLE BUTTONS (Today / Available)
               Row(
                 children: [
-                  Expanded(child: _workerToggle('today', 'Today')),
+                  Expanded(child: _workerToggle('today', loc.notifToday)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _workerToggle(
                       'claim',
-                      'Claim',
+                      loc.available,
                       count: availableBookings.length,
                     ),
                   ),
@@ -655,7 +687,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
                 /// DETAILS
                 Text(
-                  "Booking #${item.id} with ${item.customerName}",
+                  "${loc.notifBookingNo}${item.id} ${loc.notifWith} ${item.customerName}",
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
@@ -778,16 +810,17 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   /// ================= CLAIM EMPTY STATE =================
   Widget _claimEmptyState() {
-    return const Center(
+    final loc = AppLocalizations.of(context)!;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.only(top: 60),
+        padding: const EdgeInsets.only(top: 60),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_turned_in_outlined,
+            const Icon(Icons.assignment_turned_in_outlined,
                 size: 60, color: Colors.grey),
-            SizedBox(height: 10),
-            Text('No bookings to claim right now'),
+            const SizedBox(height: 10),
+            Text(loc.notifNoAvailableBookings),
           ],
         ),
       ),
@@ -796,6 +829,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   /// ================= AVAILABLE (CLAIMABLE) CARD =================
   Widget _availableCard(AvailableBookingModel item) {
+    final loc = AppLocalizations.of(context)!;
     final claiming = _claimingIds.contains(item.id);
 
     return Container(
@@ -824,7 +858,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                 child: Text(
                   item.serviceName.isNotEmpty
                       ? item.serviceName
-                      : 'New Booking',
+                      : loc.notifNewBooking,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -838,9 +872,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'AVAILABLE',
-                  style: TextStyle(
+                child: Text(
+                  loc.notifAvailableBadge,
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: Colors.green,
@@ -854,7 +888,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
           /// CUSTOMER + ID
           Text(
-            "Booking #${item.id} • ${item.customerName}",
+            "${loc.notifBookingNo}${item.id} • ${item.customerName}",
             style: const TextStyle(fontSize: 12, color: Colors.black54),
           ),
 
@@ -895,37 +929,66 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
           const SizedBox(height: 12),
 
-          /// ===== CLAIM BUTTON =====
-          SizedBox(
-            width: double.infinity,
-            height: 42,
-            child: ElevatedButton.icon(
-              onPressed: (claiming || !item.claimable)
-                  ? null
-                  : () => _claimBooking(item),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey.shade400,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          /// ===== ACCEPT / REJECT BUTTONS =====
+          Row(
+            children: [
+              /// REJECT
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: OutlinedButton(
+                    onPressed:
+                        claiming ? null : () => _rejectBooking(item),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      loc.mbReject,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              icon: claiming
-                  ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+              const SizedBox(width: 10),
+
+              /// ACCEPT
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: ElevatedButton(
+                    onPressed:
+                        claiming ? null : () => _acceptBooking(item),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: claiming
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            loc.mbAccept,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                  ),
                 ),
-              )
-                  : const Icon(Icons.add_task, size: 16),
-              label: Text(
-                item.claimable ? 'Claim Booking' : 'Not Claimable',
-                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-            ),
+            ],
           ),
         ],
       ),

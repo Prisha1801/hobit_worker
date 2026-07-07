@@ -21,7 +21,7 @@ class ConfirmLocationScreen extends StatefulWidget {
 class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
 
   LatLng? currentLatLng;
-  String address = "Fetching location...";
+  String address = "";
   Set<Marker> markers = {};
 
   @override
@@ -128,7 +128,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      address,
+                      address.isEmpty ? loc.fetchingLocation : address,
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),

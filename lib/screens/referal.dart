@@ -5,6 +5,7 @@ import '../models/referal_model.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import 'package:share_plus/share_plus.dart';
+import '../l10n/app_localizations.dart';
 
 class ReferralApi {
 
@@ -60,6 +61,8 @@ class ReferralApi {
 
 Future<void> shareReferralCode(BuildContext context) async {
 
+  final loc = AppLocalizations.of(context)!;
+
   try {
 
     final code = await ReferralApi.getReferralCode();
@@ -67,13 +70,13 @@ Future<void> shareReferralCode(BuildContext context) async {
     if (code != null) {
 
       await Share.share(
-        "Use my Hobit referral code and earn rewards 🎁\n\nReferral Code: $code",
+        "${loc.refShareInvite}\n\n${loc.referCode}: $code",
       );
 
     } else {
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Referral code not available")),
+        SnackBar(content: Text(loc.refCodeNotAvailable)),
       );
 
     }
@@ -81,7 +84,7 @@ Future<void> shareReferralCode(BuildContext context) async {
   } catch (e) {
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $e")),
+      SnackBar(content: Text("${loc.refError}: $e")),
     );
 
   }

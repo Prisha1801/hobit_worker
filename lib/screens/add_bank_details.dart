@@ -448,7 +448,7 @@ class _AddBankScreenState extends State<AddBankScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              data["message"] ?? "Bank details updated",
+              data["message"] ?? loc.bankUpdated,
             ),
           ),
         );
@@ -476,7 +476,6 @@ class _AddBankScreenState extends State<AddBankScreen> {
     required TextEditingController controller,
     required String? Function(String?) validator,
   }) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -580,10 +579,10 @@ class _AddBankScreenState extends State<AddBankScreen> {
                               validator: (value) {
                                 if (value == null ||
                                     value.trim().isEmpty) {
-                                  return "Enter account holder name";
+                                  return loc.bankErrHolderName;
                                 }
                                 if (value.length < 3) {
-                                  return "Name must be at least 3 characters";
+                                  return loc.bankErrNameShort;
                                 }
                                 return null;
                               },
@@ -598,12 +597,12 @@ class _AddBankScreenState extends State<AddBankScreen> {
                               validator: (value) {
                                 if (value == null ||
                                     value.isEmpty) {
-                                  return "Enter account number";
+                                  return loc.bankErrAccountNumber;
                                 }
                                 if (!RegExp(
                                     r'^[0-9]{9,18}$')
                                     .hasMatch(value)) {
-                                  return "Enter valid account number";
+                                  return loc.bankErrAccountInvalid;
                                 }
                                 return null;
                               },
@@ -618,10 +617,10 @@ class _AddBankScreenState extends State<AddBankScreen> {
                               validator: (value) {
                                 if (value == null ||
                                     value.isEmpty) {
-                                  return "Enter bank name";
+                                  return loc.bankErrBankName;
                                 }
                                 if (value.length < 3) {
-                                  return "Bank name too short";
+                                  return loc.bankErrBankNameShort;
                                 }
                                 return null;
                               },
@@ -635,13 +634,13 @@ class _AddBankScreenState extends State<AddBankScreen> {
                               validator: (value) {
                                 if (value == null ||
                                     value.isEmpty) {
-                                  return "Enter IFSC code";
+                                  return loc.bankErrIfsc;
                                 }
 
                                 if (!RegExp(
                                     r'^[A-Z]{4}0[A-Z0-9]{6}$')
                                     .hasMatch(value)) {
-                                  return "Enter valid IFSC code";
+                                  return loc.bankErrIfscInvalid;
                                 }
 
                                 return null;

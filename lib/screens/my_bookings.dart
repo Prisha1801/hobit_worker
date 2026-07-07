@@ -135,7 +135,8 @@ class BookingApi {
   }
 
   /// POST /api/worker/bookingrequest/{id}/claim
-  static Future<Map<String, dynamic>> claimBooking(int bookingId) async {
+  static Future<Map<String, dynamic>> claimBooking(
+      int bookingId, AppLocalizations loc) async {
     try {
       final token = AppPreference().getString(PreferencesKey.token);
 
@@ -160,10 +161,44 @@ class BookingApi {
       };
     } catch (e) {
       debugPrint("Claim booking error: $e");
-      return {'success': false, 'message': 'Something went wrong'};
+      return {'success': false, 'message': loc.somethingWentWrong};
     }
   }
 
+  /// POST /api/worker/bookingrequest/{id}/reject — reject an available booking.
+  static Future<Map<String, dynamic>> rejectBooking(
+      int bookingId, AppLocalizations loc) async {
+    try {
+      final token = AppPreference().getString(PreferencesKey.token);
+
+      final res = await ApiService.postRequest(
+        rejectBookingUrl(bookingId),
+        {},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      return {
+        'success': res.data['success'] == true,
+        'message': res.data['message']?.toString() ?? '',
+        'booking_id': res.data['booking_id'],
+        'status': res.data['status']?.toString() ?? '',
+        'acceptance_status': res.data['acceptance_status']?.toString() ?? '',
+      };
+    } catch (e) {
+      debugPrint("Reject booking error: $e");
+      return {'success': false, 'message': loc.somethingWentWrong};
+    }
+  }
+
+  // NOTE: Old assigned-booking Accept / Decline API integration disabled as per
+  // backend developer's request (accept/decline API not to be integrated).
+  /*
   /// POST /api/worker/bookingrequest/{id}/accept
   static Future<Map<String, dynamic>> acceptBooking(int bookingId) async {
     try {
@@ -224,6 +259,7 @@ class BookingApi {
       return {'success': false, 'message': 'Something went wrong'};
     }
   }
+  */
 
   static Future<RescheduleHistoryModel?> getRescheduleHistory(int bookingId) async {
     try {
@@ -457,6 +493,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   /// =======================
   /// ACCEPT / DECLINE
   /// =======================
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  /*
   Future<void> _acceptBooking(BookingModel booking) async {
     setState(() => _processingIds.add(booking.id));
 
@@ -497,10 +536,59 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
       loadBookings(isRefresh: true);
     }
   }
+  */
 
   /// =======================
-  /// CLAIM
+  /// ACCEPT / REJECT (available bookings — replaces the old Claim flow)
   /// =======================
+  Future<void> _acceptAvailableBooking(AvailableBookingModel booking) async {
+    final loc = AppLocalizations.of(context)!;
+    setState(() => _processingIds.add(booking.id));
+
+    // Accept uses the existing claim API — only the button text differs.
+    final result = await BookingApi.claimBooking(booking.id, loc);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(booking.id));
+
+    _showActionSnack(
+      result,
+      successFallback: loc.mbBookingAccepted,
+      failFallback: loc.mbFailedAccept,
+    );
+
+    if (result['success'] == true) {
+      /// Accepted bookings move to "Assigned" — jump there and reload.
+      setState(() => selectedTab = JobStatus.assigned);
+      loadBookings(isRefresh: true);
+    }
+  }
+
+  Future<void> _rejectAvailableBooking(AvailableBookingModel booking) async {
+    final loc = AppLocalizations.of(context)!;
+    setState(() => _processingIds.add(booking.id));
+
+    final result = await BookingApi.rejectBooking(booking.id, loc);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(booking.id));
+
+    _showActionSnack(
+      result,
+      successFallback: loc.mbBookingRejected,
+      failFallback: loc.mbFailedReject,
+    );
+
+    if (result['success'] == true) {
+      /// Rejected bookings drop out of the available list — just reload.
+      loadBookings(isRefresh: true);
+    }
+  }
+
+  /// =======================
+  /// CLAIM (disabled — replaced by Accept / Reject on available bookings)
+  /// =======================
+  /*
   Future<void> _claimBooking(AvailableBookingModel booking) async {
     setState(() => _processingIds.add(booking.id));
 
@@ -521,6 +609,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
       loadBookings(isRefresh: true);
     }
   }
+  */
 
   void _showActionSnack(
     Map<String, dynamic> result, {
@@ -542,6 +631,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
 
   /// Optional reason dialog before declining. Returns the reason (may be empty)
   /// or null if the worker cancelled.
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  /*
   Future<String?> _askDeclineReason() async {
     final controller = TextEditingController();
     return showDialog<String>(
@@ -597,6 +689,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
       ),
     );
   }
+  */
 
   // Future<void> loadBookings({bool isRefresh = false}) async {
   //   if (!isRefresh) {
@@ -694,7 +787,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _buildTab(loc.allRequests, JobStatus.all),
-                _buildTab('Available', JobStatus.available),
+                _buildTab(loc.available, JobStatus.available),
                 _buildTab(loc.assigned, JobStatus.assigned),
                 _buildTab(loc.inProgress, JobStatus.inProgress),
                 _buildTab(loc.completed, JobStatus.completed),
@@ -804,6 +897,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   /// BOOKING CARD
   /// =======================
   Widget _jobCard(BookingModel booking) {
+    final loc = AppLocalizations.of(context)!;
     Color chipBg;
     Color chipTextColor;
     String chipText;
@@ -811,17 +905,17 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     switch (booking.status) {
       case 'assigned':
         chipBg = const Color(0xFFFFF6E5);
-        chipText = 'Assigned';
+        chipText = loc.assigned;
         chipTextColor = Colors.orange;
         break;
       case 'inprogress':
         chipBg = const Color(0xFFFFF2FD);
-        chipText = 'In progress';
+        chipText = loc.inProgress;
         chipTextColor = Colors.blue;
         break;
       case 'completed':
         chipBg = const Color(0xFFE9F8EE);
-        chipText = 'Completed';
+        chipText = loc.completed;
         chipTextColor = Colors.green;
         break;
       // case 'cancelled':
@@ -897,9 +991,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Service Requested',
-                      style: TextStyle(
+                    Text(
+                      loc.serviceRequested,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black54,
                       ),
@@ -918,8 +1012,8 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                         children: [
 
                           /// ADDON TITLE WITH ICON
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
                             child: Row(
                               children: [
                                 // Icon(
@@ -929,8 +1023,8 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                                 // ),
                                 // SizedBox(width: 4),
                                 Text(
-                                  "Addon:",
-                                  style: TextStyle(
+                                  loc.mbAddon,
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.black,
@@ -946,7 +1040,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                           ...List.generate(
                             booking.addonNames.length,
                                 (index) => Text(
-                              "${booking.addonNames[index]} (Qty: ${booking.addonQty[index]})",
+                              "${booking.addonNames[index]} (${loc.mbQty}: ${booking.addonQty[index]})",
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.black54,
@@ -1038,7 +1132,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    "Extended service (${data.extensionCount})",
+                                    "${loc.mbExtendedService} (${data.extensionCount})",
                                     style: const TextStyle(
                                       fontSize: 10,
                                       color: Colors.white,
@@ -1062,9 +1156,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Date & Time',
-                      style: TextStyle(
+                    Text(
+                      loc.dateTime,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black54,
                       ),
@@ -1081,7 +1175,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          "Start: ${booking.startDate}",
+                          "${loc.mbStart}: ${booking.startDate}",
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black54,
@@ -1091,7 +1185,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
 
                     if (booking.endDate.isNotEmpty)
                       Text(
-                        "End: ${booking.endDate}",
+                        "${loc.mbEnd}: ${booking.endDate}",
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
@@ -1212,9 +1306,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                     Icons.history,
                     size: 16,
                   ),
-                  label: const Text(
-                    "Reschedule History",
-                    style: TextStyle(
+                  label: Text(
+                    loc.mbRescheduleHistory,
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.black
@@ -1226,7 +1320,10 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
           ),
 
           /// ===== ACCEPT / DECLINE (only for assigned bookings) =====
-          if (booking.status == 'assigned') _buildAcceptDecline(booking),
+          // NOTE: Accept / Decline flow disabled as per backend developer's
+          // request (accept/decline API not to be integrated). This also
+          // removes the "You accepted/declined this booking" status label.
+          // if (booking.status == 'assigned') _buildAcceptDecline(booking),
         ],
       ),
     );
@@ -1236,6 +1333,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   /// AVAILABLE (CLAIMABLE) CARD
   /// =======================
   Widget _availableCard(AvailableBookingModel booking) {
+    final loc = AppLocalizations.of(context)!;
     final processing = _processingIds.contains(booking.id);
 
     return Container(
@@ -1276,9 +1374,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                   color: const Color(0xFFE9F8EE),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'Available',
-                  style: TextStyle(
+                child: Text(
+                  loc.available,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Colors.green,
                     fontWeight: FontWeight.w600,
@@ -1298,9 +1396,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Service Requested',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    Text(
+                      loc.serviceRequested,
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -1330,9 +1428,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Date & Time',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    Text(
+                      loc.dateTime,
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -1372,39 +1470,70 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
             ],
           ),
 
-          /// ===== CLAIM BUTTON =====
+          /// ===== ACCEPT / REJECT BUTTONS =====
           Padding(
             padding: const EdgeInsets.only(top: 14),
-            child: SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: ElevatedButton.icon(
-                onPressed: (processing || !booking.claimable)
-                    ? null
-                    : () => _claimBooking(booking),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kkblack,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey.shade400,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                /// REJECT
+                Expanded(
+                  child: SizedBox(
+                    height: 44,
+                    child: OutlinedButton(
+                      onPressed: processing
+                          ? null
+                          : () => _rejectAvailableBooking(booking),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        loc.mbReject,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                icon: processing
-                    ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
+                const SizedBox(width: 10),
+
+                /// ACCEPT
+                Expanded(
+                  child: SizedBox(
+                    height: 44,
+                    child: ElevatedButton(
+                      onPressed: processing
+                          ? null
+                          : () => _acceptAvailableBooking(booking),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kGreen,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade400,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: processing
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              loc.mbAccept,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                    ),
                   ),
-                )
-                    : const Icon(Icons.add_task, size: 18),
-                label: Text(
-                  booking.claimable ? 'Claim Booking' : 'Not Claimable',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-              ),
+              ],
             ),
           ),
         ],
@@ -1415,6 +1544,9 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
   /// =======================
   /// ACCEPT / DECLINE WIDGET
   /// =======================
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  /*
   Widget _buildAcceptDecline(BookingModel booking) {
     final processing = _processingIds.contains(booking.id);
     final st = booking.acceptanceStatus.toLowerCase();
@@ -1523,4 +1655,5 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
       ),
     );
   }
+  */
 }

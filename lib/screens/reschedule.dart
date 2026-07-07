@@ -3,6 +3,7 @@ import '../api_services/api_services.dart';
 import '../prefs/app_preference.dart';
 import '../prefs/preference_key.dart';
 import 'package:dio/dio.dart';
+import '../l10n/app_localizations.dart';
 
 class RescheduleHistoryDialog extends StatefulWidget {
   final int bookingId;
@@ -50,6 +51,7 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -64,10 +66,10 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
             /// TITLE
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "Reschedule History",
-                    style: TextStyle(
+                    loc.reschTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -89,9 +91,9 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
                 child: CircularProgressIndicator(),
               )
             else if (history.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Text("No reschedule history found"),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(loc.reschNoHistory),
               )
             else
               Expanded(
@@ -114,7 +116,7 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
 
                           /// OLD DATE
                           Text(
-                            "Old Date: ${item['old_date']} (${item['old_time_slot']})",
+                            "${loc.reschOldDate}: ${item['old_date']} (${item['old_time_slot']})",
                             style: const TextStyle(fontSize: 13),
                           ),
 
@@ -122,7 +124,7 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
 
                           /// NEW DATE
                           Text(
-                            "New Date: ${item['new_date']} (${item['new_time_slot']})",
+                            "${loc.reschNewDate}: ${item['new_date']} (${item['new_time_slot']})",
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -133,7 +135,7 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
 
                           /// REASON
                           Text(
-                            "Reason: ${item['reason']}",
+                            "${loc.reschReason}: ${item['reason']}",
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black54,
@@ -143,7 +145,7 @@ class _RescheduleHistoryDialogState extends State<RescheduleHistoryDialog> {
                           const SizedBox(height: 6),
 
                           Text(
-                            "Rescheduled At: ${item['created_at']}",
+                            "${loc.reschRescheduledAt}: ${item['created_at']}",
                             style: const TextStyle(
                               fontSize: 11,
                               color: Colors.grey,

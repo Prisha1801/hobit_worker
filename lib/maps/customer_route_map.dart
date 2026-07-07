@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hobit_worker/utils/app_bar.dart';
 import '../colors/appcolors.dart';
+import '../l10n/app_localizations.dart';
 
 class CustomerRouteMap extends StatefulWidget {
   final double customerLat;
@@ -246,9 +247,10 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
       );
     }
 
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kWhite,
-     appBar: CommonAppBar(title: 'Service Location'),
+     appBar: CommonAppBar(title: loc.mapServiceLocation),
       body: Stack(
         children: [
           GoogleMap(
@@ -309,8 +311,8 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
                       crossAxisAlignment:
                       CrossAxisAlignment.start,
                       children: [
-                        const Text("Remaining Distance",
-                            style: TextStyle(fontSize: 12)),
+                        Text(loc.mapRemainingDistance,
+                            style: const TextStyle(fontSize: 12)),
                         Text(
                           remainingDistance,
                           style: const TextStyle(
@@ -323,8 +325,8 @@ class _CustomerRouteMapState extends State<CustomerRouteMap> {
                       crossAxisAlignment:
                       CrossAxisAlignment.start,
                       children: [
-                        const Text("Estimated Time",
-                            style: TextStyle(fontSize: 12)),
+                        Text(loc.mapEstimatedTime,
+                            style: const TextStyle(fontSize: 12)),
                         Text(
                           remainingTime,
                           style: const TextStyle(

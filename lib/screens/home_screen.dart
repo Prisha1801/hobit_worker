@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:hobit_worker/colors/appcolors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api_services/api_services.dart';
+import '../api_services/emergency_service.dart';
 import '../api_services/live_tracking_service.dart';
 import '../api_services/location_service.dart';
 import '../api_services/urls.dart';
 import '../l10n/app_localizations.dart';
 import '../models/booking_model.dart';
+import '../models/emergency_alert_model.dart';
 import '../models/extend_service_model.dart';
 import '../models/get_profile_model.dart';
 import '../prefs/app_preference.dart';
@@ -46,6 +48,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Booking ids whose "On My Way" / stop action is in flight (per-card spinner).
   final Set<int> _trackingBusy = {};
+
+  /// The currently active (uncancelled) SOS session, if any. While this is
+  /// non-null, tapping the emergency button re-opens the active SOS screen
+  /// instead of showing the alert dialog again. Cleared only when the worker
+  /// cancels the alert.
+  _SosSession? _activeSosSession;
+
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  // /// Booking ids currently being accepted/declined (per-card spinner).
+  // final Set<int> _processingIds = {};
 
 
   Future<void> loadExtensions(int bookingId) async {
@@ -219,6 +232,118 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  /*
+  /// ===== ACCEPT / DECLINE (pending assigned bookings) =====
+  Future<void> _acceptBooking(int bookingId) async {
+    setState(() => _processingIds.add(bookingId));
+
+    final result = await BookingApi.acceptBooking(bookingId);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(bookingId));
+
+    _showActionSnack(result, 'Booking accepted.', 'Failed to accept booking.');
+
+    if (result['success'] == true) {
+      await loadTodayJobs();
+    }
+  }
+
+  Future<void> _declineBooking(int bookingId) async {
+    final reason = await _askDeclineReason();
+    if (reason == null) return; // cancelled
+
+    setState(() => _processingIds.add(bookingId));
+
+    final result = await BookingApi.declineBooking(bookingId, reason: reason);
+
+    if (!mounted) return;
+    setState(() => _processingIds.remove(bookingId));
+
+    _showActionSnack(result, 'Booking declined.', 'Failed to decline booking.');
+
+    if (result['success'] == true) {
+      await loadTodayJobs();
+    }
+  }
+
+  void _showActionSnack(
+    Map<String, dynamic> result,
+    String successFallback,
+    String failFallback,
+  ) {
+    final success = result['success'] == true;
+    final msg = (result['message']?.toString().isNotEmpty == true)
+        ? result['message'].toString()
+        : (success ? successFallback : failFallback);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
+  Future<String?> _askDeclineReason() async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text(
+          'Decline Booking',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Add a reason (optional):',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'e.g. I am not available at that time',
+                hintStyle: const TextStyle(fontSize: 13),
+                contentPadding: const EdgeInsets.all(12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Decline'),
+          ),
+        ],
+      ),
+    );
+  }
+  */
+
   String getStatusText() {
     switch (jobStatus) {
       case JobStatus.assigned:
@@ -277,24 +402,17 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final assigned = await BookingApi.getAssignedBookings();
       final inProgress = await BookingApi.getInProgressBookings();
-      // for (var b in assigned) {
-      //   print("API booking dateeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${b.bookingDate}");
-      // }
-      //
-      // print("Device today dateeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: ${DateTime.now()}");
-      // ✅ Only show assigned jobs the worker has ACCEPTED.
-      // Pending / declined bookings stay out of the home UI.
-      final todayAssigned = assigned
-          .where((b) => isToday(b.bookingDate) && b.acceptanceStatus == 'accepted')
-          .toList();
 
-      final todayInProgress = inProgress
-          .where((b) => isToday(b.bookingDate))
+      // Show ALL assigned + in-progress jobs (no today-date / subscription
+      // filtering). Pending ones get Accept/Decline; accepted ones get the
+      // On My Way / Verify OTP flow. Declined ones are dropped from the list.
+      final assignedJobs = assigned
+          .where((b) => b.acceptanceStatus.toLowerCase() != 'declined')
           .toList();
 
       todayBookings = [
-        ...todayInProgress,
-        ...todayAssigned,
+        ...inProgress,
+        ...assignedJobs,
       ];
 
       for (var booking in todayBookings) {
@@ -769,6 +887,16 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
           ],
 
+          /// ===== ACTIONS =====
+          // NOTE: Accept / Decline flow disabled as per backend developer's
+          // request (accept/decline API not to be integrated). Always show the
+          // tracking / OTP flow below.
+          // if (booking.status == 'assigned' &&
+          //     booking.acceptanceStatus.toLowerCase() == 'pending') ...[
+          //   /// PENDING → ACCEPT / DECLINE
+          //   _buildAcceptDecline(booking),
+          // ] else ...[
+
           /// ===== ON MY WAY / LIVE LOCATION SHARING =====
           _buildTrackingButton(booking),
 
@@ -843,6 +971,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          // ], // end of disabled accept/decline else-branch
         ],
       ),
     );
@@ -942,60 +1071,313 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // NOTE: Accept / Decline flow disabled as per backend developer's request
+  // (accept/decline API not to be integrated).
+  /*
+  /// Accept / Decline buttons for a pending assigned booking.
+  Widget _buildAcceptDecline(AssignedBookingModel booking) {
+    final processing = _processingIds.contains(booking.id);
+
+    return Row(
+      children: [
+        /// DECLINE
+        Expanded(
+          child: SizedBox(
+            height: 42,
+            child: OutlinedButton(
+              onPressed: processing ? null : () => _declineBooking(booking.id),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Decline',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        /// ACCEPT
+        Expanded(
+          child: SizedBox(
+            height: 42,
+            child: ElevatedButton(
+              onPressed: processing ? null : () => _acceptBooking(booking.id),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: processing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Accept',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  */
+
+  /// Selectable emergency alert types accepted by the backend
+  /// (safety|medical|accident|harassment|other).
+  static const List<Map<String, dynamic>> _alertTypes = [
+    {'value': 'safety', 'label': 'Safety', 'icon': Icons.shield_outlined},
+    {'value': 'medical', 'label': 'Medical', 'icon': Icons.medical_services_outlined},
+    {'value': 'accident', 'label': 'Accident', 'icon': Icons.car_crash_outlined},
+    {'value': 'harassment', 'label': 'Harassment', 'icon': Icons.report_gmailerrorred_outlined},
+    {'value': 'other', 'label': 'Other', 'icon': Icons.more_horiz},
+  ];
+
+  /// Pushes the active SOS screen for [session]. When the worker cancels the
+  /// alert (the screen pops with `true`), the stored session is cleared so the
+  /// next emergency tap starts a fresh alert dialog.
+  Future<void> _openSosScreen(_SosSession session) async {
+    final cancelled = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => SosActiveScreen(
+          workerName: session.workerName,
+          sentAt: session.sentAt,
+          location: session.location,
+          bookingId: session.bookingId,
+          alert: session.alert,
+          alertType: session.alertType,
+          serverMessage: session.serverMessage,
+        ),
+      ),
+    );
+    if (cancelled == true && mounted) {
+      setState(() => _activeSosSession = null);
+    }
+  }
+
   void _showSosDialog() {
+    final loc = AppLocalizations.of(context)!;
+
+    // An alert is already active and not yet cancelled — re-open it instead of
+    // raising a new one.
+    if (_activeSosSession != null) {
+      _openSosScreen(_activeSosSession!);
+      return;
+    }
+
+    // SOS is only allowed against a service that is actually running.
+    final inProgressJobs = todayBookings.where(isInProgress).toList();
+
+    if (inProgressJobs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.sosOnlyInProgress),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final AssignedBookingModel activeBooking = inProgressJobs.first;
+
+    final messageController = TextEditingController();
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
         bool sending = false;
+        String alertType = 'safety';
         return StatefulBuilder(
           builder: (ctx, setDialogState) => AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Row(
-              children: const [
-                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                const SizedBox(width: 8),
                 Text(
-                  'SOS Alert',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+                  loc.sosAlert,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
                 ),
               ],
             ),
-            content: const Text(
-              'Do you want to send an SOS emergency alert? This will notify the support team immediately.',
-              style: TextStyle(fontSize: 14, color: Colors.black87),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.sosDescription,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    loc.sosBooking(activeBooking.id),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    loc.sosTypeOfEmergency,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _alertTypes.map((t) {
+                      final selected = alertType == t['value'];
+                      return ChoiceChip(
+                        selected: selected,
+                        onSelected: sending
+                            ? null
+                            : (_) => setDialogState(
+                                () => alertType = t['value'] as String),
+                        backgroundColor: Colors.grey.shade100,
+                        selectedColor: Colors.red.withOpacity(0.12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: selected ? Colors.red : Colors.grey.shade300,
+                          ),
+                        ),
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              t['icon'] as IconData,
+                              size: 15,
+                              color: selected ? Colors.red : Colors.black54,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _emergencyTypeLabel(loc, t['value'] as String),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: selected ? Colors.red : Colors.black87,
+                                fontWeight:
+                                    selected ? FontWeight.w700 : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: messageController,
+                    enabled: !sending,
+                    maxLines: 3,
+                    maxLength: 1000,
+                    decoration: InputDecoration(
+                      hintText: loc.sosAddMessage,
+                      hintStyle: const TextStyle(fontSize: 13),
+                      contentPadding: const EdgeInsets.all(12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: sending ? null : () => Navigator.pop(ctx),
-                child: const Text('No',
-                    style: TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.w600)),
+                child: Text(loc.no,
+                    style: const TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.w600)),
               ),
               ElevatedButton(
                 onPressed: sending
                     ? null
                     : () async {
                         setDialogState(() => sending = true);
-                        final activeBooking = todayBookings.isNotEmpty ? todayBookings.first : null;
-                        final workerName = AppPreference().getString(PreferencesKey.name);
-                        final location = LocationStore.address;
-                        final sentAt = DateTime.now();
+
                         final dialogNav = Navigator.of(ctx);
-                        final rootNav = Navigator.of(context);
-                        await Future.delayed(const Duration(milliseconds: 1800));
-                        if (!mounted) return;
-                        dialogNav.pop();
-                        rootNav.push(
-                          MaterialPageRoute(
-                            builder: (_) => SosActiveScreen(
-                              workerName: workerName,
-                              sentAt: sentAt,
-                              location: location,
-                              bookingId: activeBooking?.id,
-                            ),
-                          ),
+                        final messenger = ScaffoldMessenger.of(context);
+                        final workerName =
+                            AppPreference().getString(PreferencesKey.name);
+                        final sentAt = DateTime.now();
+
+                        // Best-effort live location (fields are optional on the API).
+                        double? lat;
+                        double? lng;
+                        try {
+                          final pos = await LocationService.getCurrentLocation();
+                          lat = pos.latitude;
+                          lng = pos.longitude;
+                          LocationStore.lat = lat;
+                          LocationStore.lng = lng;
+                        } catch (e) {
+                          debugPrint('SOS location fetch failed: $e');
+                          if (LocationStore.lat != 0.0 ||
+                              LocationStore.lng != 0.0) {
+                            lat = LocationStore.lat;
+                            lng = LocationStore.lng;
+                          }
+                        }
+
+                        final result = await EmergencyService.raiseAlert(
+                          bookingId: activeBooking.id,
+                          alertType: alertType,
+                          message: messageController.text,
+                          latitude: lat,
+                          longitude: lng,
                         );
+
+                        if (!mounted) return;
+
+                        final success = result['success'] == true;
+                        final msg = result['message']?.toString() ?? '';
+
+                        if (!success) {
+                          setDialogState(() => sending = false);
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(msg.isEmpty
+                                  ? loc.sosFailed
+                                  : msg),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        dialogNav.pop();
+
+                        // Remember this alert so re-tapping emergency re-opens
+                        // the active screen until the worker cancels it.
+                        final session = _SosSession(
+                          workerName: workerName,
+                          sentAt: sentAt,
+                          location: LocationStore.address,
+                          bookingId: activeBooking.id,
+                          alert: result['alert'] as EmergencyAlertModel?,
+                          alertType: alertType,
+                          serverMessage: msg,
+                        );
+                        setState(() => _activeSosSession = session);
+                        _openSosScreen(session);
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
@@ -1006,8 +1388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 18, height: 18,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text('Yes, Send SOS',
-                        style: TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600)),
+                    : Text(loc.sosYesSend,
+                        style: const TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
@@ -1732,11 +2114,61 @@ class _OtpDialogState extends State<OtpDialog> {
 // SOS Active Screen
 // ─────────────────────────────────────────────
 
+/// Maps a backend emergency-type value (safety|medical|accident|harassment|other)
+/// to its localized label.
+String _emergencyTypeLabel(AppLocalizations loc, String value) {
+  switch (value) {
+    case 'medical':
+      return loc.sosTypeMedical;
+    case 'accident':
+      return loc.sosTypeAccident;
+    case 'harassment':
+      return loc.sosTypeHarassment;
+    case 'other':
+      return loc.sosTypeOther;
+    case 'safety':
+      return loc.sosTypeSafety;
+    default:
+      return loc.sosTypeOther;
+  }
+}
+
+/// Snapshot of an active SOS alert, kept in the home screen state so the
+/// active screen can be re-opened until the worker cancels the alert.
+class _SosSession {
+  final String workerName;
+  final DateTime sentAt;
+  final String location;
+  final int? bookingId;
+  final EmergencyAlertModel? alert;
+  final String? alertType;
+  final String? serverMessage;
+
+  _SosSession({
+    required this.workerName,
+    required this.sentAt,
+    required this.location,
+    this.bookingId,
+    this.alert,
+    this.alertType,
+    this.serverMessage,
+  });
+}
+
 class SosActiveScreen extends StatefulWidget {
   final String workerName;
   final DateTime sentAt;
   final String location;
   final int? bookingId;
+
+  /// The alert returned by the backend (null if the response carried no body).
+  final EmergencyAlertModel? alert;
+
+  /// The alert type the worker selected (fallback when [alert] is null).
+  final String? alertType;
+
+  /// Confirmation message returned by the server.
+  final String? serverMessage;
 
   const SosActiveScreen({
     super.key,
@@ -1744,6 +2176,9 @@ class SosActiveScreen extends StatefulWidget {
     required this.sentAt,
     required this.location,
     this.bookingId,
+    this.alert,
+    this.alertType,
+    this.serverMessage,
   });
 
   @override
@@ -1759,11 +2194,17 @@ class _SosActiveScreenState extends State<SosActiveScreen>
   Timer? _updateTimer;
   int _updateIndex = 0;
 
-  final List<String> _staticUpdates = [
-    'Alert received by support team',
-    'Locating nearest responder...',
-    'Responder assigned — ETA 8 min',
-  ];
+  late final List<String> _staticUpdates;
+
+  /// alert type shown in the header / info tile.
+  String get _alertType =>
+      widget.alert?.alertType ?? widget.alertType ?? 'safety';
+
+  /// current status reported by the backend.
+  String get _status => widget.alert?.status ?? 'pending';
+
+  /// Guards one-time, localization-dependent setup in [didChangeDependencies].
+  bool _didInitLocalized = false;
 
   @override
   void initState() {
@@ -1777,6 +2218,28 @@ class _SosActiveScreenState extends State<SosActiveScreen>
     _pulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Localizations are only available once dependencies are ready, so this
+    // one-time setup lives here rather than in initState().
+    if (_didInitLocalized) return;
+    _didInitLocalized = true;
+
+    final loc = AppLocalizations.of(context)!;
+    _staticUpdates = [
+      loc.sosLocatingResponder,
+      loc.sosResponderAssigned,
+    ];
+
+    // Seed the timeline with the real server confirmation.
+    final confirm = (widget.serverMessage?.trim().isNotEmpty == true)
+        ? widget.serverMessage!.trim()
+        : loc.sosAlertReceived;
+    _updates.add(_SosUpdate(message: confirm, time: widget.sentAt));
 
     _updateTimer = Timer.periodic(const Duration(seconds: 3), (t) {
       if (_updateIndex < _staticUpdates.length) {
@@ -1807,29 +2270,47 @@ class _SosActiveScreenState extends State<SosActiveScreen>
     return '$h:$m:$s';
   }
 
+  String _prettyStatus(AppLocalizations loc, String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return loc.pending;
+      case 'assigned':
+        return loc.assigned;
+      case 'completed':
+        return loc.completed;
+      case '':
+        return loc.pending;
+      default:
+        return '${status[0].toUpperCase()}${status.substring(1)}';
+    }
+  }
+
   void _cancelSos() {
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text('Cancel SOS?', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text(
-            'Are you sure you want to cancel the SOS alert? The support team will be notified.'),
+        title: Text(loc.sosCancelTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(loc.sosCancelConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('No', style: TextStyle(color: Colors.black54, fontSize: 14)),
+            child: Text(loc.no, style: const TextStyle(color: Colors.black54, fontSize: 14)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              Navigator.pop(context);
+              // Signal the home screen that the alert was cancelled so it
+              // clears the active session (a plain back gesture returns null
+              // and keeps the session alive).
+              Navigator.pop(context, true);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('SOS cancelled. Stay safe!'),
+                SnackBar(
+                  content: Text(loc.sosCancelled),
                   backgroundColor: Colors.green,
-                  duration: Duration(seconds: 3),
+                  duration: const Duration(seconds: 3),
                 ),
               );
             },
@@ -1837,7 +2318,7 @@ class _SosActiveScreenState extends State<SosActiveScreen>
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.white)),
+            child: Text(loc.sosYesCancel, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1846,6 +2327,7 @@ class _SosActiveScreenState extends State<SosActiveScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFFFF5F5),
       body: SafeArea(
@@ -1875,9 +2357,9 @@ class _SosActiveScreenState extends State<SosActiveScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'SOS ALERT SENT',
-                    style: TextStyle(
+                  Text(
+                    loc.sosAlertSent,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -1886,7 +2368,7 @@ class _SosActiveScreenState extends State<SosActiveScreen>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Sent at ${_formatTime(widget.sentAt)}',
+                    loc.sosSentAt(_formatTime(widget.sentAt)),
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
@@ -1902,27 +2384,34 @@ class _SosActiveScreenState extends State<SosActiveScreen>
                 children: [
                   _InfoTile(
                     icon: Icons.person,
-                    label: 'Worker',
-                    value: widget.workerName.isEmpty ? 'Unknown' : widget.workerName,
+                    label: loc.sosWorker,
+                    value: widget.workerName.isEmpty ? loc.sosUnknown : widget.workerName,
+                  ),
+                  const SizedBox(height: 10),
+                  _InfoTile(
+                    icon: Icons.crisis_alert,
+                    label: loc.sosEmergencyType,
+                    value: '${_emergencyTypeLabel(loc, _alertType)}  •  ${_prettyStatus(loc, _status)}'
+                        '${widget.alert?.id != null ? '  (#${widget.alert!.id})' : ''}',
                   ),
                   const SizedBox(height: 10),
                   _InfoTile(
                     icon: Icons.location_on,
-                    label: 'Last Known Location',
-                    value: widget.location.isEmpty ? 'Location unavailable' : widget.location,
+                    label: loc.sosLastKnownLocation,
+                    value: widget.location.isEmpty ? loc.sosLocationUnavailable : widget.location,
                   ),
                   if (widget.bookingId != null) ...[
                     const SizedBox(height: 10),
                     _InfoTile(
                       icon: Icons.work_outline,
-                      label: 'Active Booking',
+                      label: loc.sosActiveBooking,
                       value: 'BK-${widget.bookingId}',
                     ),
                   ],
                   const SizedBox(height: 10),
                   _InfoTile(
                     icon: Icons.support_agent,
-                    label: 'Support Contact',
+                    label: loc.sosSupportContact,
                     value: '+91 98765 43210',
                   ),
                 ],
@@ -1939,9 +2428,9 @@ class _SosActiveScreenState extends State<SosActiveScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Status Updates',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      Text(
+                        loc.sosStatusUpdates,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 8),
                       Expanded(
@@ -1983,9 +2472,9 @@ class _SosActiveScreenState extends State<SosActiveScreen>
                 child: OutlinedButton.icon(
                   onPressed: _cancelSos,
                   icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-                  label: const Text(
-                    'Cancel SOS',
-                    style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w600),
+                  label: Text(
+                    loc.sosCancel,
+                    style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red, width: 1.5),

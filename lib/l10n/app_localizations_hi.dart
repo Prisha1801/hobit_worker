@@ -672,4 +672,332 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get default_title => 'बुकिंग अपडेट';
+
+  // ── Attendance screen ──
+  @override
+  String get attCheckIn => 'चेक इन';
+
+  @override
+  String get attCheckOut => 'चेक आउट';
+
+  @override
+  String get attCheckedInStatus => 'आप चेक इन हैं';
+
+  @override
+  String get attCheckedOutStatus => 'आप चेक आउट हैं';
+
+  @override
+  String attSince(Object time) {
+    return '$time से';
+  }
+
+  @override
+  String get attMarkPrompt => 'अपनी शिफ्ट शुरू करने के लिए उपस्थिति दर्ज करें';
+
+  @override
+  String get attLastActivity => 'पिछली गतिविधि';
+
+  @override
+  String get attCheckInTime => 'चेक-इन समय';
+
+  @override
+  String get attCheckOutTime => 'चेक-आउट समय';
+
+  @override
+  String get attDistance => 'दूरी';
+
+  @override
+  String get attLocationLabel => 'स्थान';
+
+  @override
+  String get attPhotoRequired => 'चेक इन करने के लिए फ़ोटो आवश्यक है।';
+
+  @override
+  String get attCheckInSuccess => 'सफलतापूर्वक चेक इन हो गया।';
+
+  @override
+  String get attCheckInFailed => 'चेक-इन विफल रहा।';
+
+  @override
+  String get attCheckOutSuccess => 'सफलतापूर्वक चेक आउट हो गया।';
+
+  @override
+  String get attCheckOutFailed => 'चेक-आउट विफल रहा।';
+
+  @override
+  String get attLocationError => 'स्थान प्राप्त नहीं हो सका। कृपया GPS सक्षम करें।';
+
+  @override
+  String get attMyAttendance => 'मेरी उपस्थिति';
+
+  @override
+  String get attLoadFailed => 'उपस्थिति लोड करने में विफल।';
+
+  @override
+  String get attNoRecords => 'अभी तक कोई उपस्थिति रिकॉर्ड नहीं।';
+
+  @override
+  String get attActive => 'सक्रिय';
+
+  // ── Emergency / SOS ──
+  @override
+  String get sosOnlyInProgress => 'SOS केवल चालू सेवा के लिए ही भेजा जा सकता है।';
+
+  @override
+  String get sosAlert => 'SOS अलर्ट';
+
+  @override
+  String get sosDescription => 'इस कार्य के लिए आपातकालीन अलर्ट भेजें। सहायता टीम को तुरंत सूचित किया जाएगा।';
+
+  @override
+  String sosBooking(Object id) {
+    return 'बुकिंग: BK-$id';
+  }
+
+  @override
+  String get sosTypeOfEmergency => 'आपातकाल का प्रकार';
+
+  @override
+  String get sosTypeSafety => 'सुरक्षा';
+
+  @override
+  String get sosTypeMedical => 'चिकित्सा';
+
+  @override
+  String get sosTypeAccident => 'दुर्घटना';
+
+  @override
+  String get sosTypeHarassment => 'उत्पीड़न';
+
+  @override
+  String get sosTypeOther => 'अन्य';
+
+  @override
+  String get sosAddMessage => 'संदेश जोड़ें (वैकल्पिक)';
+
+  @override
+  String get sosFailed => 'SOS अलर्ट भेजने में विफल।';
+
+  @override
+  String get sosYesSend => 'हाँ, SOS भेजें';
+
+  @override
+  String get sosAlertSent => 'SOS अलर्ट भेजा गया';
+
+  @override
+  String sosSentAt(Object time) {
+    return '$time पर भेजा गया';
+  }
+
+  @override
+  String get sosAlertReceived => 'सहायता टीम को अलर्ट प्राप्त हुआ';
+
+  @override
+  String get sosLocatingResponder => 'निकटतम रिस्पॉन्डर खोजा जा रहा है...';
+
+  @override
+  String get sosResponderAssigned => 'रिस्पॉन्डर नियुक्त — ETA 8 मिनट';
+
+  @override
+  String get sosWorker => 'कर्मचारी';
+
+  @override
+  String get sosUnknown => 'अज्ञात';
+
+  @override
+  String get sosEmergencyType => 'आपातकाल प्रकार';
+
+  @override
+  String get sosLastKnownLocation => 'अंतिम ज्ञात स्थान';
+
+  @override
+  String get sosLocationUnavailable => 'स्थान उपलब्ध नहीं';
+
+  @override
+  String get sosActiveBooking => 'सक्रिय बुकिंग';
+
+  @override
+  String get sosSupportContact => 'सहायता संपर्क';
+
+  @override
+  String get sosStatusUpdates => 'स्थिति अपडेट';
+
+  @override
+  String get sosCancel => 'SOS रद्द करें';
+
+  @override
+  String get sosCancelTitle => 'SOS रद्द करें?';
+
+  @override
+  String get sosCancelConfirm => 'क्या आप वाकई SOS अलर्ट रद्द करना चाहते हैं? सहायता टीम को सूचित किया जाएगा।';
+
+  @override
+  String get sosCancelled => 'SOS रद्द किया गया। सुरक्षित रहें!';
+
+  @override
+  String get sosYesCancel => 'हाँ, रद्द करें';
+
+  // ── Worker-side localization (added) ──
+  @override
+  String get mapServiceLocation => 'सेवा स्थान';
+  @override
+  String get mapRemainingDistance => 'शेष दूरी';
+  @override
+  String get mapEstimatedTime => 'अनुमानित समय';
+  @override
+  String get abhGoodMorning => 'सुप्रभात,';
+  @override
+  String get abhGoodAfternoon => 'नमस्कार,';
+  @override
+  String get abhGoodEvening => 'शुभ संध्या,';
+  @override
+  String get abhGoodNight => 'शुभ रात्रि,';
+  @override
+  String get abhUser => 'उपयोगकर्ता';
+  @override
+  String get exthTitle => 'विस्तार इतिहास';
+  @override
+  String get exthTotalExtensions => 'कुल विस्तार';
+  @override
+  String get exthDuration => 'अवधि';
+  @override
+  String get exthMin => 'मिनट';
+  @override
+  String get exthPayment => 'भुगतान';
+  @override
+  String get kycTitle => 'केवाईसी सत्यापन';
+  @override
+  String get kycDocumentUploadedSuccess => 'दस्तावेज़ सफलतापूर्वक अपलोड हो गया';
+  @override
+  String get kycPoliceVerificationId => 'पुलिस सत्यापन आईडी';
+  @override
+  String get kycAadhaarCardFront => 'आधार कार्ड (सामने)';
+  @override
+  String get kycAadhaarCardBack => 'आधार कार्ड (पीछे)';
+  @override
+  String get kycPoliceVerificationFront => 'पुलिस सत्यापन (सामने)';
+  @override
+  String get kycPoliceVerificationBack => 'पुलिस सत्यापन (पीछे)';
+  @override
+  String get kycSubmit => 'केवाईसी जमा करें';
+  @override
+  String get reschTitle => 'पुनर्निर्धारण इतिहास';
+  @override
+  String get reschNoHistory => 'कोई पुनर्निर्धारण इतिहास नहीं मिला';
+  @override
+  String get reschOldDate => 'पुरानी तारीख';
+  @override
+  String get reschNewDate => 'नई तारीख';
+  @override
+  String get reschReason => 'कारण';
+  @override
+  String get reschRescheduledAt => 'पुनर्निर्धारित किया गया';
+  @override
+  String get refShareInvite => 'मेरा Hobit रेफरल कोड उपयोग करें और इनाम पाएं';
+  @override
+  String get refCodeNotAvailable => 'रेफरल कोड उपलब्ध नहीं है';
+  @override
+  String get refError => 'त्रुटि';
+  @override
+  String get profDeleteAccount => 'खाता हटाएं';
+  @override
+  String get profDeleteAccountSub => 'अपना खाता और डेटा स्थायी रूप से हटाएं';
+  @override
+  String get supEmailBody => 'नमस्ते सहायता टीम,';
+  @override
+  String get revUser => 'उपयोगकर्ता';
+  @override
+  String get loginReceiveOtpVia => 'OTP इसके ज़रिए प्राप्त करें:';
+  @override
+  String get loginSms => 'एसएमएस';
+  @override
+  String get walletGoToBookings => 'बुकिंग पर जाएं';
+  @override
+  String refsShareMessage(Object code) {
+    return '🚀 Hobit Partner से जुड़ें और कमाई शुरू करें!\n\nरिवॉर्ड पाने के लिए मेरा रेफरल कोड इस्तेमाल करें 🎁\n\n👉 कोड: $code\n\n📲 ऐप डाउनलोड करें:\nhttps://play.google.com/store/apps/details?id=com.hobit.hobit_worker';
+  }
+  @override
+  String get suEnterPermanentAddressErr => 'कृपया स्थायी पता दर्ज करें';
+  @override
+  String get suEnterCurrentAddressErr => 'कृपया वर्तमान पता दर्ज करें';
+  @override
+  String get suSelectAll => 'सभी चुनें';
+  @override
+  String get suUserExists => 'उपयोगकर्ता पहले से मौजूद है';
+  @override
+  String get suMobileHint => '10 अंकों का मोबाइल नंबर';
+  @override
+  String get suPermanentAddress => 'स्थायी पता';
+  @override
+  String get suPermanentAddressHint => 'स्थायी पता दर्ज करें';
+  @override
+  String get suCurrentAddress => 'वर्तमान पता';
+  @override
+  String get suCurrentAddressHint => 'वर्तमान पता दर्ज करें';
+  @override
+  String get piDocumentUploaded => 'दस्तावेज़ सफलतापूर्वक अपलोड हुआ';
+  @override
+  String get piUploadFailed => 'अपलोड विफल। पुनः प्रयास करें।';
+  @override
+  String get piKycUpdateFailed => 'केवाईसी अपडेट करने में विफल';
+  @override
+  String get piNoData => 'कोई डेटा उपलब्ध नहीं';
+  @override
+  String get piSelect => 'चुनें';
+  @override
+  String get piKycStatus => 'केवाईसी स्थिति : ';
+  @override
+  String get bankErrHolderName => 'खाताधारक का नाम दर्ज करें';
+  @override
+  String get bankErrNameShort => 'नाम कम से कम 3 अक्षरों का होना चाहिए';
+  @override
+  String get bankErrAccountNumber => 'खाता संख्या दर्ज करें';
+  @override
+  String get bankErrAccountInvalid => 'मान्य खाता संख्या दर्ज करें';
+  @override
+  String get bankErrBankName => 'बैंक का नाम दर्ज करें';
+  @override
+  String get bankErrBankNameShort => 'बैंक का नाम बहुत छोटा है';
+  @override
+  String get bankErrIfsc => 'आईएफएससी कोड दर्ज करें';
+  @override
+  String get bankErrIfscInvalid => 'मान्य आईएफएससी कोड दर्ज करें';
+  @override
+  String get mbAccept => 'स्वीकार करें';
+  @override
+  String get mbReject => 'अस्वीकार करें';
+  @override
+  String get mbBookingAccepted => 'बुकिंग स्वीकार की गई।';
+  @override
+  String get mbBookingRejected => 'बुकिंग अस्वीकार की गई।';
+  @override
+  String get mbFailedAccept => 'बुकिंग स्वीकार करने में विफल।';
+  @override
+  String get mbFailedReject => 'बुकिंग अस्वीकार करने में विफल।';
+  @override
+  String get mbAddon => 'ऐडऑन:';
+  @override
+  String get mbQty => 'मात्रा';
+  @override
+  String get mbExtendedService => 'विस्तारित सेवा';
+  @override
+  String get mbStart => 'प्रारंभ';
+  @override
+  String get mbEnd => 'समाप्त';
+  @override
+  String get mbRescheduleHistory => 'पुनर्निर्धारण इतिहास';
+  @override
+  String get notifToday => 'आज';
+  @override
+  String get notifAvailableBookings => 'उपलब्ध बुकिंग';
+  @override
+  String get notifBookingNo => 'बुकिंग #';
+  @override
+  String get notifWith => 'के साथ';
+  @override
+  String get notifNoAvailableBookings => 'अभी कोई उपलब्ध बुकिंग नहीं है';
+  @override
+  String get notifNewBooking => 'नई बुकिंग';
+  @override
+  String get notifAvailableBadge => 'उपलब्ध';
 }

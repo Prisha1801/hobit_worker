@@ -148,9 +148,9 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
 
             /// OTP TYPE SELECTION
-            const Text(
-              "Receive OTP via:",
-              style: TextStyle(
+            Text(
+              loc.loginReceiveOtpVia,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Expanded(
                   child: RadioListTile<String>(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("SMS", style: TextStyle(fontSize: 14)),
+                    title: Text(loc.loginSms, style: const TextStyle(fontSize: 14)),
                     value: "sms",
                     groupValue: selectedType,
                     activeColor: Colors.black,

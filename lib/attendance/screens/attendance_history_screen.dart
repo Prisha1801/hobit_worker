@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../colors/appcolors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/app_bar.dart';
 import '../models/attendance_record_model.dart';
 import '../repository/attendance_repository.dart';
@@ -33,13 +34,14 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     final result = await AttendanceRepository.getMyAttendance();
 
     if (!mounted) return;
+    final loc = AppLocalizations.of(context)!;
     setState(() {
       _loading = false;
       if (result.success) {
         _records = result.data ?? [];
       } else {
         _error = result.message.isEmpty
-            ? 'Failed to load attendance.'
+            ? loc.attLoadFailed
             : result.message;
       }
     });
@@ -79,8 +81,8 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kWhite,
-      appBar: const CommonAppBar(
-        title: 'My Attendance',
+      appBar: CommonAppBar(
+        title: AppLocalizations.of(context)!.attMyAttendance,
         showBackButton: false,
       ),
       body: RefreshIndicator(
@@ -101,7 +103,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     }
 
     if (_records.isEmpty) {
-      return _messageView('No attendance records yet.');
+      return _messageView(AppLocalizations.of(context)!.attNoRecords);
     }
 
     return ListView.separated(
@@ -137,6 +139,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   }
 
   Widget _buildCard(AttendanceRecord r) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -172,7 +175,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  r.isActive ? 'Active' : 'Completed',
+                  r.isActive ? loc.attActive : loc.completed,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -190,7 +193,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               Expanded(
                 child: _timeBlock(
                   Icons.login,
-                  'Check In',
+                  loc.attCheckIn,
                   _formatTime(r.checkInAt),
                   kGreen,
                 ),
@@ -199,7 +202,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               Expanded(
                 child: _timeBlock(
                   Icons.logout,
-                  'Check Out',
+                  loc.attCheckOut,
                   _formatTime(r.checkOutAt),
                   Colors.redAccent,
                 ),
@@ -221,7 +224,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Distance: ${r.checkInDistanceM} m',
+                '${loc.attDistance}: ${r.checkInDistanceM} m',
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],

@@ -28,6 +28,10 @@ const String availableBookingsUrl = "/api/worker/available-bookings";
 String claimBookingUrl(int bookingId) =>
     "/api/worker/bookingrequest/$bookingId/claim";
 
+// Available bookings — "Accept" reuses the claim URL above; only "Reject" is new
+String rejectBookingUrl(int bookingId) =>
+    "/api/worker/bookingrequest/$bookingId/reject";
+
 // Live tracking ("On My Way") — worker streams GPS to Firebase RTDB
 const String trackingStartUrl = "/api/tracking/start";
 const String trackingStopUrl = "/api/tracking/stop";
@@ -41,6 +45,13 @@ const String hobitRtdbUrl =
 const String checkInUrl = "/api/checkin";
 const String checkOutUrl = "/api/checkout";
 const String myAttendanceUrl = "/api/attendance/my";
+
+// Emergency / SOS Alerts (worker)
+// POST — raise an SOS alert. body: booking_id (required), alert_type
+// (safety|medical|accident|harassment|other), message, latitude, longitude.
+const String emergencyAlertUrl = "/api/worker/emergency-alert";
+// GET — the worker's own emergency alert history.
+const String emergencyAlertsUrl = "/api/worker/emergency-alerts";
 
 // Coordinator APIs
 const String getBookingsUrl = "/api/getbookings";

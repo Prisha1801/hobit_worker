@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../api_services/location_service.dart';
 import '../../colors/appcolors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/app_bar.dart';
 import '../models/check_in_model.dart';
 import '../models/check_out_model.dart';
@@ -59,7 +60,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (!mounted) return;
     if (shot == null) {
       // Worker cancelled the camera — photo is mandatory, so abort.
-      _showSnack('Photo is required to check in.', false);
+      _showSnack(AppLocalizations.of(context)!.attPhotoRequired, false);
       return;
     }
 
@@ -87,15 +88,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         // sync the UI so the Check Out button becomes available.
         setState(() => _isCheckedIn = true);
       }
+      final loc = AppLocalizations.of(context)!;
       _showSnack(
         result.message.isEmpty
-            ? (result.success ? 'Checked in successfully.' : 'Check-in failed.')
+            ? (result.success ? loc.attCheckInSuccess : loc.attCheckInFailed)
             : result.message,
         result.success || _looksAlreadyCheckedIn(result.message),
       );
     } catch (e) {
       if (!mounted) return;
-      _showSnack('Unable to get location. Please enable GPS.', false);
+      _showSnack(AppLocalizations.of(context)!.attLocationError, false);
     } finally {
       if (mounted) setState(() => _busyAction = null);
     }
@@ -121,15 +123,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           _lastCheckOut = result.data;
         });
       }
+      final loc = AppLocalizations.of(context)!;
       _showSnack(
         result.message.isEmpty
-            ? (result.success ? 'Checked out successfully.' : 'Check-out failed.')
+            ? (result.success ? loc.attCheckOutSuccess : loc.attCheckOutFailed)
             : result.message,
         result.success,
       );
     } catch (e) {
       if (!mounted) return;
-      _showSnack('Unable to get location. Please enable GPS.', false);
+      _showSnack(AppLocalizations.of(context)!.attLocationError, false);
     } finally {
       if (mounted) setState(() => _busyAction = null);
     }
@@ -153,9 +156,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kWhite,
-      appBar: const CommonAppBar(title: 'Attendance'),
+      appBar: CommonAppBar(title: loc.attendance),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -166,7 +170,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
             /// CHECK IN BUTTON
             _buildActionButton(
-              label: 'Check In',
+              label: loc.attCheckIn,
               icon: Icons.login,
               color: kGreen,
               enabled: !_isCheckedIn && !_loading,
@@ -177,7 +181,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
             /// CHECK OUT BUTTON
             _buildActionButton(
-              label: 'Check Out',
+              label: loc.attCheckOut,
               icon: Icons.logout,
               color: Colors.redAccent,
               enabled: _isCheckedIn && !_loading,
@@ -195,6 +199,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildStatusCard() {
+    final loc = AppLocalizations.of(context)!;
     final bool active = _isCheckedIn;
     final Color accent = active ? kGreen : Colors.grey;
 
@@ -223,7 +228,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            active ? 'You are Checked In' : 'You are Checked Out',
+            active ? loc.attCheckedInStatus : loc.attCheckedOutStatus,
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
@@ -233,13 +238,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           const SizedBox(height: 6),
           if (active && _lastCheckIn != null)
             Text(
-              'Since ${_formatTime(_lastCheckIn!.loggedAt)}',
+              loc.attSince(_formatTime(_lastCheckIn!.loggedAt)),
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             )
           else
-            const Text(
-              'Mark your attendance to start your shift',
-              style: TextStyle(fontSize: 13, color: Colors.black54),
+            Text(
+              loc.attMarkPrompt,
+              style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
         ],
       ),
@@ -293,6 +298,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildDetailsCard() {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -306,29 +312,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Last Activity',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          Text(
+            loc.attLastActivity,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
 
           if (_lastCheckOut != null) ...[
-            _detailRow(Icons.login, 'Check-in time',
+            _detailRow(Icons.login, loc.attCheckInTime,
                 _formatTime(_lastCheckOut!.checkInAt)),
             const Divider(height: 18),
-            _detailRow(Icons.logout, 'Check-out time',
+            _detailRow(Icons.logout, loc.attCheckOutTime,
                 _formatTime(_lastCheckOut!.checkOutAt)),
             const Divider(height: 18),
-            _detailRow(Icons.social_distance, 'Distance',
+            _detailRow(Icons.social_distance, loc.attDistance,
                 '${_lastCheckOut!.checkOutDistanceM} m'),
           ] else if (_lastCheckIn != null) ...[
-            _detailRow(Icons.login, 'Check-in time',
+            _detailRow(Icons.login, loc.attCheckInTime,
                 _formatTime(_lastCheckIn!.loggedAt)),
             const Divider(height: 18),
-            _detailRow(Icons.my_location, 'Location',
+            _detailRow(Icons.my_location, loc.attLocationLabel,
                 '${_lastCheckIn!.latitude}, ${_lastCheckIn!.longitude}'),
             const Divider(height: 18),
-            _detailRow(Icons.social_distance, 'Distance',
+            _detailRow(Icons.social_distance, loc.attDistance,
                 '${_lastCheckIn!.distanceM} m'),
             if (_lastCheckIn!.photoUrl.isNotEmpty) ...[
               const SizedBox(height: 14),

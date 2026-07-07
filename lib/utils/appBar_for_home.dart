@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../api_services/location_service.dart';
 import '../colors/appcolors.dart';
 import '../prefs/app_preference.dart';
@@ -13,21 +14,22 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
 
   const AppBarHome({super.key, this.onMenuPressed, this.onEmergencyPressed});
 
-  String getGreeting() {
+  String getGreeting(AppLocalizations loc) {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) {
-      return "Good Morning,";
+      return loc.abhGoodMorning;
     } else if (hour >= 12 && hour < 17) {
-      return "Good Afternoon,";
+      return loc.abhGoodAfternoon;
     } else if (hour >= 17 && hour < 21) {
-      return "Good Evening,";
+      return loc.abhGoodEvening;
     } else {
-      return "Good Night,";
+      return loc.abhGoodNight;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final name = AppPreference().getString(PreferencesKey.name);
     return Container(
       width: double.infinity,
@@ -59,14 +61,14 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const SizedBox(height: 10),
                       Text(
-                        getGreeting(),
+                        getGreeting(loc),
                         style: const TextStyle(
                           fontSize: 10,
                           color: Colors.black87,
                         ),
                       ),
                       Text(
-                        name.isEmpty ? "User" : name,
+                        name.isEmpty ? loc.abhUser : name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -80,7 +82,7 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
                           Flexible(
                             child: Text(
                               LocationStore.address.isEmpty
-                                  ? "Fetching location..."
+                                  ? loc.fetchingLocation
                                   : LocationStore.address,
                               style: TextStyle(
                                 fontSize: 12,

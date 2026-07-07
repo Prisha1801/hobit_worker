@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/extend_service_model.dart';
 import '../screens/my_bookings.dart';
 
@@ -12,6 +13,7 @@ class ExtensionHistoryDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -42,9 +44,9 @@ class ExtensionHistoryDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
 
-                    const Text(
-                      "Extended History",
-                      style: TextStyle(
+                    Text(
+                      loc.exthTitle,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -62,7 +64,7 @@ class ExtensionHistoryDialog extends StatelessWidget {
                 const SizedBox(height: 6),
 
                 Text(
-                  "Total Extensions : ${data.extensionCount}",
+                  "${loc.exthTotalExtensions} : ${data.extensionCount}",
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -92,15 +94,15 @@ class ExtensionHistoryDialog extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "Duration",
-                                  style: TextStyle(
+                                Text(
+                                  loc.exthDuration,
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey,
                                   ),
                                 ),
                                 Text(
-                                  "${ext.durationMinutes} min",
+                                  "${ext.durationMinutes} ${loc.exthMin}",
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -111,9 +113,9 @@ class ExtensionHistoryDialog extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text(
-                                  "Payment",
-                                  style: TextStyle(
+                                Text(
+                                  loc.exthPayment,
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey,
                                   ),

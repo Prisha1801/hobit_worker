@@ -672,4 +672,332 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get default_title => 'Booking Update';
+
+  // ── Attendance screen ──
+  @override
+  String get attCheckIn => 'Check In';
+
+  @override
+  String get attCheckOut => 'Check Out';
+
+  @override
+  String get attCheckedInStatus => 'You are Checked In';
+
+  @override
+  String get attCheckedOutStatus => 'You are Checked Out';
+
+  @override
+  String attSince(Object time) {
+    return 'Since $time';
+  }
+
+  @override
+  String get attMarkPrompt => 'Mark your attendance to start your shift';
+
+  @override
+  String get attLastActivity => 'Last Activity';
+
+  @override
+  String get attCheckInTime => 'Check-in time';
+
+  @override
+  String get attCheckOutTime => 'Check-out time';
+
+  @override
+  String get attDistance => 'Distance';
+
+  @override
+  String get attLocationLabel => 'Location';
+
+  @override
+  String get attPhotoRequired => 'Photo is required to check in.';
+
+  @override
+  String get attCheckInSuccess => 'Checked in successfully.';
+
+  @override
+  String get attCheckInFailed => 'Check-in failed.';
+
+  @override
+  String get attCheckOutSuccess => 'Checked out successfully.';
+
+  @override
+  String get attCheckOutFailed => 'Check-out failed.';
+
+  @override
+  String get attLocationError => 'Unable to get location. Please enable GPS.';
+
+  @override
+  String get attMyAttendance => 'My Attendance';
+
+  @override
+  String get attLoadFailed => 'Failed to load attendance.';
+
+  @override
+  String get attNoRecords => 'No attendance records yet.';
+
+  @override
+  String get attActive => 'Active';
+
+  // ── Emergency / SOS ──
+  @override
+  String get sosOnlyInProgress => 'SOS can only be raised for an in-progress service.';
+
+  @override
+  String get sosAlert => 'SOS Alert';
+
+  @override
+  String get sosDescription => 'Send an emergency alert for this job. The support team is notified immediately.';
+
+  @override
+  String sosBooking(Object id) {
+    return 'Booking: BK-$id';
+  }
+
+  @override
+  String get sosTypeOfEmergency => 'Type of emergency';
+
+  @override
+  String get sosTypeSafety => 'Safety';
+
+  @override
+  String get sosTypeMedical => 'Medical';
+
+  @override
+  String get sosTypeAccident => 'Accident';
+
+  @override
+  String get sosTypeHarassment => 'Harassment';
+
+  @override
+  String get sosTypeOther => 'Other';
+
+  @override
+  String get sosAddMessage => 'Add a message (optional)';
+
+  @override
+  String get sosFailed => 'Failed to send SOS alert.';
+
+  @override
+  String get sosYesSend => 'Yes, Send SOS';
+
+  @override
+  String get sosAlertSent => 'SOS ALERT SENT';
+
+  @override
+  String sosSentAt(Object time) {
+    return 'Sent at $time';
+  }
+
+  @override
+  String get sosAlertReceived => 'Alert received by support team';
+
+  @override
+  String get sosLocatingResponder => 'Locating nearest responder...';
+
+  @override
+  String get sosResponderAssigned => 'Responder assigned — ETA 8 min';
+
+  @override
+  String get sosWorker => 'Worker';
+
+  @override
+  String get sosUnknown => 'Unknown';
+
+  @override
+  String get sosEmergencyType => 'Emergency Type';
+
+  @override
+  String get sosLastKnownLocation => 'Last Known Location';
+
+  @override
+  String get sosLocationUnavailable => 'Location unavailable';
+
+  @override
+  String get sosActiveBooking => 'Active Booking';
+
+  @override
+  String get sosSupportContact => 'Support Contact';
+
+  @override
+  String get sosStatusUpdates => 'Status Updates';
+
+  @override
+  String get sosCancel => 'Cancel SOS';
+
+  @override
+  String get sosCancelTitle => 'Cancel SOS?';
+
+  @override
+  String get sosCancelConfirm => 'Are you sure you want to cancel the SOS alert? The support team will be notified.';
+
+  @override
+  String get sosCancelled => 'SOS cancelled. Stay safe!';
+
+  @override
+  String get sosYesCancel => 'Yes, Cancel';
+
+  // ── Worker-side localization (added) ──
+  @override
+  String get mapServiceLocation => 'Service Location';
+  @override
+  String get mapRemainingDistance => 'Remaining Distance';
+  @override
+  String get mapEstimatedTime => 'Estimated Time';
+  @override
+  String get abhGoodMorning => 'Good Morning,';
+  @override
+  String get abhGoodAfternoon => 'Good Afternoon,';
+  @override
+  String get abhGoodEvening => 'Good Evening,';
+  @override
+  String get abhGoodNight => 'Good Night,';
+  @override
+  String get abhUser => 'User';
+  @override
+  String get exthTitle => 'Extended History';
+  @override
+  String get exthTotalExtensions => 'Total Extensions';
+  @override
+  String get exthDuration => 'Duration';
+  @override
+  String get exthMin => 'min';
+  @override
+  String get exthPayment => 'Payment';
+  @override
+  String get kycTitle => 'KYC Verification';
+  @override
+  String get kycDocumentUploadedSuccess => 'Document uploaded successfully';
+  @override
+  String get kycPoliceVerificationId => 'Police Verification ID';
+  @override
+  String get kycAadhaarCardFront => 'Aadhaar Card (Front)';
+  @override
+  String get kycAadhaarCardBack => 'Aadhaar Card (Back)';
+  @override
+  String get kycPoliceVerificationFront => 'Police Verification (Front)';
+  @override
+  String get kycPoliceVerificationBack => 'Police Verification (Back)';
+  @override
+  String get kycSubmit => 'Submit KYC';
+  @override
+  String get reschTitle => 'Reschedule History';
+  @override
+  String get reschNoHistory => 'No reschedule history found';
+  @override
+  String get reschOldDate => 'Old Date';
+  @override
+  String get reschNewDate => 'New Date';
+  @override
+  String get reschReason => 'Reason';
+  @override
+  String get reschRescheduledAt => 'Rescheduled At';
+  @override
+  String get refShareInvite => 'Use my Hobit referral code and earn rewards';
+  @override
+  String get refCodeNotAvailable => 'Referral code not available';
+  @override
+  String get refError => 'Error';
+  @override
+  String get profDeleteAccount => 'Delete Account';
+  @override
+  String get profDeleteAccountSub => 'Permanently delete your account and data';
+  @override
+  String get supEmailBody => 'Hello Support Team,';
+  @override
+  String get revUser => 'User';
+  @override
+  String get loginReceiveOtpVia => 'Receive OTP via:';
+  @override
+  String get loginSms => 'SMS';
+  @override
+  String get walletGoToBookings => 'Go to Bookings';
+  @override
+  String refsShareMessage(Object code) {
+    return '🚀 Join Hobit Partner & start earning!\n\nUse my referral code to get rewards 🎁\n\n👉 Code: $code\n\n📲 Download App:\nhttps://play.google.com/store/apps/details?id=com.hobit.hobit_worker';
+  }
+  @override
+  String get suEnterPermanentAddressErr => 'Please enter permanent address';
+  @override
+  String get suEnterCurrentAddressErr => 'Please enter current address';
+  @override
+  String get suSelectAll => 'Select All';
+  @override
+  String get suUserExists => 'User already exists';
+  @override
+  String get suMobileHint => '10 digit mobile number';
+  @override
+  String get suPermanentAddress => 'Permanent Address';
+  @override
+  String get suPermanentAddressHint => 'Enter permanent address';
+  @override
+  String get suCurrentAddress => 'Current Address';
+  @override
+  String get suCurrentAddressHint => 'Enter current address';
+  @override
+  String get piDocumentUploaded => 'Document uploaded successfully';
+  @override
+  String get piUploadFailed => 'Upload failed. Try again.';
+  @override
+  String get piKycUpdateFailed => 'Failed to update KYC';
+  @override
+  String get piNoData => 'No data available';
+  @override
+  String get piSelect => 'Select';
+  @override
+  String get piKycStatus => 'KYC Status : ';
+  @override
+  String get bankErrHolderName => 'Enter account holder name';
+  @override
+  String get bankErrNameShort => 'Name must be at least 3 characters';
+  @override
+  String get bankErrAccountNumber => 'Enter account number';
+  @override
+  String get bankErrAccountInvalid => 'Enter valid account number';
+  @override
+  String get bankErrBankName => 'Enter bank name';
+  @override
+  String get bankErrBankNameShort => 'Bank name too short';
+  @override
+  String get bankErrIfsc => 'Enter IFSC code';
+  @override
+  String get bankErrIfscInvalid => 'Enter valid IFSC code';
+  @override
+  String get mbAccept => 'Accept';
+  @override
+  String get mbReject => 'Reject';
+  @override
+  String get mbBookingAccepted => 'Booking accepted.';
+  @override
+  String get mbBookingRejected => 'Booking rejected.';
+  @override
+  String get mbFailedAccept => 'Failed to accept booking.';
+  @override
+  String get mbFailedReject => 'Failed to reject booking.';
+  @override
+  String get mbAddon => 'Addon:';
+  @override
+  String get mbQty => 'Qty';
+  @override
+  String get mbExtendedService => 'Extended service';
+  @override
+  String get mbStart => 'Start';
+  @override
+  String get mbEnd => 'End';
+  @override
+  String get mbRescheduleHistory => 'Reschedule History';
+  @override
+  String get notifToday => 'Today';
+  @override
+  String get notifAvailableBookings => 'Available Bookings';
+  @override
+  String get notifBookingNo => 'Booking #';
+  @override
+  String get notifWith => 'with';
+  @override
+  String get notifNoAvailableBookings => 'No available bookings right now';
+  @override
+  String get notifNewBooking => 'New Booking';
+  @override
+  String get notifAvailableBadge => 'AVAILABLE';
 }

@@ -23,13 +23,13 @@ Future<void> _callSupport() async {
   }
 }
 
-Future<void> _emailSupport() async {
+Future<void> _emailSupport(AppLocalizations loc) async {
   final Uri emailUri = Uri(
     scheme: 'mailto',
     path: 'support@hobit.club',
     queryParameters: {
-      'subject': 'Help & Support',
-      'body': 'Hello Support Team,',
+      'subject': loc.helpSupport,
+      'body': loc.supEmailBody,
     },
   );
 
@@ -103,7 +103,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               icon: Icons.email,
               title: loc.emailSupport,
               subtitle: loc.emailSupportSubtitle,
-              onTap: _emailSupport,
+              onTap: () => _emailSupport(loc),
             ),
 
             // _supportTile(

@@ -127,7 +127,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
                         const SizedBox(height: 4),
 
                         Text(
-                          "${summary.totalRatings} ratings",
+                          loc.ratingsCount(summary.totalRatings),
                           style: const TextStyle(
                             color: Colors.white70,
                           ),
@@ -189,7 +189,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
 
                                   Text(
                                     rating.customerName.isEmpty
-                                        ? "User"
+                                        ? loc.revUser
                                         : rating.customerName,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,

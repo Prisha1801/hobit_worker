@@ -301,9 +301,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
       if (!mounted) return;
 
+      final loc = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Document uploaded successfully"),
+        SnackBar(
+          content: Text(loc.piDocumentUploaded),
         ),
       );
 
@@ -313,9 +314,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
       if (!mounted) return;
 
+      final loc = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Upload failed. Try again."),
+        SnackBar(
+          content: Text(loc.piUploadFailed),
         ),
       );
 
@@ -494,9 +496,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     required List<IdNameModel> items,
     required List<IdNameModel> selectedItems,
     required Function(List<IdNameModel>) onDone,
-    String emptyMessage = "No data available",
+    String? emptyMessage,
   }) async {
     final loc = AppLocalizations.of(context)!;
+    final emptyText = emptyMessage ?? loc.piNoData;
 
     final tempSelected = List<IdNameModel>.from(selectedItems);
 
@@ -527,7 +530,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        emptyMessage,
+                        emptyText,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -597,8 +600,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     required String title,
     required List<IdNameModel> items,
     IdNameModel? selectedItem,
-    String emptyMessage = "No data available",
+    String? emptyMessage,
   }) async {
+    final loc = AppLocalizations.of(context)!;
+    final emptyText = emptyMessage ?? loc.piNoData;
     return await showModalBottomSheet<IdNameModel>(
       context: context,
       backgroundColor: kWhite,
@@ -630,7 +635,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      emptyMessage,
+                      emptyText,
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ),
@@ -909,8 +914,6 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
   /// For City, Zone, Area selection - single select bottom sheet
   Future<void> updateProfile() async {
-    final loc = AppLocalizations.of(context)!;
-
     final body = {
       "name": _nameController.text,
       "email": _emailController.text,
@@ -1004,7 +1007,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     } catch (e) {
       debugPrint("KYC Upload Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to update KYC")),
+        SnackBar(content: Text(loc.piKycUpdateFailed)),
       );
     }
   }
@@ -1091,6 +1094,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     required String value,
     required VoidCallback onTap,
   }) {
+    final loc = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1112,7 +1116,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    value.isEmpty ? 'Select $label' : value,
+                    value.isEmpty ? '${loc.piSelect} $label' : value,
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                 ),
@@ -1366,9 +1370,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                               Row(
                                 children: [
 
-                                  const Text(
-                                    "KYC Status : ",
-                                    style: TextStyle(
+                                  Text(
+                                    loc.piKycStatus,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black54,
@@ -1431,14 +1435,14 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             // ),
 
             _buildInput(
-              label: "Permanent Address",
-              hint: "Enter permanent address",
+              label: loc.suPermanentAddress,
+              hint: loc.suPermanentAddressHint,
               controller: _permanentAddressController,
             ),
 
             _buildInput(
-              label: "Current Address",
-              hint: "Enter current address",
+              label: loc.suCurrentAddress,
+              hint: loc.suCurrentAddressHint,
               controller: _currentAddressController,
             ),
             _buildDropdown(
@@ -1495,18 +1499,18 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
             _buildDropdown(
               label: loc.availabilityStatus,
-              value: profile!.isActive == 1 ? "Available" : "Unavailable",
+              value: profile!.isActive == 1 ? loc.available : loc.unavailable,
               //onTap: () {},
               onTap: () {
                 showSingleSelectSheet(
                   title:loc.selectAvailability,
                   items:  [
-                    IdNameModel(id: 1, name: "Available"),
-                    IdNameModel(id: 0, name: "Unavailable"),
+                    IdNameModel(id: 1, name: loc.available),
+                    IdNameModel(id: 0, name: loc.unavailable),
                   ],
                   selectedItem: profile!.isActive == 1
-                      ? IdNameModel(id: 1, name: "Available")
-                      : IdNameModel(id: 0, name: "Unavailable"),
+                      ? IdNameModel(id: 1, name: loc.available)
+                      : IdNameModel(id: 0, name: loc.unavailable),
                 )
                     .then((result) {
                   if (result != null) {
@@ -1543,7 +1547,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
             _buildDropdown(
               label: loc.city,
-              value: selectedCity?.name ?? "Select City",
+              value: selectedCity?.name ?? loc.selectCity,
               onTap: () async {
                 if (cities.isEmpty) {
                   cities = await SignupApi.getCities();
@@ -1575,11 +1579,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             // _buildDropdown("Zone", profile!.zone.name),
             _buildDropdown(
               label: loc.zone,
-              value: selectedZone?.name ?? "Select Zone",
+              value: selectedZone?.name ?? loc.selectZone,
               onTap: () async {
                 if (selectedCity == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please select city first")),
+                    SnackBar(content: Text(loc.selectCityFirst)),
                   );
                   return;
                 }
@@ -1606,11 +1610,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
             _buildDropdown(
               label: loc.area,
-              value: selectedArea?.name ?? "Select Area",
+              value: selectedArea?.name ?? loc.selectArea,
               onTap: () async {
                 if (selectedZone == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please select zone first")),
+                    SnackBar(content: Text(loc.selectZoneFirst)),
                   );
                   return;
                 }

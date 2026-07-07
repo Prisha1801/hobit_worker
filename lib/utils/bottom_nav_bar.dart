@@ -149,10 +149,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 activeIcon: const Icon(Icons.calendar_month),
                 label: loc.bookings,
               ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.access_time_outlined),
-                activeIcon: Icon(Icons.access_time_filled),
-                label: 'Attendance',
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.access_time_outlined),
+                activeIcon: const Icon(Icons.access_time_filled),
+                label: loc.attendance,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.person_outline),

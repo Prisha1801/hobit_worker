@@ -233,7 +233,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid OTP")),
+        SnackBar(content: Text(loc.invalidOtp)),
       );
     } finally {
       setState(() => isLoading = false);
