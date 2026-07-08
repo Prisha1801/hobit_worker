@@ -818,6 +818,30 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.black54,
                       ),
                     ),
+
+                    /// 🔥 Monthly service date range (start / end)
+                    if (booking.startDate.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "${loc.mbStart}: ${booking.startDate}",
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                    if (booking.endDate.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        "${loc.mbEnd}: ${booking.endDate}",
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1180,20 +1204,12 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // SOS is only allowed against a service that is actually running.
+    // SOS can be raised any time — it is no longer tied to a booking status.
+    // If a service happens to be running we attach it for context, otherwise
+    // the alert is raised standalone.
     final inProgressJobs = todayBookings.where(isInProgress).toList();
-
-    if (inProgressJobs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.sosOnlyInProgress),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final AssignedBookingModel activeBooking = inProgressJobs.first;
+    final AssignedBookingModel? activeBooking =
+        inProgressJobs.isNotEmpty ? inProgressJobs.first : null;
 
     final messageController = TextEditingController();
 
@@ -1226,15 +1242,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     loc.sosDescription,
                     style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    loc.sosBooking(activeBooking.id),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w600,
+                  if (activeBooking != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      loc.sosBooking(activeBooking.id),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 14),
                   Text(
                     loc.sosTypeOfEmergency,
@@ -1338,7 +1356,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         final result = await EmergencyService.raiseAlert(
-                          bookingId: activeBooking.id,
                           alertType: alertType,
                           message: messageController.text,
                           latitude: lat,
@@ -1371,7 +1388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           workerName: workerName,
                           sentAt: sentAt,
                           location: LocationStore.address,
-                          bookingId: activeBooking.id,
+                          bookingId: activeBooking?.id,
                           alert: result['alert'] as EmergencyAlertModel?,
                           alertType: alertType,
                           serverMessage: msg,
@@ -1864,20 +1881,20 @@ class _OtpDialogState extends State<OtpDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(
               loc.enterOtpMsg,
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             Row(
               children: List.generate(4, (index) {
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: AspectRatio(
-                      aspectRatio: 1, // perfect square, scales to width
+                    child: SizedBox(
+                      height: 52, // normal box height (no longer a big square)
                       child: TextField(
                         controller: controllers[index],
                         focusNode: focusNodes[index],
@@ -1886,7 +1903,7 @@ class _OtpDialogState extends State<OtpDialog> {
                         textAlign: TextAlign.center,
                         textAlignVertical: TextAlignVertical.center,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -1905,6 +1922,8 @@ class _OtpDialogState extends State<OtpDialog> {
 
                         decoration: InputDecoration(
                           counterText: '',
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                           filled: true,
                           fillColor: Colors.grey.shade50,
                           enabledBorder: OutlineInputBorder(

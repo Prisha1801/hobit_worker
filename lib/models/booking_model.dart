@@ -4,6 +4,8 @@ class AssignedBookingModel {
   final String customerPhone;
   final String bookingDate;
   final String timeSlot;
+  final String startDate;
+  final String endDate;
   final String address;
   final String city;
   final String status;
@@ -14,12 +16,21 @@ class AssignedBookingModel {
   final List<int> addonQty;
   final String acceptanceStatus; // pending | accepted | declined
 
+  /// Subscription label for this booking's service (e.g. "Monthly Subscription").
+  String get subscriptionName => service.subscription?.name ?? '';
+
+  /// True when this is a monthly (subscription) booking that spans a date range.
+  bool get isMonthly =>
+      subscriptionName.toLowerCase().contains('monthly') || endDate.isNotEmpty;
+
   AssignedBookingModel({
     required this.id,
     required this.customerName,
     required this.customerPhone,
     required this.bookingDate,
     required this.timeSlot,
+    required this.startDate,
+    required this.endDate,
     required this.address,
     required this.city,
     required this.status,
@@ -54,6 +65,8 @@ class AssignedBookingModel {
       customerPhone: json['customer_phone'] ?? '',
       bookingDate: json['booking_date'] ?? '',
       timeSlot: json['time_slot'] ?? '',
+      startDate: json['start_date'] ?? '',
+      endDate: json['end_date'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       status: json['status'] ?? '',

@@ -11,11 +11,13 @@ import 'urls.dart';
 class EmergencyService {
   /// 🔥 Raise an SOS emergency alert.
   /// POST /api/worker/emergency-alert
-  /// body: booking_id (required), alert_type, message?, latitude?, longitude?
+  /// body: alert_type, message?, latitude?, longitude?
+  ///
+  /// The alert is no longer tied to a booking, so it can be raised regardless
+  /// of any booking status.
   ///
   /// Returns: { success: bool, message: String, alert: EmergencyAlertModel? }.
   static Future<Map<String, dynamic>> raiseAlert({
-    required int bookingId,
     String alertType = 'safety',
     String? message,
     double? latitude,
@@ -25,7 +27,6 @@ class EmergencyService {
       final token = AppPreference().getString(PreferencesKey.token);
 
       final body = <String, dynamic>{
-        'booking_id': bookingId,
         'alert_type': alertType,
         if (message != null && message.trim().isNotEmpty)
           'message': message.trim(),
