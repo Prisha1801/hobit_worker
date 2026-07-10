@@ -1006,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTrackingButton(AssignedBookingModel booking) {
     final busy = _trackingBusy.contains(booking.id);
     final isTracking =
-        LiveTrackingService.instance.isTrackingBooking(booking.id);
+    LiveTrackingService.instance.isTrackingBooking(booking.id);
 
     // Currently sharing → show status + stop control.
     if (isTracking) {
@@ -1036,25 +1036,25 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               busy
                   ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
                   : TextButton(
-                      onPressed: () => _stopSharing(booking.id),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Stop',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                onPressed: () => _stopSharing(booking.id),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Stop',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -1078,13 +1078,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           icon: busy
               ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          )
               : const Icon(Icons.navigation, size: 18),
           label: const Text(
             'On My Way',
@@ -1209,7 +1209,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // the alert is raised standalone.
     final inProgressJobs = todayBookings.where(isInProgress).toList();
     final AssignedBookingModel? activeBooking =
-        inProgressJobs.isNotEmpty ? inProgressJobs.first : null;
+    inProgressJobs.isNotEmpty ? inProgressJobs.first : null;
 
     final messageController = TextEditingController();
 
@@ -1293,7 +1293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontSize: 12,
                                 color: selected ? Colors.red : Colors.black87,
                                 fontWeight:
-                                    selected ? FontWeight.w700 : FontWeight.w500,
+                                selected ? FontWeight.w700 : FontWeight.w500,
                               ),
                             ),
                           ],
@@ -1329,84 +1329,84 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: sending
                     ? null
                     : () async {
-                        setDialogState(() => sending = true);
+                  setDialogState(() => sending = true);
 
-                        final dialogNav = Navigator.of(ctx);
-                        final messenger = ScaffoldMessenger.of(context);
-                        final workerName =
-                            AppPreference().getString(PreferencesKey.name);
-                        final sentAt = DateTime.now();
+                  final dialogNav = Navigator.of(ctx);
+                  final messenger = ScaffoldMessenger.of(context);
+                  final workerName =
+                  AppPreference().getString(PreferencesKey.name);
+                  final sentAt = DateTime.now();
 
-                        // Best-effort live location (fields are optional on the API).
-                        double? lat;
-                        double? lng;
-                        try {
-                          final pos = await LocationService.getCurrentLocation();
-                          lat = pos.latitude;
-                          lng = pos.longitude;
-                          LocationStore.lat = lat;
-                          LocationStore.lng = lng;
-                        } catch (e) {
-                          debugPrint('SOS location fetch failed: $e');
-                          if (LocationStore.lat != 0.0 ||
-                              LocationStore.lng != 0.0) {
-                            lat = LocationStore.lat;
-                            lng = LocationStore.lng;
-                          }
-                        }
+                  // Best-effort live location (fields are optional on the API).
+                  double? lat;
+                  double? lng;
+                  try {
+                    final pos = await LocationService.getCurrentLocation();
+                    lat = pos.latitude;
+                    lng = pos.longitude;
+                    LocationStore.lat = lat;
+                    LocationStore.lng = lng;
+                  } catch (e) {
+                    debugPrint('SOS location fetch failed: $e');
+                    if (LocationStore.lat != 0.0 ||
+                        LocationStore.lng != 0.0) {
+                      lat = LocationStore.lat;
+                      lng = LocationStore.lng;
+                    }
+                  }
 
-                        final result = await EmergencyService.raiseAlert(
-                          alertType: alertType,
-                          message: messageController.text,
-                          latitude: lat,
-                          longitude: lng,
-                        );
+                  final result = await EmergencyService.raiseAlert(
+                    alertType: alertType,
+                    message: messageController.text,
+                    latitude: lat,
+                    longitude: lng,
+                  );
 
-                        if (!mounted) return;
+                  if (!mounted) return;
 
-                        final success = result['success'] == true;
-                        final msg = result['message']?.toString() ?? '';
+                  final success = result['success'] == true;
+                  final msg = result['message']?.toString() ?? '';
 
-                        if (!success) {
-                          setDialogState(() => sending = false);
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(msg.isEmpty
-                                  ? loc.sosFailed
-                                  : msg),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
+                  if (!success) {
+                    setDialogState(() => sending = false);
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(msg.isEmpty
+                            ? loc.sosFailed
+                            : msg),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
 
-                        dialogNav.pop();
+                  dialogNav.pop();
 
-                        // Remember this alert so re-tapping emergency re-opens
-                        // the active screen until the worker cancels it.
-                        final session = _SosSession(
-                          workerName: workerName,
-                          sentAt: sentAt,
-                          location: LocationStore.address,
-                          bookingId: activeBooking?.id,
-                          alert: result['alert'] as EmergencyAlertModel?,
-                          alertType: alertType,
-                          serverMessage: msg,
-                        );
-                        setState(() => _activeSosSession = session);
-                        _openSosScreen(session);
-                      },
+                  // Remember this alert so re-tapping emergency re-opens
+                  // the active screen until the worker cancels it.
+                  final session = _SosSession(
+                    workerName: workerName,
+                    sentAt: sentAt,
+                    location: LocationStore.address,
+                    bookingId: activeBooking?.id,
+                    alert: result['alert'] as EmergencyAlertModel?,
+                    alertType: alertType,
+                    serverMessage: msg,
+                  );
+                  setState(() => _activeSosSession = session);
+                  _openSosScreen(session);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 child: sending
                     ? const SizedBox(
-                        width: 18, height: 18,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
+                  width: 18, height: 18,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
                     : Text(loc.sosYesSend,
-                        style: const TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
@@ -1717,31 +1717,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 else if (todayBookings.length == 1)
                   /// 🔹 Single job → full-width card that wraps its content
                   /// (no fixed height, so no blank space below)
-                  SizedBox(
-                    width: double.infinity,
-                    child: buildAssignedJobCard(todayBookings.first),
-                  )
-                else
+                    SizedBox(
+                      width: double.infinity,
+                      child: buildAssignedJobCard(todayBookings.first),
+                    )
+                  else
                   /// 🔹 Multiple jobs → horizontal carousel. IntrinsicHeight makes
                   /// every card match the tallest one; height wraps content.
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (int i = 0; i < todayBookings.length; i++) ...[
-                            if (i > 0) const SizedBox(width: 12),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.85,
-                              child: buildAssignedJobCard(todayBookings[i]),
-                            ),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (int i = 0; i < todayBookings.length; i++) ...[
+                              if (i > 0) const SizedBox(width: 12),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.85,
+                                child: buildAssignedJobCard(todayBookings[i]),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
-                  ),
             ],
           ),
         ),
@@ -1889,51 +1889,50 @@ class _OtpDialogState extends State<OtpDialog> {
             const SizedBox(height: 8),
 
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(4, (index) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: SizedBox(
-                      height: 52, // normal box height (no longer a big square)
-                      child: TextField(
-                        controller: controllers[index],
-                        focusNode: focusNodes[index],
-                        maxLength: 1,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        textAlignVertical: TextAlignVertical.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: SizedBox(
+                    width: 56, // fixed square-ish box
+                    height: 60,
+                    child: TextField(
+                      controller: controllers[index],
+                      focusNode: focusNodes[index],
+                      maxLength: 1,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+
+                      onChanged: (val) {
+                        // Rebuild OTP straight from the boxes so edits /
+                        // backspace anywhere stay correct.
+                        otp = controllers.map((c) => c.text).join();
+
+                        if (val.isNotEmpty && index < 3) {
+                          FocusScope.of(context).nextFocus();
+                        } else if (val.isEmpty && index > 0) {
+                          FocusScope.of(context).previousFocus();
+                        }
+                      },
+
+                      decoration: InputDecoration(
+                        counterText: '',
+                        contentPadding: EdgeInsets.zero,
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-
-                        onChanged: (val) {
-                          // Rebuild OTP straight from the boxes so edits /
-                          // backspace anywhere stay correct.
-                          otp = controllers.map((c) => c.text).join();
-
-                          if (val.isNotEmpty && index < 3) {
-                            FocusScope.of(context).nextFocus();
-                          } else if (val.isEmpty && index > 0) {
-                            FocusScope.of(context).previousFocus();
-                          }
-                        },
-
-                        decoration: InputDecoration(
-                          counterText: '',
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: kkblack, width: 2),
-                          ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: kkblack, width: 2),
                         ),
                       ),
                     ),
@@ -2004,7 +2003,7 @@ class _OtpDialogState extends State<OtpDialog> {
 
                         // 🔥 NEW FLOW: regenerate the customer start code
                         final result =
-                            await BookingApi.generateStartCode(widget.bookingId);
+                        await BookingApi.generateStartCode(widget.bookingId);
 
                         // ❌ OLD SMS / WhatsApp resend (kept for reference)
                         // final success = await BookingApi.sendStartOtp(
