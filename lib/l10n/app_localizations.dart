@@ -1279,6 +1279,12 @@ abstract class AppLocalizations {
   /// **'Subscription'**
   String get subscription;
 
+  /// No description provided for @rescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled'**
+  String get rescheduled;
+
   /// No description provided for @viewDirection.
   ///
   /// In en, this message translates to:

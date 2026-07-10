@@ -600,6 +600,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get subscription => 'सदस्यता';
 
   @override
+  String get rescheduled => 'पुनर्निर्धारित';
+
+  @override
   String get viewDirection => 'मैप देखें';
 
   @override

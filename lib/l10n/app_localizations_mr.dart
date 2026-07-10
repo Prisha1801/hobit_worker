@@ -600,6 +600,9 @@ class AppLocalizationsMr extends AppLocalizations {
   String get subscription => 'सदस्यत्व';
 
   @override
+  String get rescheduled => 'पुनर्नियोजित';
+
+  @override
   String get viewDirection => 'नकाशा पहा';
 
   @override

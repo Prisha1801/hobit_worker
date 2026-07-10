@@ -336,7 +336,7 @@ class BookingApi {
 
 }
 /// STATUS ENUM
-enum JobStatus { all, available, assigned, inProgress, completed,  subscription }
+enum JobStatus { all, available, assigned, inProgress, completed,  subscription, rescheduled }
 /// SCREEN
 // class BookingsScreen extends StatefulWidget {
 //   final String? initialStatus;
@@ -464,6 +464,10 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
 
         case JobStatus.subscription:
           status = null;
+          break;
+
+        case JobStatus.rescheduled:
+          status = 'rescheduled';
           break;
 
         case JobStatus.available:
@@ -792,6 +796,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 _buildTab(loc.inProgress, JobStatus.inProgress),
                 _buildTab(loc.completed, JobStatus.completed),
                 _buildTab(loc.subscription, JobStatus.subscription),
+                _buildTab(loc.rescheduled, JobStatus.rescheduled),
                // _buildTab(loc.cancelled, JobStatus.cancelled),
               ],
             ),
@@ -1311,7 +1316,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black
+                      color: Colors.white
                     ),
                   ),
                 ),
@@ -1408,18 +1413,20 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (booking.amount.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          "₹${booking.amount}",
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
+                    // NOTE: Price is intentionally hidden from the worker in
+                    // the available bookings card (as per requirement).
+                    // if (booking.amount.isNotEmpty)
+                    //   Padding(
+                    //     padding: const EdgeInsets.only(top: 4),
+                    //     child: Text(
+                    //       "₹${booking.amount}",
+                    //       style: const TextStyle(
+                    //         fontSize: 13,
+                    //         fontWeight: FontWeight.w600,
+                    //         color: Colors.black87,
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
               ),

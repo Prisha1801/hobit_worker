@@ -902,7 +902,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
           const SizedBox(height: 4),
 
-          /// ADDRESS + AMOUNT
+          /// ADDRESS
+          /// NOTE: Price/amount is intentionally hidden from the worker in the
+          /// notification claim card (as per requirement).
           Row(
             children: [
               const Icon(Icons.location_on, size: 14, color: Colors.green),
@@ -915,15 +917,6 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   style: const TextStyle(fontSize: 11, color: Colors.black45),
                 ),
               ),
-              if (item.amount.isNotEmpty)
-                Text(
-                  "₹${item.amount}",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
             ],
           ),
 

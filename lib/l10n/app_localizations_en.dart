@@ -600,6 +600,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscription => 'Subscription';
 
   @override
+  String get rescheduled => 'Rescheduled';
+
+  @override
   String get viewDirection => 'View Map';
 
   @override
