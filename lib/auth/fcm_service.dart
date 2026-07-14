@@ -53,21 +53,28 @@ class FCMService {
 
       // ✅ FOREGROUND — app is open
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        print("📩 [FCMService] FOREGROUND MESSAGE RECEIVED: ${message.data}");
+        print("┌───────────────────────────────────────────────");
+        print("│ 🟢 STEP F1 — FOREGROUND onMessage FIRED (app open)");
+        print("│ 🆔 messageId: ${message.messageId}");
+        print("│ 📦 data: ${message.data}");
+        print("│ 🔔 notification block: "
+            "${message.notification == null ? 'NULL (data-only ✅)' : 'PRESENT ⚠️ (title=${message.notification?.title})'}");
+        print("└───────────────────────────────────────────────");
 
         final data = message.data;
         final type = data['type']?.toString();
-        
+        print("🟢 STEP F2 — type = '$type'");
+
         final role = AppPreference().getString(PreferencesKey.role).toLowerCase();
-        print("👤 [FCMService] Current User Role: $role");
-        
+        print("🟢 STEP F3 — Current User Role: $role");
+
         final isCoordinator = role.contains('coordinator');
 
         // 🚨 Handle New Booking for Coordinator
         if (isCoordinator && type == 'new_booking') {
-          print("🔔 [FCMService] NEW BOOKING DETECTED FOR COORDINATOR");
+          print("🟢 STEP F4a — NEW BOOKING FOR COORDINATOR → will show 1 local notification");
           newBookingNotifier.value = data;
-          
+
           // Also show a heads-up notification in foreground
           await LocalNotificationService.showFromMessage(message);
           return;
@@ -75,18 +82,19 @@ class FCMService {
 
         final bookingId = data['booking_id']?.toString().trim();
         final isBookingCall = bookingId != null && bookingId.isNotEmpty && type != 'new_booking';
+        print("🟢 STEP F4 — bookingId='$bookingId', isBookingCall=$isBookingCall");
 
         if (isBookingCall) {
-          print("🚨 [FCMService] BOOKING CALL — triggering native CallService");
+          print("🟢 STEP F5a — BOOKING CALL → native CallService (no local notification)");
           try {
             await const MethodChannel('incoming_call')
                 .invokeMethod('showIncomingCall', {'booking_id': bookingId});
           } catch (e) {
-            print("⚠️ [FCMService] MethodChannel Error 👉 $e");
+            print("⚠️ [FCMService] MethodChannel Error 👉 $e → fallback to local notification");
             await LocalNotificationService.showFromMessage(message);
           }
         } else {
-          print("🔔 [FCMService] SHOWING NORMAL LOCAL NOTIFICATION");
+          print("🟢 STEP F5b — NORMAL/CAMPAIGN → showing 1 local notification");
           await LocalNotificationService.showFromMessage(message);
           notificationCount.value++;
         }

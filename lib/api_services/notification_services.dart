@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,6 +13,12 @@ class LocalNotificationService {
   // ✅ Incremented version to hobit_booking_call_v6 to force refresh channel settings
   static const String _channelId = 'hobit_booking_call_v6';
   static const String _channelName = 'Urgent Booking Alerts';
+
+  /// 🔢 DEBUG COUNTERS
+  /// How many FCM messages our code received from backend (foreground + background).
+  static int messagesReceivedCount = 0;
+  /// How many notifications our code actually displayed on screen.
+  static int notificationsShownCount = 0;
 
   /// ✅ Set to true when the app was cold-started by tapping a notification.
   /// MainScreen reads this once it is built and opens the NotificationScreen.
@@ -90,13 +98,59 @@ class LocalNotificationService {
     print("✅ [LocalNotificationService] Initialization Complete");
   }
 
+  /// 🖼 Downloads an image from a URL so it can be shown as a BigPicture.
+  /// Returns null on any failure (bad url, no network, timeout) so the
+  /// notification silently falls back to text-only.
+  static Future<Uint8List?> _downloadImageBytes(String url) async {
+    try {
+      final dio = Dio();
+      final res = await dio.get<List<int>>(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      );
+      if (res.data == null || res.data!.isEmpty) return null;
+      print("🖼 [LocalNotificationService] Image downloaded: ${res.data!.length} bytes");
+      return Uint8List.fromList(res.data!);
+    } catch (e) {
+      print("⚠️ [LocalNotificationService] Image download failed: $e");
+      return null;
+    }
+  }
+
   static Future<void> showBookingCall({
     required String title,
     required String body,
     String? payload,
+    String? imageUrl,
   }) async {
     print("📢 [LocalNotificationService] TRIGGERING CONTINUOUS RINGING: $title");
-    
+
+    // 🖼 If the message carries an image, download it and build a BigPicture
+    // style so it renders inside the notification (data-only messages don't
+    // auto-render images — the app must do it).
+    StyleInformation? styleInformation;
+    if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+      print("🖼 [LocalNotificationService] Fetching notification image: $imageUrl");
+      final bytes = await _downloadImageBytes(imageUrl.trim());
+      if (bytes != null) {
+        final ByteArrayAndroidBitmap bigPicture = ByteArrayAndroidBitmap(bytes);
+        styleInformation = BigPictureStyleInformation(
+          bigPicture,
+          largeIcon: bigPicture,
+          contentTitle: title,
+          summaryText: body,
+          hideExpandedLargeIcon: true,
+        );
+        print("🖼 [LocalNotificationService] BigPicture style attached ✅");
+      } else {
+        print("🖼 [LocalNotificationService] No image → showing text-only");
+      }
+    }
+
     final AndroidNotificationDetails androidDetails =
     AndroidNotificationDetails(
       _channelId,
@@ -108,11 +162,13 @@ class LocalNotificationService {
       sound: const RawResourceAndroidNotificationSound('alarm_clock'),
       enableVibration: true,
       fullScreenIntent: true,
-      ongoing: true, 
-      autoCancel: false, 
-      category: AndroidNotificationCategory.call, 
+      ongoing: true,
+      autoCancel: false,
+      category: AndroidNotificationCategory.call,
       audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
-      
+      // 🖼 Attaches the downloaded image (null → normal text notification).
+      styleInformation: styleInformation,
+
       actions: <AndroidNotificationAction>[
         const AndroidNotificationAction(
           'view_booking',
@@ -131,27 +187,53 @@ class LocalNotificationService {
 
     try {
       await _plugin.show(
-        2024, 
+        2024,
         title,
         body,
         NotificationDetails(android: androidDetails),
         payload: payload,
       );
+      notificationsShownCount++;
       print("🚀 [LocalNotificationService] Notification shown with alarm_clock sound");
+      print("🔢 [LocalNotificationService] Total notifications DISPLAYED by our code: $notificationsShownCount");
     } catch (e) {
       print("❌ [LocalNotificationService] Error showing notification: $e");
     }
   }
 
   static Future<void> showFromMessage(RemoteMessage message) async {
+    // 🔢 Count every message our code receives from backend.
+    messagesReceivedCount++;
+
     final data = message.data;
     final title = data['title'] ?? message.notification?.title ?? "New Booking Arrived! 🔔";
     final body = data['body'] ?? message.notification?.body ?? "Check dashboard for details.";
+    // 🖼 Image URL (from data-only payload, or native notification image as fallback).
+    final imageUrl = (data['image']?.toString().trim().isNotEmpty ?? false)
+        ? data['image'].toString().trim()
+        : message.notification?.android?.imageUrl;
+
+    print("==================================================");
+    print("📨 [Notification] MESSAGE RECEIVED FROM BACKEND");
+    print("🔢 [Notification] Total messages received so far: $messagesReceivedCount");
+    print("🆔 [Notification] messageId: ${message.messageId}");
+    print("📦 [Notification] data payload: $data");
+    print("🔔 [Notification] notification block: "
+        "${message.notification == null ? 'NULL (data-only ✅)' : 'PRESENT ⚠️ (Android will auto-show → duplicate!)'}");
+    if (message.notification != null) {
+      print("   ↳ notification.title: ${message.notification?.title}");
+      print("   ↳ notification.body : ${message.notification?.body}");
+    }
+    print("🏷 [Notification] title used: $title");
+    print("🏷 [Notification] body used : $body");
+    print("🖼 [Notification] image url  : ${imageUrl ?? '(none)'}");
+    print("==================================================");
 
     await showBookingCall(
       title: title,
       body: body,
       payload: data['booking_id']?.toString(),
+      imageUrl: imageUrl,
     );
   }
 }

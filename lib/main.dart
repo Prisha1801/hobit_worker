@@ -18,13 +18,19 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // ✅ IMPORTANT: Do NOT call requestNotificationsPermission here (NullPointerException)
   await Firebase.initializeApp();
-  print("🌙 BACKGROUND HANDLER — Processing message");
-  print("📦 DATA 👉 ${message.data}");
+  print("┌═══════════════════════════════════════════════");
+  print("│ 🌙 STEP B1 — BACKGROUND/TERMINATED handler FIRED");
+  print("│ 🆔 messageId: ${message.messageId}");
+  print("│ 📦 data: ${message.data}");
+  print("│ 🔔 notification block: "
+      "${message.notification == null ? 'NULL (data-only ✅ → only WE show, no duplicate)' : 'PRESENT ⚠️ → Android ALREADY auto-showed one (no buttons). We are about to show a 2nd (with View Booking/Dismiss buttons) = DUPLICATE'}");
+  print("└═══════════════════════════════════════════════");
 
   // ✅ Init WITHOUT permission request (avoids NPE)
   await LocalNotificationService.init(isBackground: true);
-  
-  // ✅ Explicitly show the notification
+
+  // ✅ Explicitly show OUR notification (this is the one WITH action buttons + alarm)
+  print("🌙 STEP B2 — Calling showFromMessage → this creates OUR notification (buttons + alarm)");
   await LocalNotificationService.showFromMessage(message);
 }
 

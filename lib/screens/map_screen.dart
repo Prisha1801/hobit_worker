@@ -152,20 +152,22 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () async {
+                onPressed: () {
                   print("✅ [ConfirmLocation] Confirm Location pressed");
                   print(
                     "📍 [ConfirmLocation] Confirmed worker location: "
                     "${LocationStore.lat}, ${LocationStore.lng}",
                   );
 
-                  // 🔥 Share the worker's location with the customer(s) now.
-                  await BookingApi.broadcastWorkerLocation(
+                  // 🔥 Share the worker's location with the customer(s) in the
+                  // background — do NOT await, so navigation happens on a
+                  // single tap instead of waiting for network calls.
+                  BookingApi.broadcastWorkerLocation(
                     latitude: LocationStore.lat,
                     longitude: LocationStore.lng,
                   );
 
-                  if (!mounted) return;
+                  // ✅ Navigate immediately on a single tap.
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const MainScreen()),
