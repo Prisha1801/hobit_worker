@@ -16,6 +16,7 @@ import '../utils/appBar_for_home.dart';
 import '../auth/fcm_service.dart';
 import '../auth/logout.dart';
 import '../widgets/booking_repo_home.dart';
+import '../widgets/sos_widget.dart';
 
 class CoordinatorDashboard extends ConsumerStatefulWidget {
   const CoordinatorDashboard({super.key});
@@ -25,7 +26,8 @@ class CoordinatorDashboard extends ConsumerStatefulWidget {
       _CoordinatorDashboardState();
 }
 
-class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
+class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard>
+    with SosMixin<CoordinatorDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedFilter = "All";
   bool isLoading = false;
@@ -334,6 +336,7 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
       key: _scaffoldKey,
       appBar: AppBarHome(
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onEmergencyPressed: () => showSosDialog(),
       ),
       drawer: Drawer(
         child: ListView(
@@ -1228,14 +1231,14 @@ class _CoordinatorDashboardState extends ConsumerState<CoordinatorDashboard> {
                     borderColor: const Color(0xFFFFD580),
                     onTap: onUpdateStatusTap,
                   ),
-                  const SizedBox(width: 8),
-                  _actionButton(
-                    label: "Edit",
-                    icon: Icons.edit_outlined,
-                    color: Colors.green.shade700,
-                    borderColor: const Color(0xFFA7F3D0),
-                    onTap: onEditTap,
-                  ),
+                  // const SizedBox(width: 8),
+                  // _actionButton(
+                  //   label: "Edit",
+                  //   icon: Icons.edit_outlined,
+                  //   color: Colors.green.shade700,
+                  //   borderColor: const Color(0xFFA7F3D0),
+                  //   onTap: onEditTap,
+                  // ),
                 ],
               ),
             ),
