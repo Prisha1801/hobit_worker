@@ -1,10 +1,10 @@
 //const String baseUrl = "https://hobitadmin.anantkamalsoftwarelabs.com";
 //const String baseUrl = "https://backendhobit.anantkamalsoftwarelabs.com";
 
-const String baseUrl = "https://hobitadmin.hobit.club";
+//const String baseUrl = "https://hobitadmin.hobit.club";
 
 //const String baseUrl = "https://uatadmin.hobit.club";
-// const String baseUrl = "https://testing.hobit.club";
+ const String baseUrl = "https://testing.hobit.club";
 //registrations apis
 const String signUpUrl = "/api/worker/register_app";
 const String  serviceCategoriesUrl = "/api/service-categories";
